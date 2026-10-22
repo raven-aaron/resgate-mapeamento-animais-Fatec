@@ -1,0 +1,12 @@
+{
+  "nodeMajor": 24,
+  "npmMajor": 11,
+  "packages": {
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "5.9.3",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2"
+  }
+}
