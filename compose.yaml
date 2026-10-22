@@ -1,0 +1,52 @@
+name: resgate-animais
+
+services:
+  mysql:
+    image: mysql:8.4.13
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Defina MYSQL_ROOT_PASSWORD no arquivo .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-resgate_animais}
+      MYSQL_USER: ${MYSQL_USER:-resgate_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Defina MYSQL_PASSWORD no arquivo .env}
+    ports:
+      - "127.0.0.1:${MYSQL_HOST_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="${MYSQL_PASSWORD}" mysql --protocol=tcp -h 127.0.0.1 -u "${MYSQL_USER}" -D "${MYSQL_DATABASE}" -e "SELECT 1" > /dev/null 2>&1'
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "true"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: ${MYSQL_DATABASE:-resgate_animais}
+      DB_USER: ${MYSQL_USER:-resgate_app}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Defina MYSQL_PASSWORD no arquivo .env}
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+      - web_next:/app/.next
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  web_node_modules:
+  web_next:
