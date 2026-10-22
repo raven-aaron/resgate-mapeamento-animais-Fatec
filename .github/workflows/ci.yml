@@ -50,3 +50,14 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Validate Docker Compose configuration
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-root-password
+          MYSQL_PASSWORD: ci-only-app-password
+        run: docker compose --env-file .env.example config --quiet
+        working-directory: .
+
+      - name: Build Docker development image
+        run: docker build -f web/Dockerfile.dev -t resgate-web-dev:ci web
+        working-directory: .

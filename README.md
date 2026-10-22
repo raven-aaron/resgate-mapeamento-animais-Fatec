@@ -33,3 +33,11 @@ Repositório novo, em fase de estruturação. O código da aplicação, as migra
 Cada integrante deve desenvolver em uma branch própria e propor alterações por Pull Request. Não adicionar senhas, tokens, dados pessoais reais ou arquivos `.env.local` ao repositório.
 
 O planejamento do trabalho é acompanhado no Jira do grupo.
+
+## Desenvolvimento local com Docker
+
+O ambiente local do projeto utiliza `compose.yaml` para iniciar **Next.js (Node.js 24)** e **MySQL 8.4.13** de forma padronizada.
+
+Consulte [o guia de ambiente Docker](docs/ambiente-docker.md) para instalar o Docker Desktop, criar o seu `.env` local e executar `docker compose up --build`.
+
+As tabelas SQL e a persistência da aplicação serão implementadas pela equipe em etapas posteriores.
