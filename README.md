@@ -40,4 +40,4 @@ O ambiente local do projeto utiliza `compose.yaml` para iniciar **Next.js (Node.
 
 Consulte [o guia de ambiente Docker](docs/ambiente-docker.md) para instalar o Docker Desktop, criar o seu `.env` local e executar `docker compose up --build`.
 
-As tabelas SQL e a persistência da aplicação serão implementadas pela equipe em etapas posteriores.
+A proposta de banco, as migrações e os testes estão em [database/README.md](database/README.md). Consulte também o [modelo revisado](docs/modelo-banco.md) e o [contrato de integração dos módulos](docs/integracao-modulos.md). As rotas da aplicação e a integração com a hospedagem ainda serão implementadas.
