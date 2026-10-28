@@ -37,6 +37,8 @@ jobs:
         run: node database/scripts/migrar.mjs
       - name: Verificar integridade e chat
         run: node database/tests/integridade.mjs
+      - name: Verificar protecoes do migrador
+        run: node database/tests/migracoes.mjs
       - name: Conferir historico
         run: node database/scripts/migrar.mjs --status
       - name: Encerrar ambiente descartavel de CI

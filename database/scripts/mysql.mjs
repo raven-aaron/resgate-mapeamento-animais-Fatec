@@ -5,8 +5,13 @@ export const raiz = fileURLToPath(new URL('../../', import.meta.url));
 
 // As credenciais são lidas DENTRO do contêiner. Não aparecem nos argumentos do host.
 // execFileSync evita a interpretação de aspas pelo PowerShell.
-export function consultar(sql) {
-  const comando = 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql --protocol=tcp -h 127.0.0.1 -u "$MYSQL_USER" --database="$MYSQL_DATABASE" --default-character-set=utf8mb4 --batch --raw --skip-column-names';
+export function consultar(sql, { administrador = false } = {}) {
+  // Apenas o migrador usa root local para instalar triggers com binlog ativo.
+  // Não elevar os privilégios globais do usuário da aplicação.
+  const autenticacao = administrador
+    ? 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql --protocol=tcp -h 127.0.0.1 -u root'
+    : 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql --protocol=tcp -h 127.0.0.1 -u "$MYSQL_USER"';
+  const comando = autenticacao + ' --database="$MYSQL_DATABASE" --default-character-set=utf8mb4 --batch --raw --skip-column-names';
   try {
     return execFileSync('docker', ['compose', 'exec', '-T', 'mysql', 'sh', '-c', comando], {
       cwd: raiz,

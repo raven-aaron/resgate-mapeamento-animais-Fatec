@@ -30,8 +30,11 @@ docker compose up -d web
 ```
 
 Antes de migrar, confira `docker compose ps`: MySQL deve estar `healthy`.
-O migrador usa `MYSQL_DATABASE`, `MYSQL_USER` e `MYSQL_PASSWORD` de dentro do
-contêiner. Ele não imprime senhas e evita as aspas problemáticas do PowerShell.
+O migrador lê o estado com `MYSQL_USER`/`MYSQL_PASSWORD` e aplica mudanças com
+`root`/`MYSQL_ROOT_PASSWORD`, apenas dentro do Docker local, na base `MYSQL_DATABASE`.
+Isso permite instalar triggers com binlog ativo sem conceder privilégios globais
+ao usuário da aplicação. As consultas de teste usam o usuário da aplicação.
+O comando não imprime senhas e evita as aspas problemáticas do PowerShell.
 Nenhuma migração contém `CREATE DATABASE`, `USE` ou `DROP`.
 
 **Se você já executou o SQL antigo** (`Usuario`, `Pet`, etc.), não aplique os

@@ -77,7 +77,7 @@ try {
     partes.push('START TRANSACTION;', m.sql);
     partes.push(`UPDATE controle_migracoes SET situacao = 'APLICADA', aplicado_em = CURRENT_TIMESTAMP(3) WHERE arquivo = '${m.nome}';`, 'COMMIT;');
   }
-  consultar(partes.join('\n') + '\n');
+  consultar(partes.join('\n') + '\n', { administrador: true });
   for (const m of pendentes) console.log(`Aplicada: ${m.nome}`);
 } catch (erro) {
   console.error(`Migração interrompida: ${erro.message}`);
