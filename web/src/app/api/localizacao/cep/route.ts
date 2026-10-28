@@ -13,12 +13,12 @@ type ViaCep = {
 };
 
 function limpar(texto: string | undefined, limite: number): string {
-  return (texto ?? "").normalize("NFC").replace(/\\s+/g, " ").trim().slice(0, limite);
+  return (texto ?? "").normalize("NFC").replace(/\s+/g, " ").trim().slice(0, limite);
 }
 
 export async function GET(request: NextRequest) {
-  const cep = request.nextUrl.searchParams.get("cep")?.replace(/\\D/g, "") ?? "";
-  if (!/^\\d{8}$/.test(cep)) {
+  const cep = request.nextUrl.searchParams.get("cep")?.replace(/\D/g, "") ?? "";
+  if (!/^\d{8}$/.test(cep)) {
     return NextResponse.json({ erro: "Informe um CEP com 8 dígitos." }, { status: 400 });
   }
 
