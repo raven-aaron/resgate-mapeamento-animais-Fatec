@@ -53,27 +53,36 @@ export async function GET(request: NextRequest) {
         aviso: "Endereço incompleto: selecione manualmente a região aproximada no mapa." });
     }
 
-    const parametros = new URLSearchParams({
-      q: `${logradouro}, ${bairro}, Votorantim, São Paulo, Brasil`,
-      format: "jsonv2", addressdetails: "1", limit: "3", countrycodes: "br",
-      "accept-language": "pt-BR",
-    });
-    await aguardarVez();
-    const respostaNominatim = await fetch(`https://nominatim.openstreetmap.org/search?${parametros}`, {
-      headers: {
-        "User-Agent": "ResgateMapeamentoAnimaisFatec/0.1 (projeto academico; https://github.com/raven-aaron/resgate-mapeamento-animais-Fatec)",
-        Accept: "application/json",
-      },
-      signal: AbortSignal.timeout(9000), cache: "no-store",
-    });
-    if (!respostaNominatim.ok) return resposta({ erro: "Geocodificação temporariamente indisponível." }, 503);
-    const resultados = (await respostaNominatim.json()) as Resultado[];
-    const correspondente = resultados.find((item) => {
+    // O bairro do ViaCEP pode divergir dos bairros mapeados no OSM.
+    // Tentar primeiro endereço completo e depois rua + município.
+    async function buscar(consulta: string): Promise<Resultado[]> {
+      const parametros = new URLSearchParams({
+        q: consulta, format: "jsonv2", addressdetails: "1", limit: "5",
+        countrycodes: "br", "accept-language": "pt-BR",
+      });
+      await aguardarVez();
+      const respostaNominatim = await fetch(`https://nominatim.openstreetmap.org/search?${parametros}`, {
+        headers: {
+          "User-Agent": "ResgateMapeamentoAnimaisFatec/0.1 (projeto academico; https://github.com/raven-aaron/resgate-mapeamento-animais-Fatec)",
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(9000), cache: "no-store",
+      });
+      if (!respostaNominatim.ok) throw new Error("Nominatim indisponível");
+      return (await respostaNominatim.json()) as Resultado[];
+    }
+    function ehVotorantim(item: Resultado) {
       const municipio = [item.address?.city, item.address?.town, item.address?.municipality, item.address?.county];
       return item.address?.country_code === "br" &&
         municipio.some((nome) => simplificar(nome) === "votorantim") &&
         Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon));
-    });
+    }
+    let resultados = await buscar(`${logradouro}, ${bairro}, Votorantim, São Paulo, Brasil`);
+    let correspondente = resultados.find(ehVotorantim);
+    if (!correspondente) {
+      resultados = await buscar(`${logradouro}, Votorantim, São Paulo, Brasil`);
+      correspondente = resultados.find(ehVotorantim);
+    }
 
     const resultado = correspondente ? {
       cep, bairro, logradouro,
