@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-
 type ViaCep = {
   erro?: boolean | string;
   cep?: string;
