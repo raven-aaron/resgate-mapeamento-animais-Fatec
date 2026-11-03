@@ -1,14 +1,38 @@
 /**
  * Cria ou concede permissão de administrador RESGATE a uma conta.
- * Variáveis do processo: ADMIN_NOME, ADMIN_EMAIL, ADMIN_SENHA.
+ * No Docker Compose, execute: docker compose exec web node scripts/criar-admin.mjs
+ * Também aceita ADMIN_NOME, ADMIN_EMAIL, ADMIN_SENHA via ambiente.
  * Execute dentro do container web. Não publique credenciais.
  */
 import { randomBytes, scryptSync } from "node:crypto";
 import mysql from "mysql2/promise";
+import { createInterface } from "node:readline/promises";
+import { execFileSync } from "node:child_process";
 
-const nome = (process.env.ADMIN_NOME || "").trim();
-const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-const senha = process.env.ADMIN_SENHA || "";
+let nome = (process.env.ADMIN_NOME || "").trim();
+let email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+let senha = process.env.ADMIN_SENHA || "";
+
+if ((!nome || !email || !senha) && process.stdin.isTTY) {
+  const terminal = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    if (!nome) nome = (await terminal.question("Nome do administrador: ")).trim();
+    if (!email) email = (await terminal.question("E-mail administrativo: ")).trim().toLowerCase();
+    if (!senha) {
+      let ocultou = false;
+      try {
+        execFileSync("stty", ["-echo"], { stdio: "inherit" });
+        ocultou = true;
+        senha = await terminal.question("Senha (mínimo 10 caracteres; não será exibida): ");
+      } finally {
+        if (ocultou) execFileSync("stty", ["echo"], { stdio: "inherit" });
+        process.stdout.write("\n");
+      }
+    }
+  } finally {
+    terminal.close();
+  }
+}
 if (nome.length < 2 || nome.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || senha.length < 10 || senha.length > 128) {
   console.error("Defina ADMIN_NOME, ADMIN_EMAIL e ADMIN_SENHA (10 a 128 caracteres) no ambiente.");
   process.exit(1);
