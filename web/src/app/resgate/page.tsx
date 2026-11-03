@@ -1,0 +1,17 @@
+import Link from "next/link";
+
+export default function ResgatePage() {
+  return (
+    <main className="site-wrap" style={{padding:"55px 0"}}>
+      <span className="eyebrow">Módulo de resgate</span>
+      <h1 style={{color:"var(--cor-verde-agua)",fontSize:"clamp(30px,5vw,45px)",margin:"14px 0"}}>Perdi meu Pet</h1>
+      <p className="section-lead">Registre um animal perdido ou encontrado em Votorantim. O cadastro inclui informações do pet, CEP validado e localização pública aproximada.</p>
+      <div className="cards">
+        <article className="card"><h2>Perdi um animal</h2><p>Informe os dados do animal para preparar uma ocorrência de desaparecimento.</p><div className="action-row"><Link className="action action-primary" href="/ocorrencias/nova?tipo=PERDIDO">Registrar perda</Link></div></article>
+        <article className="card"><h2>Encontrei um animal</h2><p>Descreva o animal encontrado e a região em que foi visto.</p><div className="action-row"><Link className="action action-primary" href="/ocorrencias/nova?tipo=ENCONTRADO">Registrar encontro</Link></div></article>
+        <article className="card"><h2>Mapa do resgate</h2><p>Consulte e ajuste uma posição aproximada no mapa, sem marcar residências.</p><div className="action-row"><Link className="action action-primary" href="/localizacao">Abrir localização</Link></div></article>
+      </div>
+      <p className="note note-warning" style={{marginTop:24}}>A gravação das ocorrências, a aprovação administrativa e o mapa público ainda estão em integração com o MySQL. O formulário atual permite revisar os dados sem publicá-los.</p>
+    </main>
+  );
+}
