@@ -3,6 +3,7 @@ import type { RowDataPacket } from "mysql2/promise";
 import { usuarioAtual } from "../../../lib/auth";
 import { banco } from "../../../lib/db";
 import AdminShell from "../../../components/admin/AdminShell";
+import MapaCalorAdministrativo from "../../../components/admin/MapaCalorAdministrativo";
 export const dynamic="force-dynamic";
 export default async function MapaTermico() {
   const usuario=await usuarioAtual();
@@ -12,7 +13,8 @@ export default async function MapaTermico() {
   );
   const maximo=Math.max(1,...bairros.map(r=>Number(r.total)));
   return <AdminShell nome={usuario.nome} titulo="MAPA TÉRMICO — DENSIDADE">
-    <p>Visão de concentração por bairro, calculada com ocorrências aprovadas do banco. A representação cartográfica de calor será uma etapa posterior.</p>
+    <p>Concentração espacial de ocorrências aprovadas e abertas. O mapa usa dados agregados em zonas, enquanto o ranking abaixo mostra os bairros com mais registros.</p>
+    <MapaCalorAdministrativo />
     {bairros.map(r=><div key={r.bairro} className="admin-barra">
       <span>{r.bairro}</span><div><i style={{width:(Number(r.total)/maximo*100)+"%"}}/></div><strong>{Number(r.total)}</strong>
     </div>)}
