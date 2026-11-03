@@ -40,6 +40,8 @@ export default function FormularioOcorrencia() {
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState("");
   const [registro, setRegistro] = useState<number | null>(null);
+  const [confirmacaoAberta,setConfirmacaoAberta] = useState(false);
+  const [orientacoesLidas,setOrientacoesLidas] = useState(false);
   const [precisaLogin, setPrecisaLogin] = useState(false);
   const [fotos, setFotos] = useState<File[]>([]);
   const [previas, setPrevias] = useState<string[]>([]);
@@ -122,12 +124,13 @@ export default function FormularioOcorrencia() {
   }
 
   async function enviarRegistro() {
-    if (!revisao || !endereco || !localizacao || enviando || registro) return;
+    if (!revisao || !endereco || !localizacao || !orientacoesLidas || enviando || registro) return;
     setEnviando(true);
     setErroEnvio("");
     setPrecisaLogin(false);
     try {
       const formulario = new FormData();
+      formulario.append("confirmacao_privacidade", "confirmado");
       formulario.append("dados", JSON.stringify({
         tipo, especie, nome, raca, sexo, porte, cor, idade, microchip, dataEvento, descricao,
         cep: endereco.cep, referencia, localizacao,
@@ -141,6 +144,7 @@ export default function FormularioOcorrencia() {
       }
       if (typeof dados.id !== "number") throw new Error("O servidor não retornou o registro criado.");
       setRegistro(dados.id);
+      setConfirmacaoAberta(false);
     } catch (error) {
       setErroEnvio(error instanceof Error ? error.message : "Falha ao enviar o cadastro.");
     } finally {
@@ -149,16 +153,23 @@ export default function FormularioOcorrencia() {
   }
 
   return (
-    <main className="form-shell">
+    <main className="form-shell cadastro-pet">
       <header className="form-heading">
-        <Link href="/resgate">← Voltar ao módulo de resgate</Link>
-        <h1>{tipo === "PERDIDO" ? "REGISTRO PET PERDIDO" : "REGISTRO PET ENCONTRADO"} 🐾</h1>
-        <p>Preencha os dados do pet. Confirme a região aproximada no mapa; após o envio, a ocorrência ficará aguardando aprovação da Prefeitura.</p>
-        <p><Link href="/login">Entrar na minha conta</Link> · <Link href="/cadastro">Criar conta</Link></p>
+        <Link href="/resgate">← Voltar para animais perdidos e encontrados</Link>
+        <span className="eyebrow">Cadastro de ocorrência</span>
+        <h1>{tipo === "PERDIDO" ? "REGISTRAR ANIMAL PERDIDO" : "REGISTRAR ANIMAL ENCONTRADO"}</h1>
+        <p>Preencha as informações com atenção. Após o envio, a publicação será analisada antes de aparecer no mapa.</p>
+        <div className="etapas-cadastro" aria-label="Etapas do cadastro">
+          <span><b>01</b> Animal</span><span><b>02</b> Localização</span><span><b>03</b> Fotos</span><span><b>04</b> Revisão</span>
+        </div>
       </header>
       <form onSubmit={revisar}>
-        <section className="form-panel">
-          <div className="form-grid">
+        <section className="form-panel cadastro-pet-painel">
+          <div className="form-grid cadastro-pet-grid">
+            <div className="pet-form-section-title form-field-full">
+              <span className="pet-form-numero">01</span>
+              <div><h2>Dados do animal</h2><p>Identifique o animal e descreva suas características principais.</p></div>
+            </div>
             <label className="form-field">
               Tipo de ocorrência
               <select value={tipo} onChange={e => { setTipo(e.target.value as Tipo); setRevisao(false); }}>
@@ -168,8 +179,9 @@ export default function FormularioOcorrencia() {
             </label>
 
             <label className="form-field">
-              {tipo === "PERDIDO" ? "Nome do pet" : "Nome (se souber)"}
-              <input maxLength={80} required={tipo === "PERDIDO"} value={nome} onChange={e => { setNome(e.target.value); setRevisao(false); }} placeholder="Digite aqui..." />
+              Nome do animal {tipo === "ENCONTRADO" && <span className="campo-opcional">Opcional</span>}
+              <input maxLength={80} required={tipo === "PERDIDO"} value={nome} onChange={e => { setNome(e.target.value); setRevisao(false); }} placeholder={tipo === "PERDIDO" ? "Nome pelo qual o animal atende" : "Nome identificado na coleira ou plaquinha"} />
+              {tipo === "ENCONTRADO" && <small>Preencha apenas quando houver identificação. Animais sem nome também podem ser cadastrados.</small>}
             </label>
 
             <label className="form-field">
@@ -182,12 +194,12 @@ export default function FormularioOcorrencia() {
             </label>
 
             <label className="form-field">
-              {tipo === "PERDIDO" ? "Idade" : "Idade aparente"}
+              {tipo === "PERDIDO" ? "Idade aproximada" : "Faixa etária aparente"}
               <input maxLength={30} value={idade} onChange={e => { setIdade(e.target.value); setRevisao(false); }} placeholder="Ex.: 3 anos ou 6 meses" />
             </label>
 
             <label className="form-field">
-              O pet possui microchip?
+              Possui identificação por microchip?
               <select value={microchip} onChange={e => { setMicrochip(e.target.value); setRevisao(false); }}>
                 <option value="">Selecione</option>
                 <option value="SIM">Sim</option>
@@ -229,11 +241,15 @@ export default function FormularioOcorrencia() {
                 <option value="">{especie === "Gato" ? "Raça desabilitada para gatos" : "Selecione"}</option>
                 {racasCaninas.map(opcao => <option key={opcao} value={opcao}>{opcao === "Sem raça definida" ? "SRD (Sem Raça Definida)" : opcao}</option>)}
               </select>
-              {especie === "Gato" && <small>Conforme o formulário do primeiro semestre, este campo é desabilitado para gatos.</small>}
+              {especie === "Gato" && <small>Para gatos, descreva as características da pelagem e os sinais particulares nas observações.</small>}
             </label>
 
+            <div className="pet-form-section-title form-field-full">
+              <span className="pet-form-numero">02</span>
+              <div><h2>Localização e data</h2><p>Informe a região onde o animal desapareceu ou foi encontrado.</p></div>
+            </div>
             <div className="form-field">
-              <label htmlFor="cep">CEP de Votorantim</label>
+              <label htmlFor="cep">CEP da região da ocorrência</label>
               <input id="cep" required inputMode="numeric" maxLength={9} value={cep} onChange={e => {
                 ++versaoCep.current;
                 setConsultando(false);
@@ -246,8 +262,8 @@ export default function FormularioOcorrencia() {
               <button type="button" className="inline-action" onClick={() => { void buscarCep(); }} disabled={consultando}>{consultando ? "Consultando..." : "Consultar CEP"}</button>
             </div>
 
-            {consultaCep && <p role="status" className={"note" + (endereco ? "" : " note-warning")}>{consultaCep}</p>}
-            {endereco && <p><strong>Região consultada:</strong> {endereco.logradouro || "Rua não informada"}, {endereco.bairro || "Bairro não informado"} — {endereco.cidade}/{endereco.uf}</p>}
+            {consultaCep && <p role="status" className={"note form-field-full" + (endereco ? "" : " note-warning")}>{consultaCep}</p>}
+            {endereco && <p className="regiao-confirmada form-field-full"><strong>Região identificada:</strong> {endereco.bairro || "Bairro não identificado"} — {endereco.cidade}/{endereco.uf}</p>}
 
             <label className="form-field">
               {tipo === "PERDIDO" ? "Local onde foi visto pela última vez" : "Local onde o animal foi encontrado"}
@@ -255,19 +271,23 @@ export default function FormularioOcorrencia() {
               <small>Somente referência pública; não informe número de residência.</small>
             </label>
 
-            {endereco && <div className="form-field">
-              <span>Posição no mapa</span>
+            {endereco && <div className="form-field form-field-full">
+              <span>Localização aproximada no mapa</span>
               <MapaOcorrencia key={endereco.cep} cep={endereco.cep} onConfirm={valor => { setLocalizacao(valor); setRevisao(false); }} />
             </div>}
-            {!endereco && <p className="note">Consulte o CEP para selecionar e confirmar uma posição aproximada no mapa.</p>}
+            {!endereco && <p className="note form-field-full">Consulte o CEP para indicar a região aproximada no mapa.</p>}
 
             <label className="form-field">
               {tipo === "PERDIDO" ? "Data em que o animal foi perdido" : "Data em que o animal foi encontrado"}
               <input type="date" required max={hojeLocal()} value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
             </label>
 
-            <div className="form-field">
-              <label htmlFor="fotos-pet">Foto do pet</label>
+            <div className="pet-form-section-title form-field-full">
+              <span className="pet-form-numero">03</span>
+              <div><h2>Fotos e informações adicionais</h2><p>Imagens nítidas e detalhes particulares ajudam na identificação.</p></div>
+            </div>
+            <div className="form-field form-field-full">
+              <label htmlFor="fotos-pet">Fotografias do animal</label>
               <div className="area-upload-foto">
                 <input id="fotos-pet" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={trocarFotos} aria-describedby="instrucao-fotos" />
               </div>
@@ -278,13 +298,13 @@ export default function FormularioOcorrencia() {
               </div>}
             </div>
 
-            <label className="form-field">
-              Observações adicionais
-              <textarea value={descricao} onChange={e => { setDescricao(e.target.value); setRevisao(false); }} placeholder="Coleira, pelagem, comportamento, sinais particulares..." rows={4} />
+            <label className="form-field form-field-full">
+              Características e observações
+              <textarea value={descricao} onChange={e => { setDescricao(e.target.value); setRevisao(false); }} placeholder="Descreva detalhes da pelagem, coleira, comportamento e sinais que auxiliem na identificação." rows={4} />
             </label>
           </div>
 
-          <p className="note" style={{marginTop:24}}>Revise os dados antes de enviar. O registro será salvo no banco com status PENDENTE e só ficará visível no mapa após aprovação administrativa.</p>
+          <p className="observacao-envio">Após a revisão, você poderá conferir os dados antes de enviar a ocorrência para análise.</p>
           <div className="action-row">
             <Link href="/resgate" className="action action-secondary">CANCELAR</Link>
             <button className="action action-primary" type="submit">REVISAR CADASTRO</button>
@@ -292,7 +312,10 @@ export default function FormularioOcorrencia() {
         </section>
 
         {revisao && <section className="form-panel" aria-live="polite">
-          <h2>Revisão da ocorrência</h2>
+          <div className="pet-form-section-title">
+            <span className="pet-form-numero">04</span>
+            <div><h2>Confira as informações</h2><p>Verifique os dados antes de enviar para análise.</p></div>
+          </div>
           <dl className="review-list">
             <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Perdido" : "Encontrado"}</dd></div>
             <div><dt>Espécie / nome</dt><dd>{especie}{nome ? " — " + nome : ""}</dd></div>
@@ -302,15 +325,15 @@ export default function FormularioOcorrencia() {
             <div><dt>Idade / microchip</dt><dd>{idade || "Não informada"} / {microchip || "Não informado"}</dd></div>
             <div><dt>Região</dt><dd>{endereco?.bairro}, Votorantim/SP</dd></div>
             <div><dt>Local de referência</dt><dd>{referencia || "Não informado"}</dd></div>
-            <div><dt>Data</dt><dd>{dataEvento}</dd></div>
+            <div><dt>Data da ocorrência</dt><dd>{dataEvento.split("-").reverse().join("/")}</dd></div>
             <div><dt>Fotos selecionadas</dt><dd>{fotos.length}</dd></div>
-            <div><dt>Pin aproximado</dt><dd>{localizacao?.latitude_aproximada}, {localizacao?.longitude_aproximada}</dd></div>
+            <div><dt>Localização</dt><dd>Região aproximada confirmada no mapa</dd></div>
             <div><dt>Observações</dt><dd>{descricao || "Não informadas"}</dd></div>
           </dl>
           {registro ? (
             <div className="note" role="status">
-              <strong>Ocorrência #{registro} registrada com sucesso no MySQL.</strong>
-              <p>Status: PENDENTE. Ela aparecerá no mapa e nos cards depois da aprovação administrativa.</p>
+              <strong>Solicitação nº {registro} recebida com sucesso.</strong>
+              <p>Seu cadastro está em análise. Após a aprovação, o cartaz ficará disponível no mapa de animais.</p>
               <Link href="/minhas-ocorrencias" className="action action-primary">ACOMPANHAR MINHAS OCORRÊNCIAS</Link>
             </div>
           ) : (
@@ -318,14 +341,40 @@ export default function FormularioOcorrencia() {
               {erroEnvio && <p role="alert" className="note note-warning">{erroEnvio}</p>}
               {precisaLogin && <div className="action-row"><Link href="/login" className="action action-secondary">ENTRAR</Link><Link href="/cadastro" className="action action-secondary">CRIAR CONTA</Link></div>}
               <div className="action-row">
-                <button type="button" className="action action-primary" disabled={enviando} onClick={() => { void enviarRegistro(); }}>
-                  {enviando ? "Enviando para análise..." : "ENVIAR PARA ANÁLISE"}
+                <button type="button" className="action action-primary" disabled={enviando} onClick={() => { setOrientacoesLidas(false); setConfirmacaoAberta(true); }}>
+                  ENVIAR PARA ANÁLISE
                 </button>
               </div>
             </>
           )}
         </section>}
       </form>
+      {confirmacaoAberta && !registro && (
+        <div className="orientacoes-overlay" role="presentation">
+          <section role="dialog" aria-modal="true" aria-labelledby="orientacoes-titulo" aria-describedby="orientacoes-descricao" className="orientacoes-modal" onKeyDown={evento => { if (evento.key === "Escape" && !enviando) setConfirmacaoAberta(false); }}>
+            <div className="orientacoes-topo"><span className="orientacoes-simbolo" aria-hidden="true">!</span><span>Antes de continuar</span></div>
+            <h2 id="orientacoes-titulo">Proteja seus dados e sua privacidade</h2>
+            <p id="orientacoes-descricao">Confira estas orientações antes de enviar a ocorrência:</p>
+            <ul>
+              <li>Não publique seu endereço residencial, número da casa, telefone, e-mail ou outros dados pessoais no cartaz.</li>
+              <li>Indique apenas a região aproximada e referências públicas para facilitar a localização do animal.</li>
+              <li>Utilize o chat interno para conversar com outros usuários. Não compartilhe documentos, senhas ou códigos de verificação.</li>
+              <li>As informações e fotografias enviadas serão analisadas antes da publicação.</li>
+            </ul>
+            <label className="orientacoes-aceite">
+              <input type="checkbox" checked={orientacoesLidas} onChange={evento=>setOrientacoesLidas(evento.target.checked)} />
+              <span>Li e compreendi as orientações de segurança e privacidade.</span>
+            </label>
+            <div className="orientacoes-acoes">
+              <button className="action action-secondary" type="button" disabled={enviando} onClick={()=>setConfirmacaoAberta(false)}>VOLTAR E REVISAR</button>
+              <button className="action action-primary" type="button" disabled={!orientacoesLidas || enviando} onClick={()=>{void enviarRegistro();}}>
+                {enviando ? "Enviando..." : "CONCORDO E ENVIAR"}
+              </button>
+            </div>
+            {erroEnvio && <p role="alert" className="note note-warning">{erroEnvio}</p>}
+          </section>
+        </div>
+      )}
     </main>
   );
 }

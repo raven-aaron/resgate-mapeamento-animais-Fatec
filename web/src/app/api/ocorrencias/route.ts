@@ -58,6 +58,9 @@ export async function POST(request: Request) {
   const caminhos: string[] = [];
   try {
     const formulario = await request.formData();
+    if (formulario.get("confirmacao_privacidade") !== "confirmado") {
+      return NextResponse.json({ erro: "Confirme as orientações de privacidade antes de enviar." }, { status: 400 });
+    }
     const campoDados = formulario.get("dados");
     if (typeof campoDados !== "string" || campoDados.length > 10000) {
       return NextResponse.json({ erro: "Cadastro inválido." }, { status: 400 });
