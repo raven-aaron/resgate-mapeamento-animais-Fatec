@@ -14,7 +14,7 @@ const executar = () => {
   }
 };
 const quantidadeMigracoes = readdirSync(new URL('../migrations/', import.meta.url))
-  .filter((nome) => /^\\d+_.*\\.sql$/.test(nome)).length;
+  .filter((nome) => /^\d+_.*\.sql$/.test(nome)).length;
 assert.equal(Number(consultar("SELECT COUNT(*) FROM controle_migracoes WHERE situacao = 'APLICADA';")), quantidadeMigracoes);
 const antes = consultar('SELECT arquivo, resumo_sha256, aplicado_em FROM controle_migracoes ORDER BY arquivo;');
 assert.match(executar(), /nenhuma migração executada/);
