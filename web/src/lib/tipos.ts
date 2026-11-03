@@ -12,6 +12,12 @@ export type Ocorrencia = {
   latitude: number | null;
   longitude: number | null;
   foto: string | null;
+  raca?: string | null;
+  cores?: string | null;
+  idade?: string | null;
+  microchip?: number | null;
+  autor?: string;
+  id_autor?: number;
   status_aprovacao?: string;
   status_caso?: string;
 };
