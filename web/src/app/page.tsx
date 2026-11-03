@@ -33,14 +33,14 @@ export default function Home() {
                 As ocorrências passam por análise administrativa antes de aparecerem publicamente. A região informada é aproximada, preservando a privacidade dos moradores e dos responsáveis pelos animais.
               </p>
               <div className={styles.botoes}>
-                <Link href="/localizacao" className={styles.btnCustom}>TESTAR LOCALIZAÇÃO</Link>
+                <Link href="/mapa" className={styles.btnCustom}>VER MAPA DE ANIMAIS</Link>
               </div>
             </div>
             <div className={styles.colImg}>
               <Image src="/assets/cachorrogato2.jpg" alt="Cachorro e gato, imagem do PI original" width={750} height={400} className={styles.imgBorda} />
             </div>
           </div>
-          <p className={styles.aviso}>A consulta pública de ocorrências e o mapa de animais serão integrados ao banco de dados. Esta versão já permite testar a seleção aproximada do local.</p>
+          <p className={styles.aviso}>Consulte no mapa e nos cards as ocorrências aprovadas e ativas. Você também pode registrar um animal perdido ou encontrado.</p>
         </div>
       </section>
     </main>
