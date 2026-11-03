@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import MapaOcorrencia, { type LocalizacaoConfirmada } from "../../../components/localizacao/MapaOcorrencia";
 
 type Tipo = "PERDIDO" | "ENCONTRADO";
 type Endereco = { bairro: string | null; logradouro: string | null; cidade: string; uf: string; cep: string };
@@ -26,6 +27,7 @@ export default function FormularioOcorrencia() {
   const [cep, setCep] = useState("");
   const [referencia, setReferencia] = useState("");
   const [endereco, setEndereco] = useState<Endereco | null>(null);
+  const [localizacao, setLocalizacao] = useState<LocalizacaoConfirmada | null>(null);
   const [consultaCep, setConsultaCep] = useState("");
   const [consultando, setConsultando] = useState(false);
   const [revisao, setRevisao] = useState(false);
@@ -33,6 +35,7 @@ export default function FormularioOcorrencia() {
   async function buscarCep() {
     const limpo = cep.replace(/\D/g, "");
     setEndereco(null);
+    setLocalizacao(null);
     setRevisao(false);
     if (!/^\d{8}$/.test(limpo)) {
       setConsultaCep("Informe um CEP com oito dígitos.");
@@ -57,6 +60,10 @@ export default function FormularioOcorrencia() {
     evento.preventDefault();
     if (!endereco || endereco.cep !== cep.replace(/\D/g, "")) {
       setConsultaCep("Consulte e valide o CEP antes de revisar os dados.");
+      return;
+    }
+    if (!localizacao) {
+      setConsultaCep("Confirme a posição aproximada no mapa antes de revisar.");
       return;
     }
     setRevisao(true);
@@ -132,7 +139,7 @@ export default function FormularioOcorrencia() {
             <div className="form-field">
               <label htmlFor="cep">CEP de Votorantim</label>
               <input id="cep" required inputMode="numeric" maxLength={9} value={cep}
-                onChange={e => { setCep(e.target.value); setEndereco(null); setConsultaCep(""); setRevisao(false); }} placeholder="00000-000" />
+                onChange={e => { setCep(e.target.value); setEndereco(null); setLocalizacao(null); setConsultaCep(""); setRevisao(false); }} placeholder="00000-000" />
               <button type="button" className="inline-action" onClick={() => { void buscarCep(); }} disabled={consultando}>
                 {consultando ? "Consultando..." : "Consultar CEP"}
               </button>
@@ -144,12 +151,12 @@ export default function FormularioOcorrencia() {
           </div>
           {consultaCep && <p role="status" className={`note ${endereco ? "" : "note-warning"}`} style={{marginTop:15}}>{consultaCep}</p>}
           {endereco && <p style={{fontSize:14,lineHeight:1.7}}><strong>Endereço consultado:</strong> {endereco.logradouro || "Rua não informada"}, {endereco.bairro || "Bairro não informado"} — {endereco.cidade}/{endereco.uf}</p>}
-          <p style={{marginTop:20,fontSize:14}}>O posicionamento do pin será incorporado diretamente neste formulário na próxima etapa.</p>
-          <Link href="/localizacao" target="_blank" rel="noopener noreferrer" className="action action-secondary" style={{fontSize:14}}>Abrir protótipo do mapa</Link>
+          {endereco && <MapaOcorrencia cep={endereco.cep} onConfirm={valor => { setLocalizacao(valor); setRevisao(false); }} />}
+          {!endereco && <p style={{marginTop:20,fontSize:14}}>Valide o CEP para habilitar a seleção do ponto aproximado no mapa.</p>}
         </section>
         <section className="form-panel">
           <h2>4. Revisão do cadastro</h2>
-          <p className="note note-warning">A revisão é apenas uma prévia. Não existe envio de ocorrência nem mensagem de cadastro concluído nesta versão; autenticação, mapa integrado e persistência ainda serão implementados.</p>
+          <p className="note note-warning">A revisão é apenas uma prévia. Não existe envio de ocorrência nem mensagem de cadastro concluído nesta versão; autenticação, upload de fotos e persistência ainda serão implementados.</p>
           <button className="action action-primary" type="submit" style={{marginTop:18}}>Revisar informações</button>
           {revisao && (
             <div aria-live="polite">
@@ -161,9 +168,10 @@ export default function FormularioOcorrencia() {
                 <div><dt>Características</dt><dd>{cor || "Não informada"} · {porte} · {sexo} · {idade || "Idade não informada"} · microchip: {microchip || "Não sei"}</dd></div>
                 <div><dt>Região</dt><dd>{endereco?.bairro || "Bairro não informado"} — Votorantim/SP</dd></div>
                 <div><dt>Referência</dt><dd>{referencia || "Não informada"}</dd></div>
+                <div><dt>Pin aproximado</dt><dd>{localizacao ? String(localizacao.latitude_aproximada) + ", " + String(localizacao.longitude_aproximada) : "Não confirmado"}</dd></div>
                 <div style={{gridColumn:"1 / -1"}}><dt>Descrição</dt><dd>{descricao || "Não informada"}</dd></div>
               </dl>
-              <p className="note">Próxima etapa de desenvolvimento: associar o pin, incluir fotos, autenticar o usuário e gravar no MySQL com status PENDENTE.</p>
+              <p className="note">Próxima etapa de desenvolvimento: incluir fotos, autenticar o usuário e gravar os dados e o pin no MySQL com status PENDENTE.</p>
             </div>
           )}
         </section>
