@@ -1,66 +1,50 @@
-# Demonstração funcional do PI — Resgate e Mapeamento
+# Demonstração do PI — Resgate e Mapeamento de Animais
 
-## Preparação no Ubuntu
+## Ambiente local
 
-No repositório clonado, na branch \`feat/banco-resgate-modulos\`:
+1. Abra a pasta do repositório e mantenha a branch `feat/banco-resgate-modulos`.
+2. Execute `git pull origin feat/banco-resgate-modulos`.
+3. Execute `node database/scripts/migrar.mjs` para aplicar somente migrações pendentes.
+4. Execute `docker compose up -d --build web`.
+5. Como o volume de dependências já pode existir, execute `docker compose exec web npm ci` após atualizar.
+6. Execute `docker compose restart web` e `docker compose ps`.
 
-    git pull origin feat/banco-resgate-modulos
-    node database/scripts/migrar.mjs
-    docker compose up -d --build web
-    docker compose ps
+**Não execute `docker compose down -v`: isso apagaria o volume do MySQL.**
 
-O MySQL deve estar saudável. O banco não deve ser descartado: não execute \`docker compose down -v\`.
+## Conta administrativa
 
-A aplicação fica em http://localhost:3000.
+Execute `docker compose exec web node scripts/criar-admin.mjs` e informe nome, e-mail e senha pelo terminal interativo. O programa armazena hash scrypt e concede a permissão `RESGATE/ADMIN` somente à conta escolhida. Não há senha padrão.
 
-## Criar o administrador de demonstração
+Acesse `http://localhost:3000/admin/login`.
 
-Execute, no mesmo diretório:
+## Roteiro da apresentação em duas janelas/usuários
 
-    docker compose exec web node scripts/criar-admin.mjs
+1. **Visitante:** abra `/mapa`. Veja o mapa interativo de animais e o modo Cards. Apenas ocorrências aprovadas e abertas são mostradas.
+2. **Cidadão:** acesse `/cadastro`, registre nome, telefone com DDD, e-mail e senha (com confirmação). O telefone é privado e não aparece em cartazes.
+3. **Cidadão:** acesse `/ocorrencias/nova?tipo=PERDIDO` (ou `ENCONTRADO`), preencha dados, selecione fotos, valide CEP de Votorantim, confirme um ponto público aproximado e envie. O cadastro entra em estado **PENDENTE**.
+4. **Prefeitura (janela privativa):** faça login em `/admin/login`. Abra `/admin/solicitacoes`; a fila verifica novas solicitações automaticamente. Clique em **Saiba mais · Ver cartaz** para abrir a visualização completa da ocorrência antes da aprovação.
+5. **Prefeitura:** aprove a ocorrência. A ação atualiza o MySQL e registra histórico. Em caso de rejeição, informe motivo.
+6. **Visitante:** em `/mapa`, o novo animal aparece depois da atualização periódica. O pin abre um resumo, **Ver informações** abre o cartaz completo. A alternativa **Cards** apresenta os mesmos registros com filtros de espécie, porte, sexo e perdido/encontrado.
+7. **Interessado (uma conta distinta da do autor):** abra o cartaz e clique em **Entrar em contato pelo chat**. Se não estiver autenticado, o sistema direciona ao login. A conversa é criada somente entre o interessado e o autor da ocorrência, sem divulgar e-mails e telefones.
+8. **Cidadão/Interessado:** entre em `/mensagens` para ver a caixa de entrada ou `/mensagens/{id}` para conversar. As mensagens são consultadas automaticamente a cada cinco segundos. Um usuário alheio não pode ler a conversa.
+9. **Prefeitura:** confira `/admin/estatisticas`, `/admin/mapa-termico` e `/admin/ocorrencias`. O mapa administrativo mostra zonas agregadas de densidade; o painel e ranking usam dados do MySQL. Ao ocultar um registro, ele deixa de aparecer publicamente.
 
-O programa solicita nome, e-mail e senha localmente. Escolha uma senha forte (10 a 128 caracteres), que não será ecoada na tela. O comando cria uma conta com permissão \`ADMIN\` **somente no módulo \`RESGATE\`**, usando hash scrypt. Não há senha embutida no GitHub.
+## Hospedagem e múltiplos computadores
 
-Se a conta já existir, o programa atualiza a senha e revoga sessões anteriores. Não use uma conta de produção para apresentar o PI.
+O Docker local utiliza `WEB_BIND_HOST=127.0.0.1` por padrão. Se os dois computadores estiverem na **mesma rede Wi-Fi de demonstração**, é possível configurar `WEB_BIND_HOST=0.0.0.0` no `.env` e recriar o serviço `web`. Acessar pelo IP LAN da máquina principal e liberar somente a porta 3000 no firewall da rede necessária. **Isso não constitui hospedagem pública nem deve ser usado para publicar o servidor de desenvolvimento na internet.**
 
-## Roteiro de teste end-to-end
+Para hospedagem pública, serão necessários um serviço persistente de MySQL, storage persistente de imagens, gestão de segredos, HTTPS, testes de segurança e implantação do Next.js. O banco instalado apenas na máquina Ubuntu não ficará acessível em um host remoto automaticamente.
 
-1. Abra http://localhost:3000/cadastro e crie uma conta de cidadão com outro e-mail (sem acesso ADM).
-2. Abra http://localhost:3000/ocorrencias/nova?tipo=PERDIDO e preencha um animal cachorro ou gato, espécie, data, CEP de Votorantim, fotos opcionais e a localização aproximada. Confirme o ponto no mapa e clique **REVISAR CADASTRO**, depois **ENVIAR PARA ANÁLISE**.
-3. A ocorrência deve ser gravada no MySQL como \`PENDENTE\` e aparecer em http://localhost:3000/minhas-ocorrencias para o proprietário.
-4. Em uma janela privativa (sessão separada), abra http://localhost:3000/admin/login e entre com a conta administrativa criada no terminal.
-5. Acesse http://localhost:3000/admin/solicitacoes; localize o registro, abra a confirmação e clique **ACEITAR**.
-6. Na janela pública, abra http://localhost:3000/mapa. O registro aprovado e aberto aparecerá no mapa com um marcador próprio. Clique no pin para ver o resumo e acesse a página completa do animal. Alterne para **Cards** e aplique filtros por espécie, porte, sexo e situação.
-7. Volte ao ADM, vá em **Animais cadastrados** e teste **OCULTAR** (informando o motivo). Confirme que o animal deixa de aparecer na consulta pública.
+Fotos novas são armazenadas no volume Docker `media_data`, em `/app/storage/uploads`. A rota `/api/fotos/{arquivo}` restringe fotos pendentes ao autor e ao ADM. Não são salvas no repositório nem em `public/uploads` na implementação atual.
 
-## Rotas
+## Recuperação de senha
 
-- \`/resgate\`: entrada do módulo de resgate.
-- \`/mapa\`: consulta pública por mapa e cards com dados reais.
-- \`/ocorrencias/nova\`: cadastro do cidadão com seleção de localização aproximada.
-- \`/minhas-ocorrencias\`: consulta autenticada ao próprio histórico.
-- \`/cadastro\` e \`/login\`: contas normais.
-- \`/admin/login\`: login exclusivo do ADM do módulo RESGATE.
-- \`/admin\`: indicadores reais.
-- \`/admin/solicitacoes\`: aprovação e rejeição de pendências, com motivo e histórico.
-- \`/admin/ocorrencias\`: todas as ocorrências e ocultação de publicações.
-- \`/admin/estatisticas\`: indicadores por espécie, situação e bairro.
-- \`/admin/mapa-termico\`: **ranking territorial** real por bairro; representação geográfica de calor ainda não está implementada.
+As rotas `/recuperar-senha` e `/redefinir-senha` usam token de uso único (SHA-256 no MySQL, expiração de 30 minutos, invalidação de sessões após redefinir). O envio por e-mail **só funciona** após configurar `RESEND_API_KEY`, `MAIL_FROM` (remetente verificado) e `APP_PUBLIC_URL`. Sem isso, a API informa que o serviço não está configurado. Não inserir credenciais no GitHub.
 
-## Separação de acesso
+## Estado e limitações
 
-- A senha fica armazenada somente como hash \`scrypt\`.
-- A sessão usa cookie HTTP-only; o token bruto não fica no MySQL, apenas hash SHA-256.
-- Criar conta em \`/cadastro\` **não concede administração**.
-- Os endpoints de administração verificam a permissão \`RESGATE/ADMIN\` no servidor, e as páginas ADM também são protegidas.
-- A listagem pública exibe apenas ocorrências \`APROVADO\`, \`ABERTO\` e não excluídas.
-- Os pontos apresentados publicamente são arredondados a três casas decimais; não exibir local de residência.
-
-## Limitações atuais e próximos trabalhos
-
-- Fotos são gravadas localmente em \`web/public/uploads/\` para a demonstração no Docker; os arquivos são ignorados pelo Git e **não** são adequados como storage definitivo de produção. Migrar para armazenamento privado/controlado em nuvem ou storage local administrado antes de hospedar.
-- ViaCEP, Nominatim e o mapa base OpenStreetMap dependem de serviços externos e internet.
-- A restrição geográfica usa limites provisórios, não o polígono oficial do município.
-- O mapa térmico ainda precisa de uma camada real de densidade sobre o mapa.
-- O chat interno, edição/exclusão de ocorrências, recuperação de senha, integração do Banco de Ração, notificações e recursos complementares de acessibilidade continuam pendentes.
-- A CI valida lint, TypeScript, build Next.js, Docker e migrações; para comprovar o fluxo completo, executar este roteiro manual no Ubuntu.
+- Funcionalidades implementadas no código: login cidadão/ADM, criação de conta, envio de ocorrência pendente com fotos, moderação, prévia de cartaz pendente, consulta pública mapa/cards, cartaz completo, chat privado e indicadores.
+- A CI valida migrações, lint, TypeScript e build. **O funcionamento ponta a ponta em navegador + Docker + dois usuários deve ser verificado manualmente**, não presumido a partir da CI.
+- Pendente para outra etapa: edição/encerramento pelo cidadão, gerenciamento de usuários, notificações, recuperação de senha sem serviço de e-mail, integração do Banco de Ração e melhorias de acessibilidade/produção.
+- Posicionamento geográfico ainda usa limites provisórios, não o polígono oficial de Votorantim. ViaCEP, Nominatim e OpenStreetMap dependem de internet.
+- A área administrativa não tem permissão implícita para outros módulos (ex.: Banco de Ração).

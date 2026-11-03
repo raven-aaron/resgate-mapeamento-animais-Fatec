@@ -1,19 +1,27 @@
-# Compatibilidade entre formulário antigo e banco novo
+# Adaptação do PI do primeiro semestre
 
-A interface do módulo de resgate segue o formulário original do PI do primeiro semestre:
-- Espécies disponíveis ao cidadão: **Cachorro** e **Gato**. A entrada legada **Outro** foi inativada no catálogo (migração 004), sem apagar registros.
-- Campo **Raça**: lista de raças caninas do formulário original; desabilitado para gatos. A migração 004 alimenta o catálogo MySQL para cães; gatos mantêm **Sem raça definida** no banco caso seja necessário indicar raça sem conhecimento.
-- Campos mantidos: nome (obrigatório para perdido e opcional para encontrado), espécie, idade, microchip, sexo, porte, cor/pelagem, raça, localização, data, fotos e observações.
-- Endereço: usa CEP validado para Votorantim, referência pública e confirmação de ponto aproximado — adaptação necessária ao modelo atual com privacidade.
-- Cor: campo estruturado conforme a tabela \`cores\`, com detalhes adicionais de pelagem no texto de observações.
-- Fotos: pré-visualização local de até 5 imagens. Não ocorre upload nem gravação antes da implementação da API autenticada.
-- A ação do formulário é **Revisar cadastro**, não "Salvar": não simular sucesso enquanto não houver persistência real no MySQL.
-- Navegação geral da Prefeitura: Vacinas, Adoção, Banco de Ração, Perdi meu Pet.
-- Menu lateral: apenas registrar perdido, registrar encontrado e mapa de localização.
-- Busca do cabeçalho: índice local de serviços/rotas conhecidas, não busca de ocorrências em banco nem integração com motor de busca externo.
+Referências no repositório `raven-aaron/Projeto-Resgate-e-Mapeamento-FATEC`:
 
-## Estilização
+- `ProjetoHtmlCss/cartaz-PET-perdido-USER.html` e `cartaz-PET-encontrado-USER.html`: serviram de base para o cartaz público e para a prévia do ADM. Os HTMLs antigos mostravam contatos por telefone/e-mail; a nova versão substitui isso por chat privado.
+- `ProjetoHtmlCss/mapa-interativo.html`: mapa de animais (pins individuais, foto e acesso ao cartaz), não mapa de seleção de CEP.
+- `ProjetoHtmlCss/registro-USER.html`: nome completo, telefone, e-mail, senha e confirmação de senha. Telefone privado.
+- `ProjetoHtmlCss/login-USER.html`, `recuperar-Senha.html`: entrada em conta e formulário de recuperação.
+- `ProjetoHtmlCss/adm/solicitacoes-ADM.html`: fila de análise com prévia do cartaz, aprovar ou negar.
+- `ProjetoHtmlCss/adm/animais-cadastrados-ADM.html`: gestão das ocorrências registradas.
+- `ProjetoHtmlCss/adm/menuADM.html`, `painel-estatisticas-ADM.html` e `mapa-calor-ADM.html`: navegação e análises.
 
-A versão atual usa **CSS global + CSS Modules**, como a estrutura original. **Tailwind ainda não está instalado** no \`web/package.json\`. Adicioná-lo exige \`tailwindcss\`, \`@tailwindcss/postcss\`, \`postcss\` e atualizar \`package-lock.json\` com npm para manter \`npm ci\` e Docker reproduzíveis. Não adicionar somente import ou dependências sem o lockfile, para evitar quebrar build/CI.
+## Formulário atual
 
-O modo alto contraste passa a usar variáveis de cores coerentes nos componentes e não a inverter o fundo sem corrigir o texto e o menu.
+- Espécies: **Cachorro** e **Gato**; raça canina da lista original; campo desabilitado para gatos.
+- Campos: nome, espécie, idade, microchip, sexo, porte, cor/pelagem, raça, data, CEP e referência, fotos e observações.
+- **Nunca oferecer opção com texto “Não sei”**; campos não conhecidos podem ser deixados sem preencher quando a regra permitir.
+- CEP validado para Votorantim, mapa de seleção da região aproximada **dentro do formulário**, sem número da residência.
+- Fotos: até cinco; guardadas no volume persistente privado com rota de acesso autorizada.
+- Fluxo: login obrigatório → revisar cadastro → enviar para análise → MySQL status `PENDENTE` → moderação ADM → publicação no mapa/cards.
+- Contato: interessados precisam estar logados; telefone/e-mail nunca são exibidos em cartazes públicos.
+
+## Identidade visual
+
+Manter **Outfit**, verde-água `#348888`, ciano `#9EF8EE` e laranja `#FA7F08`. O projeto ainda usa CSS global e CSS Modules; Tailwind não foi instalado nesta etapa.
+
+A navegação pública da Prefeitura é separada do menu de resgate. O ADM possui acesso próprio, protegido por permissão `RESGATE/ADMIN`.
