@@ -4,11 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import MapaOcorrencia, { type LocalizacaoConfirmada } from "../../../components/localizacao/MapaOcorrencia";
+type LocalizacaoConfirmada = { latitude_aproximada: number; longitude_aproximada: number };
 
 type Tipo = "PERDIDO" | "ENCONTRADO";
 type Endereco = { bairro: string | null; logradouro: string | null; cidade: string; uf: string; cep: string };
-type ViaCepResposta = Endereco & { erro?: string };
+type ViaCepResposta = Endereco & { erro?: string; latitude?: number; longitude?: number };
 const racasCaninas = ["Sem raça definida","Beagle","Border Collie","Boxer","Bulldog Francês","Chow Chow","Cocker Spaniel","Salsicha","Golden Retriever","Husky Siberiano","Labrador","Lhasa","Maltês","Pastor Alemão","Sheltie","Pequinês","Pinscher","Pitbull / American Staffordshire Terrier","Spitz Alemão","Poodle","Pug","Rottweiler","Shih-tzu","Yorkshire Terrier"];
 const cores = ["Preta", "Branca", "Marrom", "Caramelo", "Cinza", "Amarela", "Laranja", "Outra"];
 
@@ -92,8 +92,12 @@ export default function FormularioOcorrencia() {
       const dados = await resposta.json() as ViaCepResposta;
       if (versao !== versaoCep.current) return;
       if (!resposta.ok) throw new Error(dados.erro || "Não foi possível consultar o CEP.");
-      setEndereco({ bairro: dados.bairro, logradouro: dados.logradouro, cidade: dados.cidade, uf: dados.uf, cep: limpo });
-      setConsultaCep("CEP validado para Votorantim/SP.");
+      if (typeof dados.latitude !== "number" || typeof dados.longitude !== "number" || !dados.bairro) {
+        throw new Error("Não foi possível identificar a região deste CEP. Confira os dados.");
+      }
+      setEndereco({ bairro: dados.bairro, logradouro: null, cidade: dados.cidade, uf: dados.uf, cep: limpo });
+      setLocalizacao({ latitude_aproximada: dados.latitude, longitude_aproximada: dados.longitude });
+      setConsultaCep("CEP verificado. O marcador público será posicionado na região aproximada de "+dados.bairro+".");
     } catch (error) {
       if (versao === versaoCep.current) setConsultaCep(error instanceof Error ? error.message : "Erro ao consultar o CEP.");
     } finally {
@@ -112,7 +116,7 @@ export default function FormularioOcorrencia() {
       return;
     }
     if (!localizacao) {
-      setConsultaCep("Confirme a posição aproximada no mapa antes de revisar.");
+      setConsultaCep("Consulte o CEP para definir a região do animal antes de revisar.");
       return;
     }
     if (dataEvento > hojeLocal()) {
@@ -133,7 +137,7 @@ export default function FormularioOcorrencia() {
       formulario.append("confirmacao_privacidade", "confirmado");
       formulario.append("dados", JSON.stringify({
         tipo, especie, nome, raca, sexo, porte, cor, idade, microchip, dataEvento, descricao,
-        cep: endereco.cep, referencia, localizacao,
+        cep: endereco.cep, referencia,
       }));
       fotos.forEach(foto => formulario.append("fotos", foto));
       const resposta = await fetch("/api/ocorrencias", { method: "POST", body: formulario });
@@ -246,7 +250,7 @@ export default function FormularioOcorrencia() {
 
             <div className="pet-form-section-title form-field-full">
               <span className="pet-form-numero">02</span>
-              <div><h2>Localização e data</h2><p>Informe a região onde o animal desapareceu ou foi encontrado.</p></div>
+              <div><h2>Localização e data</h2><p>O CEP identifica o bairro e define a posição aproximada do cartaz automaticamente.</p></div>
             </div>
             <div className="form-field">
               <label htmlFor="cep">CEP da região da ocorrência</label>
@@ -271,11 +275,14 @@ export default function FormularioOcorrencia() {
               <small>Somente referência pública; não informe número de residência.</small>
             </label>
 
-            {endereco && <div className="form-field form-field-full">
-              <span>Localização aproximada no mapa</span>
-              <MapaOcorrencia key={endereco.cep} cep={endereco.cep} onConfirm={valor => { setLocalizacao(valor); setRevisao(false); }} />
+            {endereco && localizacao && <div className="regiao-publica-card form-field-full" role="status">
+              <div className="regiao-publica-simbolo" aria-hidden="true">⌖</div>
+              <div>
+                <strong>Região de publicação: {endereco.bairro}, Votorantim/SP</strong>
+                <p>A localização foi definida automaticamente a partir do CEP. O mapa público mostrará um ponto representativo da região, sem identificar um imóvel ou número residencial.</p>
+              </div>
             </div>}
-            {!endereco && <p className="note form-field-full">Consulte o CEP para indicar a região aproximada no mapa.</p>}
+            {!endereco && <p className="note form-field-full">Consulte o CEP para identificar o bairro e definir automaticamente a região da ocorrência.</p>}
 
             <label className="form-field">
               {tipo === "PERDIDO" ? "Data em que o animal foi perdido" : "Data em que o animal foi encontrado"}
@@ -327,7 +334,7 @@ export default function FormularioOcorrencia() {
             <div><dt>Local de referência</dt><dd>{referencia || "Não informado"}</dd></div>
             <div><dt>Data da ocorrência</dt><dd>{dataEvento.split("-").reverse().join("/")}</dd></div>
             <div><dt>Fotos selecionadas</dt><dd>{fotos.length}</dd></div>
-            <div><dt>Localização</dt><dd>Região aproximada confirmada no mapa</dd></div>
+            <div><dt>Localização no mapa</dt><dd>Região aproximada de {endereco?.bairro} definida pelo CEP</dd></div>
             <div><dt>Observações</dt><dd>{descricao || "Não informadas"}</dd></div>
           </dl>
           {registro ? (

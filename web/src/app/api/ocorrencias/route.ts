@@ -7,6 +7,7 @@ import { banco } from "../../../lib/db";
 import { usuarioAtual } from "../../../lib/auth";
 import { buscarPublicas } from "../../../lib/ocorrencias";
 import { mesmaOrigem } from "../../../lib/seguranca";
+import { localizarBairroPorCep, ErroLocalizacao } from "../../../lib/localizacao-cep";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 type Cadastro = {
   tipo?: string; nome?: string; especie?: string; raca?: string; sexo?: string; porte?: string;
   cor?: string; idade?: string; microchip?: string; dataEvento?: string; descricao?: string;
-  cep?: string; referencia?: string; bairro?: string; localizacao?: { latitude_aproximada?: number; longitude_aproximada?: number; origem_localizacao?: string; precisao_localizacao?: string };
+  cep?: string; referencia?: string;
 };
 
 function texto(valor: unknown, limite: number) {
@@ -34,10 +35,6 @@ function dataValida(valor: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
   const data = new Date(valor + "T12:00:00Z");
   return !Number.isNaN(data.getTime()) && data.toISOString().slice(0, 10) === valor && valor <= new Date().toISOString().slice(0, 10);
-}
-function coordenadasValidas(lat: unknown, lon: unknown) {
-  return typeof lat === "number" && typeof lon === "number" && Number.isFinite(lat) && Number.isFinite(lon)
-    && lat >= -23.67 && lat <= -23.46 && lon >= -47.58 && lon <= -47.35;
 }
 function extensaoImagem(bytes: Uint8Array): string | null {
   if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpg";
@@ -79,14 +76,12 @@ export async function POST(request: Request) {
     const referencia = texto(dados.referencia, 255);
     const dataEvento = texto(dados.dataEvento, 10);
     const cep = texto(dados.cep, 10).replace(/\D/g, "");
-    const loc = dados.localizacao;
     if (!["PERDIDO", "ENCONTRADO"].includes(tipo) || !["Cachorro", "Gato"].includes(especie) ||
       (tipo === "PERDIDO" && nome.length < 1) || !["", "MACHO", "FEMEA"].includes(sexo) ||
       !["", "PEQUENO", "MEDIO", "GRANDE"].includes(porte) ||
       !["", "SIM", "NAO"].includes(microchip) || !dataValida(dataEvento) ||
-      !/^\d{8}$/.test(cep) || !coordenadasValidas(loc?.latitude_aproximada, loc?.longitude_aproximada) ||
-      !["RUA", "AJUSTE_USUARIO"].includes(loc?.origem_localizacao || "") || loc?.precisao_localizacao !== "RUA_APROXIMADA") {
-      return NextResponse.json({ erro: "Preencha os campos essenciais, consulte o CEP e confirme o marcador." }, { status: 400 });
+      !/^\d{8}$/.test(cep)) {
+      return NextResponse.json({ erro: "Preencha os campos essenciais e consulte um CEP válido de Votorantim." }, { status: 400 });
     }
     if ((raca && especie === "Gato") || (!/^[\p{L}\p{M}\s.'-]{0,100}$/u.test(nome))) {
       return NextResponse.json({ erro: "Verifique o nome e a raça do animal." }, { status: 400 });
@@ -108,13 +103,16 @@ export async function POST(request: Request) {
       arquivos.push({ nome: randomUUID() + "." + extensao, buffer: bytes });
     }
 
-    const viacep = await fetch("https://viacep.com.br/ws/" + cep + "/json/", {
-      signal: AbortSignal.timeout(8000), cache: "no-store",
-    });
-    if (!viacep.ok) return NextResponse.json({ erro: "CEP indisponível para validação." }, { status: 502 });
-    const endereco = await viacep.json() as { erro?: boolean; ibge?: string; bairro?: string; logradouro?: string; uf?: string };
-    if (endereco.erro || endereco.ibge !== "3557006" || endereco.uf !== "SP" || !endereco.bairro?.trim()) {
-      return NextResponse.json({ erro: "Informe um CEP válido de Votorantim com bairro identificado." }, { status: 422 });
+    // A coordenada da ocorrência vem exclusivamente da geocodificação do
+    // bairro validado no servidor. Coordenadas fornecidas pelo cliente são ignoradas.
+    let endereco;
+    try {
+      endereco = await localizarBairroPorCep(cep);
+    } catch (error) {
+      if (error instanceof ErroLocalizacao) {
+        return NextResponse.json({ erro: error.message }, { status: error.status });
+      }
+      throw error;
     }
     const pasta = join(process.cwd(), "storage", "uploads");
     await mkdir(pasta, { recursive: true });
@@ -127,8 +125,8 @@ export async function POST(request: Request) {
     conexao = await banco().getConnection();
     await conexao.beginTransaction();
     const [bairros] = await conexao.execute<ResultSetHeader>(
-      "INSERT INTO bairros (nome) VALUES (?) ON DUPLICATE KEY UPDATE id_bairro = LAST_INSERT_ID(id_bairro)",
-      [endereco.bairro.trim().replace(/\s+/g, " ").slice(0, 100)]
+      "INSERT INTO bairros (nome,latitude_aproximada,longitude_aproximada) VALUES (?,?,?) ON DUPLICATE KEY UPDATE id_bairro=LAST_INSERT_ID(id_bairro),latitude_aproximada=VALUES(latitude_aproximada),longitude_aproximada=VALUES(longitude_aproximada)",
+      [endereco.bairro, endereco.latitude, endereco.longitude]
     );
     const [especies] = await conexao.execute<RowDataPacket[]>(
       "SELECT id_especie AS id FROM especies WHERE nome=? AND ativo=1 LIMIT 1", [especie]
@@ -149,7 +147,7 @@ export async function POST(request: Request) {
     );
     const [ocorrencia] = await conexao.execute<ResultSetHeader>(
       "INSERT INTO ocorrencias (id_usuario_criador,id_animal,id_bairro,ponto_referencia,tipo_ocorrencia,status_aprovacao,data_evento,descricao,cep,logradouro,latitude_aproximada,longitude_aproximada,origem_localizacao,precisao_localizacao) VALUES (?,?,?,?,?,'PENDENTE',?,?,?,?,?,?,?,?)",
-      [usuario.id,animal.insertId,bairros.insertId,referencia || null,tipo,dataEvento,descricao || null,cep,endereco.logradouro?.trim().slice(0,160) || null,Number(loc!.latitude_aproximada),Number(loc!.longitude_aproximada),String(loc!.origem_localizacao),String(loc!.precisao_localizacao)]
+      [usuario.id,animal.insertId,bairros.insertId,referencia || null,tipo,dataEvento,descricao || null,cep,null,endereco.latitude,endereco.longitude,"BAIRRO","BAIRRO_APROXIMADO"]
     );
     if (cor) {
       const [cores] = await conexao.execute<RowDataPacket[]>("SELECT id_cor AS id FROM cores WHERE nome=? AND ativo=1 LIMIT 1", [cor]);
