@@ -28,7 +28,8 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     const controlador=new AbortController();
     void Promise.resolve().then(()=>carregar(controlador.signal)).catch(error=>{if(!controlador.signal.aborted)setErro(error instanceof Error?error.message:"Erro de consulta");})
       .finally(()=>{if(!controlador.signal.aborted)setCarregando(false);});
-    return ()=>controlador.abort();
+    const intervalo=setInterval(()=>{void carregar(controlador.signal).catch(()=>undefined);},7000);
+    return ()=>{clearInterval(intervalo);controlador.abort();};
   },[carregar]);
 
   async function confirmar() {
@@ -52,7 +53,8 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   }
 
   return <div>
-    <p>As ações abaixo alteram o banco de dados. Aprovações tornam a ocorrência visível na consulta pública.</p>
+    <p>As ações abaixo alteram o banco de dados. Novas solicitações são verificadas automaticamente.</p>
+    <button type="button" className="inline-action" onClick={()=>{void carregar().catch(e=>setErro(e instanceof Error?e.message:"Falha ao atualizar."));}}>ATUALIZAR SOLICITAÇÕES</button>
     {carregando && <p role="status">Carregando solicitações...</p>}
     {erro && <p role="alert" className="note note-warning">{erro}</p>}
     {sucesso && <p role="status" className="note">{sucesso}</p>}

@@ -64,12 +64,27 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
     if(!pronto || !L || !m)return;
     marcadores.current.forEach(marker=>m.removeLayer(marker));
     marcadores.current=[];
+    const repeticoes=new Map<string,number>();
+    const totais=new Map<string,number>();
+    for(const o of ocorrencias){
+      if(typeof o.latitude==="number"&&typeof o.longitude==="number"){
+        const chave=o.latitude+","+o.longitude;
+        totais.set(chave,(totais.get(chave)||0)+1);
+      }
+    }
     for(const o of ocorrencias){
       if(typeof o.latitude!=="number"||typeof o.longitude!=="number")continue;
       const perdido=o.tipo==="PERDIDO";
       const classe=perdido?"pin-publico pin-perdido":"pin-publico pin-encontrado";
       const icone=L.divIcon({className:"",html:'<div class="'+classe+'">🐾</div>',iconSize:[38,44],iconAnchor:[19,42]});
-      const marker=L.marker([o.latitude,o.longitude],{icon:icone}).addTo(m);
+      const chave=o.latitude+","+o.longitude;
+      const posicao=repeticoes.get(chave)||0;
+      repeticoes.set(chave,posicao+1);
+      const n=totais.get(chave)||1;
+      const angulo=2*Math.PI*posicao/n;
+      // Deslocamento visual pequeno quando vários animais compartilham um ponto aproximado.
+      const deslocamento=n>1?0.00036:0;
+      const marker=L.marker([o.latitude+Math.sin(angulo)*deslocamento,o.longitude+Math.cos(angulo)*deslocamento],{icon:icone}).addTo(m);
       const conteudo=document.createElement("div");conteudo.className="popup-pet";
       const titulo=document.createElement("strong");titulo.textContent=perdido?"PROCURA-SE":"ENCONTRADO";titulo.className=perdido?"status-perdido":"status-encontrado";conteudo.append(titulo);
       if(o.foto && /^\/uploads\/[0-9a-f-]+\.(jpg|png|webp)$/.test(o.foto)){

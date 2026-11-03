@@ -23,8 +23,8 @@ export default function ConsultaOcorrencias() {
     if (porte) params.set("porte", porte);
     if (sexo) params.set("sexo", sexo);
     if (tipo) params.set("tipo", tipo);
-    async function carregar() {
-      setCarregando(true);
+    async function carregar(primeira=false) {
+      if(primeira)setCarregando(true);
       setErro("");
       try {
         const resposta = await fetch("/api/ocorrencias?" + params.toString(), { cache:"no-store",signal:controlador.signal });
@@ -35,8 +35,9 @@ export default function ConsultaOcorrencias() {
         if (!controlador.signal.aborted) setErro(e instanceof Error ? e.message : "Falha na consulta.");
       } finally { if (!controlador.signal.aborted) setCarregando(false); }
     }
-    void carregar();
-    return () => controlador.abort();
+    void carregar(true);
+    const intervalo=setInterval(()=>{void carregar();},8000);
+    return () => {clearInterval(intervalo);controlador.abort();};
   }, [especie, porte, sexo, tipo]);
 
   return (
@@ -64,7 +65,7 @@ export default function ConsultaOcorrencias() {
         </div>
         <div className="filtros-acoes">
           <button type="button" className="inline-action" style={{marginTop:0}} onClick={()=>{setEspecie("");setPorte("");setTipo("");setSexo("");}}>Limpar filtros</button>
-          <span role="status">{carregando ? "Buscando ocorrências..." : ocorrencias.length + " ocorrência(s) encontrada(s)"}</span>
+          <span role="status">{carregando ? "Buscando ocorrências..." : ocorrencias.length + " ocorrência(s) encontrada(s) · Atualização automática"}</span>
           <div className="seletor-modo" aria-label="Modo de visualização">
             <button type="button" aria-pressed={modo==="mapa"} className={modo==="mapa"?"ativo":""} onClick={()=>setModo("mapa")}>Mapa</button>
             <button type="button" aria-pressed={modo==="cards"} className={modo==="cards"?"ativo":""} onClick={()=>setModo("cards")}>Cards</button>
