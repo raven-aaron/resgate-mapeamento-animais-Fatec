@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Ponto = { lat: number; lng: number };
 type LeafletMap = { setView: (p: [number, number], zoom: number) => void; on: (event: string, cb: (e: { latlng: Ponto }) => void) => void; remove: () => void };
-type LeafletMarker = { setLatLng: (p: [number, number]) => void; addTo: (map: LeafletMap) => LeafletMarker };
+type LeafletMarker = { setLatLng: (p: [number, number]) => void; addTo: (map: LeafletMap) => LeafletMarker; remove: () => void };
 type LeafletApi = {
   map: (el: HTMLElement) => LeafletMap;
   tileLayer: (url: string, opts: { attribution: string; maxZoom: number }) => { addTo: (map: LeafletMap) => void };
@@ -89,7 +89,9 @@ export default function LocalizacaoPage() {
     setConfirmado(false);
     setPonto(null);
     setSugestao(null);
+    marcador.current?.remove();
     marcador.current = null;
+    pontoAtual.current = null;
     try {
       const resposta = await fetch(`/api/localizacao/geocodificar?cep=${limpo}`, { cache: "no-store" });
       const dados = await resposta.json() as { erro?: string; aviso?: string; latitude?: number | null; longitude?: number | null };

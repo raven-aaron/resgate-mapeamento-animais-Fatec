@@ -87,7 +87,8 @@ export async function GET(request: NextRequest) {
     const resultado = correspondente ? {
       cep, bairro, logradouro,
       latitude: Number(correspondente.lat), longitude: Number(correspondente.lon),
-      origem_localizacao: "NOMINATIM", precisao_localizacao: "APROXIMADA",
+      origem_localizacao: "RUA", precisao_localizacao: "RUA_APROXIMADA",
+      fonte_geocodificacao: "NOMINATIM",
       requer_confirmacao_manual: true,
       aviso: "Posição aproximada sugerida. Confirme ou ajuste o pin antes de publicar; não informe número residencial.",
       atribuicao: "© OpenStreetMap contributors",
