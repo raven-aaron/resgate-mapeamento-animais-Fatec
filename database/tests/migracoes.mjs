@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { consultar, raiz } from '../scripts/mysql.mjs';
 
 if (process.env.BANCO_TESTE !== '1') throw new Error('Exige BANCO_TESTE=1 e ambiente descartável.');
@@ -13,7 +13,9 @@ const executar = () => {
     throw new Error(erro.stderr?.toString() || erro.message);
   }
 };
-assert.equal(consultar("SELECT COUNT(*) FROM controle_migracoes WHERE situacao = 'APLICADA';"), '2');
+const quantidadeMigracoes = readdirSync(new URL('../migrations/', import.meta.url))
+  .filter((nome) => /^\\d+_.*\\.sql$/.test(nome)).length;
+assert.equal(Number(consultar("SELECT COUNT(*) FROM controle_migracoes WHERE situacao = 'APLICADA';")), quantidadeMigracoes);
 const antes = consultar('SELECT arquivo, resumo_sha256, aplicado_em FROM controle_migracoes ORDER BY arquivo;');
 assert.match(executar(), /nenhuma migração executada/);
 assert.equal(consultar('SELECT arquivo, resumo_sha256, aplicado_em FROM controle_migracoes ORDER BY arquivo;'), antes);
