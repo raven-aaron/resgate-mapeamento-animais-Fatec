@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import MapaOcorrencia, { type LocalizacaoConfirmada } from "../../../components/localizacao/MapaOcorrencia";
 
@@ -31,8 +31,11 @@ export default function FormularioOcorrencia() {
   const [consultaCep, setConsultaCep] = useState("");
   const [consultando, setConsultando] = useState(false);
   const [revisao, setRevisao] = useState(false);
+  // Invalida respostas antigas se o usuário mudar o CEP durante a consulta.
+  const versaoCep = useRef(0);
 
   async function buscarCep() {
+    const versao = ++versaoCep.current;
     const limpo = cep.replace(/\D/g, "");
     setEndereco(null);
     setLocalizacao(null);
@@ -46,13 +49,14 @@ export default function FormularioOcorrencia() {
     try {
       const resposta = await fetch(`/api/localizacao/cep?cep=${limpo}`, { cache: "no-store" });
       const dados = await resposta.json() as ViaCepResposta;
+      if (versao !== versaoCep.current) return;
       if (!resposta.ok) throw new Error(dados.erro || "Não foi possível consultar o CEP.");
       setEndereco({ bairro: dados.bairro, logradouro: dados.logradouro, cidade: dados.cidade, uf: dados.uf, cep: limpo });
       setConsultaCep("CEP validado para Votorantim/SP.");
     } catch (error) {
-      setConsultaCep(error instanceof Error ? error.message : "Erro ao consultar o CEP.");
+      if (versao === versaoCep.current) setConsultaCep(error instanceof Error ? error.message : "Erro ao consultar o CEP.");
     } finally {
-      setConsultando(false);
+      if (versao === versaoCep.current) setConsultando(false);
     }
   }
 
@@ -66,6 +70,15 @@ export default function FormularioOcorrencia() {
       setConsultaCep("Confirme a posição aproximada no mapa antes de revisar.");
       return;
     }
+    if (!endereco.bairro) {
+      setConsultaCep("O ViaCEP não informou o bairro. Ainda não é possível finalizar este registro; precisamos validar o bairro antes de salvar.");
+      return;
+    }
+    if (dataEvento > new Date().toLocaleDateString("en-CA")) {
+      setConsultaCep("A data da ocorrência não pode estar no futuro.");
+      return;
+    }
+    setConsultaCep("");
     setRevisao(true);
   }
 
@@ -88,7 +101,7 @@ export default function FormularioOcorrencia() {
               </select>
             </label>
             <label className="form-field">Data do ocorrido
-              <input required type="date" value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
+              <input required type="date" max={new Date().toLocaleDateString("en-CA")} value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
             </label>
           </div>
         </section>
@@ -139,7 +152,7 @@ export default function FormularioOcorrencia() {
             <div className="form-field">
               <label htmlFor="cep">CEP de Votorantim</label>
               <input id="cep" required inputMode="numeric" maxLength={9} value={cep}
-                onChange={e => { setCep(e.target.value); setEndereco(null); setLocalizacao(null); setConsultaCep(""); setRevisao(false); }} placeholder="00000-000" />
+                onChange={e => { ++versaoCep.current; setConsultando(false); setCep(e.target.value); setEndereco(null); setLocalizacao(null); setConsultaCep(""); setRevisao(false); }} placeholder="00000-000" />
               <button type="button" className="inline-action" onClick={() => { void buscarCep(); }} disabled={consultando}>
                 {consultando ? "Consultando..." : "Consultar CEP"}
               </button>
