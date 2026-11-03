@@ -9,6 +9,14 @@ type Tipo = "PERDIDO" | "ENCONTRADO";
 type Endereco = { bairro: string | null; logradouro: string | null; cidade: string; uf: string; cep: string };
 type ViaCepResposta = Endereco & { erro?: string };
 
+function hojeLocal(): string {
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, "0");
+  const dia = String(agora.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 const especies = ["Cachorro", "Gato", "Outro"];
 const cores = ["", "Preta", "Branca", "Marrom", "Caramelo", "Cinza", "Amarela", "Laranja", "Outra"];
 
@@ -74,7 +82,7 @@ export default function FormularioOcorrencia() {
       setConsultaCep("O ViaCEP não informou o bairro. Ainda não é possível finalizar este registro; precisamos validar o bairro antes de salvar.");
       return;
     }
-    if (dataEvento > new Date().toLocaleDateString("en-CA")) {
+    if (dataEvento > hojeLocal()) {
       setConsultaCep("A data da ocorrência não pode estar no futuro.");
       return;
     }
@@ -101,7 +109,7 @@ export default function FormularioOcorrencia() {
               </select>
             </label>
             <label className="form-field">Data do ocorrido
-              <input required type="date" max={new Date().toLocaleDateString("en-CA")} value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
+              <input required type="date" max={hojeLocal()} value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
             </label>
           </div>
         </section>
