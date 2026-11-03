@@ -55,6 +55,29 @@ function correspondeBairro(item:ResultadoOSM,bairro:string){
   return [a?.suburb,a?.neighbourhood,a?.quarter,a?.city_district,item.display_name]
     .some(n=>chave(n).includes(chave(bairro)));
 }
+
+type BrasilApiCep = {
+  city?:string;
+  state?:string;
+  neighborhood?:string;
+  location?:{coordinates?:{latitude?:string|number;longitude?:string|number}};
+};
+async function consultarBrasilApi(cep:string,bairro:string){
+  const resposta=await fetch("https://brasilapi.com.br/api/cep/v2/"+cep,{
+    cache:"no-store",headers:{Accept:"application/json"},signal:AbortSignal.timeout(6500),
+  });
+  if(!resposta.ok)return null;
+  const r=await resposta.json() as BrasilApiCep;
+  if(chave(r.city)!=="votorantim" || r.state?.toUpperCase()!=="SP" ||
+     chave(r.neighborhood)!==chave(bairro))return null;
+  const lat=Number(r.location?.coordinates?.latitude);
+  const lon=Number(r.location?.coordinates?.longitude);
+  if(!r.location?.coordinates?.latitude || !r.location?.coordinates?.longitude ||
+     !dentroDoMunicipio(lat,lon))return null;
+  const ponto={lat:coordenadaRegional(lat),lon:coordenadaRegional(lon)};
+  return dentroDoMunicipio(ponto.lat,ponto.lon)?ponto:null;
+}
+
 async function aguardarLimite(){
   const anterior=fila;
   let liberar!:()=>void;
@@ -109,31 +132,42 @@ export async function localizarBairroPorCep(valorCep:string):Promise<Localizacao
   const geocache=cacheBairro.get(key);
   let ponto=geocache&&geocache.ate>Date.now()?{lat:geocache.lat,lon:geocache.lon}:null;
   if(!ponto){
+    // Primeiro procuramos a região do bairro no mapa, sem receber um ponto do usuário.
     try {
-      // Prioridade ao centro aproximado do bairro, nunca ao número de uma residência.
       const bairros=await buscarNoMapa(bairro+", Votorantim, São Paulo, Brasil");
-      let escolhido=bairros.find(r=>correspondeMunicipio(r)&&correspondeBairro(r,bairro));
-      if(!escolhido&&rua){
-        // Fallback para via pública do CEP. O resultado também é generalizado
-        // para a grade da região, sem revelar a coordenada recebida do provedor.
-        const ruas=await buscarNoMapa(rua+", "+bairro+", Votorantim, São Paulo, Brasil");
-        escolhido=ruas.find(r=>correspondeMunicipio(r)&&(
-          correspondeBairro(r,bairro)||chave(r.address?.road)===chave(rua)
-        ));
-        if(!escolhido){
-          const simples=await buscarNoMapa(rua+", Votorantim, São Paulo, Brasil");
-          escolhido=simples.find(r=>correspondeMunicipio(r)&&chave(r.address?.road)===chave(rua));
-        }
+      const escolhido=bairros.find(item=>correspondeMunicipio(item)&&correspondeBairro(item,bairro));
+      if(escolhido){
+        const lat=coordenadaRegional(Number(escolhido.lat));
+        const lon=coordenadaRegional(Number(escolhido.lon));
+        if(dentroDoMunicipio(lat,lon))ponto={lat,lon};
+      }
+    }catch {
+      // Falhas pontuais no provedor não autorizam divulgar um local inventado.
+    }
+  }
+  if(!ponto){
+    // Segundo provedor independente: aceita somente o mesmo município e bairro
+    // retornados pelo ViaCEP e generaliza a localização para uma grade regional.
+    try{ponto=await consultarBrasilApi(cep,bairro);}catch{}
+  }
+  if(!ponto && rua){
+    // Último recurso: localizar a via pública no mesmo município, nunca o imóvel.
+    // Também é obrigatório que o provedor reconheça o bairro ou a rua consultada.
+    try{
+      const ruas=await buscarNoMapa(rua+", "+bairro+", Votorantim, São Paulo, Brasil");
+      let escolhido=ruas.find(item=>correspondeMunicipio(item)&&(
+        correspondeBairro(item,bairro)||chave(item.address?.road)===chave(rua)
+      ));
+      if(!escolhido){
+        const simples=await buscarNoMapa(rua+", Votorantim, São Paulo, Brasil");
+        escolhido=simples.find(item=>correspondeMunicipio(item)&&chave(item.address?.road)===chave(rua));
       }
       if(escolhido){
         const lat=coordenadaRegional(Number(escolhido.lat));
         const lon=coordenadaRegional(Number(escolhido.lon));
         if(dentroDoMunicipio(lat,lon))ponto={lat,lon};
       }
-    }catch(error){
-      if(error instanceof ErroLocalizacao)throw error;
-      throw new ErroLocalizacao("Não foi possível localizar a região no mapa agora.",503);
-    }
+    }catch{}
   }
   if(!ponto)throw new ErroLocalizacao(
     "Não conseguimos confirmar a região deste CEP no mapa. Confira o CEP ou tente outro CEP do mesmo bairro.",422
