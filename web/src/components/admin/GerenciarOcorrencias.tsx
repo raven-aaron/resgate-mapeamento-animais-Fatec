@@ -23,7 +23,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   },[status]);
   useEffect(()=>{
     const controlador=new AbortController();
-    carregar(controlador.signal).catch(error=>{if(!controlador.signal.aborted)setErro(error instanceof Error?error.message:"Erro de consulta");})
+    void Promise.resolve().then(()=>carregar(controlador.signal)).catch(error=>{if(!controlador.signal.aborted)setErro(error instanceof Error?error.message:"Erro de consulta");})
       .finally(()=>{if(!controlador.signal.aborted)setCarregando(false);});
     return ()=>controlador.abort();
   },[carregar]);
