@@ -23,3 +23,12 @@
 .voltar { margin-top:10px; }
 .voltar a { color:var(--cor-verde-agua);font-weight:750; }
 @media(max-width:780px){.hero{grid-template-columns:1fr;padding:24px;}.detalhes{grid-template-columns:1fr;gap:12px;padding:30px 12px;}.galeria img,.semFoto{height:275px;}}
+
+@media(max-width:480px){
+  .cartaz {width:calc(100% - 20px);margin:20px auto 32px;}
+  .hero {padding:21px 15px;border-radius:14px;gap:20px;}
+  .introducao h1 {overflow-wrap:anywhere;}
+  .detalhes {padding:24px 5px;gap:12px;}
+  .detalhes h2 {font-size:20px;}
+  .galeria img,.semFoto {height:245px;}
+}

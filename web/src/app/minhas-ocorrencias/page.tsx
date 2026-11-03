@@ -28,8 +28,8 @@ export default async function MinhasOcorrencias() {
           <strong>{o.tipo==="PERDIDO"?"PERDIDO":"ENCONTRADO"}</strong>
           <h3>{o.nome||o.especie}</h3>
           <p>{o.especie} • {o.bairro} • {String(o.data).slice(0,10).split("-").reverse().join("/")}</p>
-          <p><strong>Aprovação:</strong> {o.status_aprovacao}</p>
-          <p><strong>Caso:</strong> {o.status_caso}</p>
+          <p><strong>Situação do cadastro:</strong> {o.status_aprovacao === "PENDENTE" ? "Em análise" : o.status_aprovacao === "APROVADO" ? "Aprovado" : o.status_aprovacao === "REJEITADO" ? "Não aprovado" : o.status_aprovacao === "OCULTO" ? "Não publicado" : o.status_aprovacao}</p>
+          <p><strong>Ocorrência:</strong> {o.status_caso === "ABERTO" ? "Ativa" : o.status_caso === "RESOLVIDO" ? "Resolvida" : "Encerrada"}</p>
           {o.status_aprovacao==="APROVADO" && o.status_caso==="ABERTO" && <Link className="action action-primary" href={"/ocorrencias/"+o.id}>Ver publicação</Link>}
         </div>
       </article>)}

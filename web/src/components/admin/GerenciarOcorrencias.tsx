@@ -44,7 +44,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
       });
       const dados=await resposta.json() as { erro?:string; status?:string };
       if(!resposta.ok)throw new Error(dados.erro || "Não foi possível alterar a ocorrência.");
-      setSucesso("Ocorrência #"+confirmacao.id+" atualizada para "+dados.status+".");
+      setSucesso("Situação da ocorrência nº "+confirmacao.id+" atualizada com sucesso.");
       setConfirmacao(null);
       setMotivo("");
       await carregar();
@@ -71,7 +71,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
           <strong className={o.tipo==="PERDIDO"?"status-perdido":"status-encontrado"}>{o.tipo==="PERDIDO"?"PROCURA-SE":"ENCONTRADO"}</strong>
           <h3>{o.nome || o.especie} <small>#{o.id}</small></h3>
           <p>{o.especie} • {o.bairro} • {String(o.data).slice(0,10).split("-").reverse().join("/")}</p>
-          <p><strong>Estado:</strong> {o.status_aprovacao} / {o.status_caso}</p>
+          <p><strong>Situação:</strong> {o.status_aprovacao === "PENDENTE" ? "Em análise" : o.status_aprovacao === "APROVADO" ? "Aprovado" : o.status_aprovacao === "REJEITADO" ? "Não aprovado" : "Oculto"} · {o.status_caso === "ABERTO" ? "Ativo" : "Encerrado"}</p>
           {o.descricao && <p><strong>Observações:</strong> {o.descricao}</p>}
           {o.referencia && <p><strong>Referência:</strong> {o.referencia}</p>}
           <div className="action-row">

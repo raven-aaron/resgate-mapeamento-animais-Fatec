@@ -59,3 +59,26 @@
 .acessoPrefeitura { color:var(--cor-verde-agua);font-weight:700;font-size:12px;text-align:center;text-decoration:underline;white-space:nowrap; }
 .linkAdministracao { float:right;font-weight:700;text-decoration:underline; }
 @media(max-width:680px){.acessoPrefeitura{white-space:normal;font-size:10px;}.linkAdministracao{float:none;display:block;margin-top:10px;}}
+
+/* Navegação adaptativa, sem rolagem horizontal da página */
+@media(max-width:800px) {
+  .barraNav {flex-wrap:nowrap;overflow-x:auto;max-width:calc(100vw - 120px);scrollbar-width:thin;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:12px 16px 12px 26px;}
+  .barraNav a {white-space:nowrap;flex-shrink:0;}
+  .gridCabecalho {min-width:0;}
+  .buscaWrapper {min-width:0;}
+}
+@media(max-width:480px) {
+  .container {padding:0 12px;}
+  .cabecalho {padding:12px 0;}
+  .gridCabecalho {grid-template-columns:minmax(0,1fr) 100px;column-gap:10px;}
+  .logoDepartamento {max-width:145px;}
+  .prefeituraWrapper {max-width:100px;}
+  .logoPrefeitura {max-width:82px;height:auto;}
+  .flexNav {min-width:0;}
+  .btnMenu {min-width:61px;height:54px;padding:6px;border-radius:13px;}
+  .barraNav {min-width:0;max-width:calc(100vw - 91px);min-height:45px;gap:14px;margin-left:-8px;border-radius:11px;}
+  .barraAcessibilidade {padding:5px 0;}
+  .acessibilidadeBotao {width:32px;height:32px;}
+  .rodapeLogos {flex-wrap:wrap;}
+  .rodapeLogos img {max-width:95px;height:auto;}
+}
