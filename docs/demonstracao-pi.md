@@ -6,8 +6,8 @@
 2. Execute `git pull origin feat/banco-resgate-modulos`.
 3. Execute `node database/scripts/migrar.mjs` para aplicar somente migrações pendentes.
 4. Execute `docker compose up -d --build web`.
-5. Como o volume de dependências já pode existir, execute `docker compose exec web npm ci` após atualizar.
-6. Execute `docker compose restart web` e `docker compose ps`.
+5. **Ao atualizar dependências do projeto**, o volume `web_node_modules` existente precisa receber os novos pacotes: execute `docker compose run --rm --no-deps web npm ci` (especialmente após a instalação do Leaflet).
+6. Execute `docker compose restart web` e `docker compose ps`. Confira `docker compose logs --tail=40 web` se necessário.
 
 **Não execute `docker compose down -v`: isso apagaria o volume do MySQL.**
 
@@ -21,10 +21,10 @@ Acesse `http://localhost:3000/admin/login`.
 
 1. **Visitante:** abra `/mapa`. Veja o mapa interativo de animais e o modo Cards. Apenas ocorrências aprovadas e abertas são mostradas.
 2. **Cidadão:** acesse `/cadastro`, registre nome, telefone com DDD, e-mail e senha (com confirmação). O telefone é privado e não aparece em cartazes.
-3. **Cidadão:** acesse `/ocorrencias/nova?tipo=PERDIDO` (ou `ENCONTRADO`), preencha dados, selecione fotos, valide CEP de Votorantim, confirme um ponto público aproximado e envie. O cadastro entra em estado **PENDENTE**.
+3. **Cidadão:** acesse `/ocorrencias/nova?tipo=PERDIDO` (ou `ENCONTRADO`), preencha dados, selecione fotos, consulte o CEP de Votorantim e confira o bairro identificado automaticamente; o sistema define a posição pública aproximada sem permitir mover o marcador. Revise os dados, concorde com as orientações de privacidade e envie. O cadastro entra em estado **PENDENTE**.
 4. **Prefeitura (janela privativa):** faça login em `/admin/login`. Abra `/admin/solicitacoes`; a fila verifica novas solicitações automaticamente. Clique em **Saiba mais · Ver cartaz** para abrir a visualização completa da ocorrência antes da aprovação.
 5. **Prefeitura:** aprove a ocorrência. A ação atualiza o MySQL e registra histórico. Em caso de rejeição, informe motivo.
-6. **Visitante:** em `/mapa`, o novo animal aparece depois da atualização periódica. O pin abre um resumo, **Ver informações** abre o cartaz completo. A alternativa **Cards** apresenta os mesmos registros com filtros de espécie, porte, sexo e perdido/encontrado.
+6. **Visitante:** em `/mapa`, o novo animal aparece depois da atualização periódica. O pin abre um resumo com a fotografia principal, e **Ver cartaz completo** apresenta todos os dados disponíveis. A alternativa **Cards** apresenta os mesmos registros com filtros de espécie, porte, sexo e perdido/encontrado.
 7. **Interessado (uma conta distinta da do autor):** abra o cartaz e clique em **Entrar em contato pelo chat**. Se não estiver autenticado, o sistema direciona ao login. A conversa é criada somente entre o interessado e o autor da ocorrência, sem divulgar e-mails e telefones.
 8. **Cidadão/Interessado:** entre em `/mensagens` para ver a caixa de entrada ou `/mensagens/{id}` para conversar. As mensagens são consultadas automaticamente a cada cinco segundos. Um usuário alheio não pode ler a conversa.
 9. **Prefeitura:** confira `/admin/estatisticas`, `/admin/mapa-termico` e `/admin/ocorrencias`. O mapa administrativo mostra zonas agregadas de densidade; o painel e ranking usam dados do MySQL. Ao ocultar um registro, ele deixa de aparecer publicamente.
@@ -46,5 +46,8 @@ As rotas `/recuperar-senha` e `/redefinir-senha` usam token de uso único (SHA-2
 - Funcionalidades implementadas no código: login cidadão/ADM, criação de conta, envio de ocorrência pendente com fotos, moderação, prévia de cartaz pendente, consulta pública mapa/cards, cartaz completo, chat privado e indicadores.
 - A CI valida migrações, lint, TypeScript e build. **O funcionamento ponta a ponta em navegador + Docker + dois usuários deve ser verificado manualmente**, não presumido a partir da CI.
 - Pendente para outra etapa: edição/encerramento pelo cidadão, gerenciamento de usuários, notificações, recuperação de senha sem serviço de e-mail, integração do Banco de Ração e melhorias de acessibilidade/produção.
-- Posicionamento geográfico ainda usa limites provisórios, não o polígono oficial de Votorantim. ViaCEP, Nominatim e OpenStreetMap dependem de internet.
+- A localização dos **novos** cadastros é definida no backend: CEP validado por ViaCEP, bairro e posição regional (aproximadamente 1 km de generalização) obtida via Nominatim ou BrasilAPI CEP v2; o visitante não escolhe coordenadas. CEPs sem localização verificável são recusados, não posicionados em qualquer ponto. Isso evita desvios arbitrários, mas **não comprova a veracidade do CEP informado**: a moderação continua necessária.
+- Ocorrências criadas em versões antigas mantêm suas coordenadas anteriores; não há reescrita destrutiva automática do histórico.
+- Posicionamento geográfico ainda usa limites provisórios, não o polígono oficial de Votorantim. ViaCEP, Nominatim, BrasilAPI e os tiles do OpenStreetMap dependem de internet. A biblioteca Leaflet (JS/CSS) agora é empacotada localmente, sem depender do CDN unpkg.
+- O mapa público atualiza apenas as ocorrências que mudaram, em intervalos de cerca de 20 segundos, e oferece **Atualizar resultados**. Popups de animais não devem mais desaparecer periodicamente sem mudanças.
 - A área administrativa não tem permissão implícita para outros módulos (ex.: Banco de Ração).

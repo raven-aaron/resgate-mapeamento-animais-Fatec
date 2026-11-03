@@ -15,7 +15,8 @@ Referências no repositório `raven-aaron/Projeto-Resgate-e-Mapeamento-FATEC`:
 - Espécies: **Cachorro** e **Gato**; raça canina da lista original; campo desabilitado para gatos.
 - Campos: nome, espécie, idade, microchip, sexo, porte, cor/pelagem, raça, data, CEP e referência, fotos e observações.
 - **Nunca oferecer opção com texto “Não sei”**; campos não conhecidos podem ser deixados sem preencher quando a regra permitir.
-- CEP validado para Votorantim, mapa de seleção da região aproximada **dentro do formulário**, sem número da residência.
+- O cidadão informa somente um CEP de Votorantim, consulta o bairro e vê a **região de publicação aproximada**. Não existe seleção manual do pin: coordenadas enviadas pelo navegador são ignoradas e o backend resolve a localização novamente na gravação.
+- A localização é derivada de fonte geográfica validada, generalizada para uma grade regional e nunca aponta deliberadamente para um imóvel. Consulta malsucedida impede o cadastro com um aviso, em vez de escolher uma localização arbitrária.
 - Fotos: até cinco; guardadas no volume persistente privado com rota de acesso autorizada.
 - Fluxo: login obrigatório → revisar cadastro → enviar para análise → MySQL status `PENDENTE` → moderação ADM → publicação no mapa/cards.
 - Contato: interessados precisam estar logados; telefone/e-mail nunca são exibidos em cartazes públicos.
