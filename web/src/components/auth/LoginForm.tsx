@@ -1,10 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export default function LoginForm({ admin = false }: { admin?: boolean }) {
   const router = useRouter();
+  const params = useSearchParams();
+  const solicitado = params.get("retorno") || "";
+  const retorno = solicitado.startsWith("/") && !solicitado.startsWith("//") && !solicitado.startsWith("/\\") && !solicitado.startsWith("/admin") ? solicitado : "/resgate";
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -21,7 +24,7 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
       });
       const resultado = await resposta.json();
       if (!resposta.ok) throw new Error(resultado.erro || "Falha ao entrar.");
-      router.push(admin ? "/admin" : "/resgate");
+      router.push(admin ? "/admin" : retorno);
       router.refresh();
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Não foi possível entrar.");
@@ -44,7 +47,7 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
           <button className="action action-primary" type="submit" disabled={carregando}>{carregando ? "Autenticando..." : "ENTRAR"}</button>
           <Link href="/resgate" className="action action-secondary">Voltar</Link>
         </div>
-        {!admin && <p style={{marginTop:22}}>Ainda não possui conta? <Link href="/cadastro" style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Cadastre-se</Link></p>}
+        {!admin && <p style={{marginTop:22}}>Ainda não possui conta? <Link href={"/cadastro?retorno="+encodeURIComponent(retorno)} style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Cadastre-se</Link> · <Link href="/recuperar-senha" style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Esqueci minha senha</Link></p>}
       </form>
     </main>
   );

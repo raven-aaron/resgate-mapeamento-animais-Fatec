@@ -2,22 +2,25 @@ import { NextResponse } from "next/server";
 import type { ResultSetHeader } from "mysql2/promise";
 import { banco } from "../../../../lib/db";
 import { criarSessao, gerarSenhaHash } from "../../../../lib/auth";
+import { mesmaOrigem } from "../../../../lib/seguranca";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  if (!mesmaOrigem(request)) return NextResponse.json({ erro: "Origem não permitida." }, { status: 403 });
   try {
     if (Number(request.headers.get("content-length") || 0) > 4096) return NextResponse.json({ erro: "Dados muito extensos." }, { status: 413 });
     const data = await request.json();
     const nome = typeof data.nome === "string" ? data.nome.trim() : "";
     const email = typeof data.email === "string" ? data.email.trim().toLowerCase() : "";
     const senha = typeof data.senha === "string" ? data.senha : "";
-    if (nome.length < 2 || nome.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || senha.length < 10 || senha.length > 128) {
-      return NextResponse.json({ erro: "Informe nome, e-mail válido e senha entre 10 e 128 caracteres." }, { status: 400 });
+    const telefone = typeof data.telefone === "string" ? data.telefone.replace(/\D/g, "") : "";
+    if (nome.length < 2 || nome.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || !/^[0-9]{10,11}$/.test(telefone) || senha.length < 10 || senha.length > 128) {
+      return NextResponse.json({ erro: "Informe nome, telefone com DDD, e-mail válido e senha entre 10 e 128 caracteres." }, { status: 400 });
     }
     const hash = await gerarSenhaHash(senha);
     const [resultado] = await banco().execute<ResultSetHeader>(
-      "INSERT INTO usuarios (nome,email,senha_hash) VALUES (?,?,?)", [nome, email, hash]
+      "INSERT INTO usuarios (nome,email,telefone,senha_hash) VALUES (?,?,?,?)", [nome, email, telefone, hash]
     );
     await criarSessao(resultado.insertId);
     return NextResponse.json({ ok: true, nome }, { status: 201 });
