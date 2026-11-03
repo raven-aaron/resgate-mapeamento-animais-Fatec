@@ -156,7 +156,7 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
       <p role="status" style={{fontSize:13,lineHeight:1.6,color:"var(--muted)"}}>{aviso}</p>
       {ponto && <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
         <span style={{fontSize:13}}>Ponto: {ponto.lat.toFixed(5)}, {ponto.lng.toFixed(5)}</span>
-        <button className="action action-primary" type="button" disabled={confirmado} onClick={confirm}>
+        <button className="action action-primary" type="button" disabled={confirmado} onClick={confirmar}>
           {confirmado ? "Ponto confirmado" : "Confirmar posição aproximada"}
         </button>
       </div>}
