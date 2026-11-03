@@ -206,3 +206,89 @@ body.modo-alto-contraste .inline-action { background: #222; }
 @media(prefers-reduced-motion:reduce) {
  .action,.inline-action,.cartao-ocorrencia {transition:none!important;}
 }
+
+
+/* Cadastro de ocorrências: organização dos campos por seções */
+.cadastro-pet { width:min(1040px,calc(100% - 40px));margin-top:36px; }
+.cadastro-pet .form-heading {padding:8px 4px 3px;margin-bottom:24px;}
+.cadastro-pet .form-heading .eyebrow { display:block;margin:20px 0 0;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--cor-verde-agua);font-weight:800; }
+.cadastro-pet .form-heading h1 {margin:9px 0 12px;font-size:clamp(28px,4vw,42px);letter-spacing:-.025em;}
+.cadastro-pet .form-heading p {font-size:16px;max-width:700px;margin:0 0 18px;}
+.etapas-cadastro {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #d7e6e0;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 5px 18px #3488880b;margin-top:25px;}
+.etapas-cadastro span {display:flex;gap:10px;align-items:center;justify-content:center;padding:16px 8px;font-size:13px;font-weight:750;color:#426662;border-right:1px solid #e8eeeb;min-width:0;}
+.etapas-cadastro span:last-child {border-right:0;}
+.etapas-cadastro b {width:30px;height:30px;flex:0 0 30px;border-radius:50%;display:grid;place-items:center;background:#d5f1ef;color:#286e6e;font-size:12px;letter-spacing:.02em;}
+.cadastro-pet-painel {border-radius:20px;padding:36px 40px 30px;box-shadow:0 12px 32px rgba(52,136,136,.08);border-color:#d8e6e0;}
+.cadastro-pet-grid {grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;row-gap:23px;}
+.cadastro-pet-grid .form-field {gap:9px;align-self:start;}
+.cadastro-pet-grid .form-field > :is(label,span:first-child) {line-height:1.4;}
+.cadastro-pet-grid .form-field input,
+.cadastro-pet-grid .form-field select,
+.cadastro-pet-grid .form-field textarea {border-color:#cbd8d3;border-radius:11px;min-height:50px;padding:12px 15px;box-shadow:0 1px 0 #00000008;}
+.cadastro-pet-grid .form-field input::placeholder,
+.cadastro-pet-grid .form-field textarea::placeholder {color:#7a8b86;}
+.cadastro-pet-grid .form-field input:focus,
+.cadastro-pet-grid .form-field select:focus,
+.cadastro-pet-grid .form-field textarea:focus {outline:3px solid #d5f1ef;outline-offset:0;border-color:#348888;}
+.cadastro-pet-grid .form-field small {line-height:1.5;color:#657a73;font-size:12px;}
+.cadastro-pet-grid .form-field-full {grid-column:1 / -1;}
+.pet-form-section-title {display:flex;align-items:center;gap:17px;margin:10px 0 0;min-width:0;}
+.pet-form-section-title:not(:first-child) {border-top:1px solid #e5ece8;padding-top:32px;margin-top:12px;}
+.pet-form-numero {flex:0 0 46px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;color:#fff;background:#348888;font-weight:800;letter-spacing:.03em;}
+.pet-form-section-title h2 {font-size:clamp(18px,2.3vw,24px);margin:0 0 5px;color:#266d69;line-height:1.25;letter-spacing:-.01em;}
+.pet-form-section-title p {margin:0;font-size:13px;color:#657a73;font-weight:400;line-height:1.5;}
+.campo-opcional {margin-left:8px;display:inline-block;border-radius:40px;padding:3px 8px;background:#eaf1ee;color:#55716a;font-size:11px;font-weight:650;letter-spacing:.01em;}
+.cadastro-pet .regiao-confirmada {background:#eaf5f0;border:1px solid #c5e4d6;border-radius:12px;padding:14px 16px;color:#235e4a;font-size:14px;margin:0;}
+.cadastro-pet .area-upload-foto {background:#f9fcfa;border-color:#95bdb1;border-radius:14px;min-height:130px;padding:20px;}
+.cadastro-pet .area-upload-foto:hover {border-color:#348888;background:#f2faf7;}
+.cadastro-pet .galeria-previas img {width:110px;height:110px;border-radius:12px;border:2px solid #e2ebe6;}
+.cadastro-pet .observacao-envio {padding:14px 17px;margin:28px 0 0;background:#eef7f4;border-left:3px solid #348888;color:#42635a;border-radius:8px;font-size:13px;line-height:1.65;}
+.cadastro-pet .action-row {margin-top:22px;}
+.cadastro-pet .action {border-radius:10px;min-height:48px;}
+.cadastro-pet .review-list {gap:13px;}
+.cadastro-pet .review-list div {background:#f4f8f6;border:1px solid #e8efeb;border-radius:11px;padding:14px;}
+.cadastro-pet .review-list dd {font-size:14px;}
+
+/* Última confirmação, antes de publicar uma ocorrência */
+.orientacoes-overlay {position:fixed;inset:0;z-index:6000;display:grid;place-items:center;background:rgba(12,38,38,.72);padding:16px;overflow-y:auto;}
+.orientacoes-modal {background:#fff;width:min(610px,100%);max-height:min(90dvh,850px);overflow-y:auto;border-radius:20px;padding:clamp(22px,4vw,37px);box-shadow:0 22px 60px #001a1960;color:#273f39;}
+.orientacoes-topo {display:flex;align-items:center;gap:9px;color:#286e6e;text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:.08em;}
+.orientacoes-simbolo {width:27px;height:27px;display:grid;place-items:center;background:#e1f4ec;border-radius:50%;color:#286e6e;font-size:18px;font-weight:900;}
+.orientacoes-modal h2 {font-size:clamp(23px,4vw,31px);line-height:1.18;letter-spacing:-.025em;margin:15px 0;color:#184e47;}
+.orientacoes-modal > p {font-size:15px;line-height:1.6;color:#516962;}
+.orientacoes-modal ul {padding-left:20px;display:grid;gap:12px;margin:20px 0 24px;line-height:1.55;font-size:14px;}
+.orientacoes-modal li::marker {color:#348888;}
+.orientacoes-aceite {display:flex;align-items:flex-start;gap:13px;padding:15px;background:#f0f8f4;border:1px solid #c8e6d7;border-radius:12px;line-height:1.5;font-size:14px;font-weight:700;cursor:pointer;}
+.orientacoes-aceite input {width:22px;height:22px;flex:0 0 22px;margin:0;accent-color:#348888;cursor:pointer;}
+.orientacoes-acoes {display:flex;gap:11px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap;}
+.orientacoes-acoes button {flex:1 1 200px;min-width:0;box-shadow:none;}
+body.modo-alto-contraste .orientacoes-modal {background:#151515;color:#fff;border:1px solid #fff;}
+body.modo-alto-contraste .orientacoes-modal h2,
+body.modo-alto-contraste .orientacoes-modal > p {color:#fff;}
+body.modo-alto-contraste .orientacoes-aceite {background:#252525;color:#fff;border-color:#ddd;}
+body.modo-alto-contraste .etapas-cadastro {background:#171717;border-color:#fff;}
+body.modo-alto-contraste .etapas-cadastro span {color:#fff;border-color:#ccc;}
+body.modo-alto-contraste .pet-form-section-title p {color:#ddd;}
+body.modo-alto-contraste .regiao-confirmada,
+body.modo-alto-contraste .observacao-envio {background:#262626;color:#fff;border-color:#fff;}
+@media(max-width:780px) {
+  .cadastro-pet {width:calc(100% - 28px);margin-top:26px;}
+  .cadastro-pet-painel {padding:22px 20px;}
+  .cadastro-pet-grid {grid-template-columns:1fr;row-gap:20px;}
+  .cadastro-pet-grid .form-field-full {grid-column:auto;}
+  .etapas-cadastro {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .etapas-cadastro span:nth-child(2) {border-right:0;}
+  .etapas-cadastro span:nth-child(-n+2) {border-bottom:1px solid #e8eeeb;}
+  .pet-form-section-title:not(:first-child) {padding-top:23px;}
+}
+@media(max-width:450px) {
+  .cadastro-pet {width:calc(100% - 20px);}
+  .cadastro-pet-painel {padding:20px 14px;}
+  .pet-form-section-title {gap:11px;}
+  .pet-form-numero {width:40px;height:40px;flex-basis:40px;}
+  .etapas-cadastro span {font-size:12px;justify-content:start;padding:12px 8px;}
+  .etapas-cadastro b {width:27px;height:27px;flex-basis:27px;}
+  .orientacoes-overlay {padding:8px;}
+  .orientacoes-modal {padding:20px 16px;border-radius:14px;max-height:96dvh;}
+  .orientacoes-acoes {gap:9px;}
+}
