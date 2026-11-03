@@ -32,6 +32,7 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const mapa = useRef<Mapa | null>(null);
   const marcador = useRef<Marcador | null>(null);
+  const requisicao = useRef<AbortController | null>(null);
   const [pronto, setPronto] = useState(false);
   const [ponto, setPonto] = useState<Ponto | null>(null);
   const [origem, setOrigem] = useState<"RUA" | "AJUSTE_USUARIO">("AJUSTE_USUARIO");
@@ -93,6 +94,7 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
     }
     return () => {
       ativo = false;
+      requisicao.current?.abort();
       mapa.current?.remove();
       mapa.current = null;
       marcador.current = null;
@@ -104,6 +106,9 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
 
   async function sugerir() {
     if (!pronto || consultando) return;
+    const controle = new AbortController();
+    requisicao.current?.abort();
+    requisicao.current = controle;
     setConsultando(true);
     setConfirmado(false);
     onConfirm(null);
@@ -111,8 +116,9 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
     marcador.current = null;
     setPonto(null);
     try {
-      const resposta = await fetch("/api/localizacao/geocodificar?cep=" + encodeURIComponent(cep), { cache: "no-store" });
+      const resposta = await fetch("/api/localizacao/geocodificar?cep=" + encodeURIComponent(cep), { cache: "no-store", signal: controle.signal });
       const dados = await resposta.json() as { erro?: string; aviso?: string; latitude?: number | null; longitude?: number | null };
+      if (controle.signal.aborted) return;
       if (!resposta.ok) throw new Error(dados.erro || "Não foi possível obter uma sugestão.");
       const p = typeof dados.latitude === "number" && typeof dados.longitude === "number"
         ? { lat: dados.latitude, lng: dados.longitude } : null;
@@ -125,9 +131,12 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
       }
       if (p && naRegiao(p)) setAviso(dados.aviso || "Confirme ou ajuste a sugestão.");
     } catch (error) {
-      setAviso(error instanceof Error ? error.message : "Erro na consulta de localização.");
+      if (!controle.signal.aborted) setAviso(error instanceof Error ? error.message : "Erro na consulta de localização.");
     } finally {
-      setConsultando(false);
+      if (requisicao.current === controle) {
+        requisicao.current = null;
+        if (!controle.signal.aborted) setConsultando(false);
+      }
     }
   }
 
