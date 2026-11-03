@@ -30,10 +30,10 @@ let proximaConsulta=0;
 let fila:Promise<void>=Promise.resolve();
 
 function normalizar(valor:string|undefined){
-  return (valor||"").normalize("NFC").replace(/\\s+/g," ").trim();
+  return (valor||"").normalize("NFC").replace(/\s+/g," ").trim();
 }
 function chave(valor:string|undefined){
-  return normalizar(valor).normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase();
+  return normalizar(valor).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 }
 function dentroDoMunicipio(lat:number,lon:number){
   return Number.isFinite(lat)&&Number.isFinite(lon) &&
@@ -82,8 +82,8 @@ async function buscarNoMapa(consulta:string):Promise<ResultadoOSM[]>{
   return await r.json() as ResultadoOSM[];
 }
 export async function localizarBairroPorCep(valorCep:string):Promise<LocalizacaoDoBairro>{
-  const cep=valorCep.replace(/\\D/g,"");
-  if(!/^\\d{8}$/.test(cep))throw new ErroLocalizacao("Informe um CEP com oito dígitos.",400);
+  const cep=valorCep.replace(/\D/g,"");
+  if(!/^\d{8}$/.test(cep))throw new ErroLocalizacao("Informe um CEP com oito dígitos.",400);
   const salvo=cacheCep.get(cep);
   if(salvo&&salvo.ate>Date.now())return salvo.dados;
 
