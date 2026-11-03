@@ -3,21 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Ocorrencia } from "../../lib/tipos";
 import { fotoPermitidaNoMapa } from "../../lib/foto-url";
+import { carregarLeaflet, type MapaLeaflet, type MarcadorLeaflet } from "../../lib/mapa-browser";
 
-type Mapa = {
-  setView: (pos: [number, number], zoom: number) => Mapa;
-  remove: () => void;
-  removeLayer: (m: Marcador) => void;
-};
-type Marcador = { addTo: (m: Mapa) => Marcador; bindPopup: (content: HTMLElement, options?: object) => Marcador };
-type Folheto = {
-  map: (el: HTMLElement) => Mapa;
-  tileLayer: (url: string, opts: { attribution: string; maxZoom: number }) => { addTo: (m: Mapa) => void };
-  marker: (pos: [number, number], options?: { icon: object }) => Marcador;
-  divIcon: (opts: { className: string; html: string; iconSize: [number,number]; iconAnchor:[number,number] }) => object;
-};
-
-function API(): Folheto | undefined { return (window as unknown as { L?: Folheto }).L; }
 function linha(titulo: string, valor: string) {
   const p=document.createElement("p");
   const strong=document.createElement("strong"); strong.textContent=titulo; p.append(strong, document.createTextNode(valor)); return p;
@@ -25,44 +12,37 @@ function linha(titulo: string, valor: string) {
 
 export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[] }) {
   const el = useRef<HTMLDivElement>(null);
-  const mapa = useRef<Mapa | null>(null);
-  const marcadores = useRef<Marcador[]>([]);
+  const mapa = useRef<MapaLeaflet | null>(null);
+  const marcadores = useRef<MarcadorLeaflet[]>([]);
   const [pronto,setPronto] = useState(false);
   const [erro,setErro] = useState("");
   useEffect(()=>{
     let ativo=true;
-    let script: HTMLScriptElement | null=null;
-    function iniciar(){
-      const L=API();
-      if(!ativo || !L || !el.current || mapa.current)return;
-      const m=L.map(el.current);
-      mapa.current=m;
-      m.setView([-23.5443,-47.4491],13);
+    void carregarLeaflet().then(L=>{
+      if(!ativo || !el.current || mapa.current)return;
+      const instancia=L.map(el.current);
+      mapa.current=instancia;
+      instancia.setView([-23.5443,-47.4491],13);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
-        attribution:'© OpenStreetMap contributors',maxZoom:19,
-      }).addTo(m);
+        attribution:"© OpenStreetMap contributors",maxZoom:19,
+      }).addTo(instancia);
       setPronto(true);
-    }
-    if(API())iniciar();
-    else {
-      script=document.createElement("script");
-      script.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.onload=iniciar;
-      script.onerror=()=>setErro("O mapa não pôde ser carregado. Utilize a visualização por cards.");
-      document.body.appendChild(script);
-    }
+    }).catch(()=>{
+      if(ativo)setErro("Não foi possível carregar o mapa. Utilize a visualização por cards.");
+    });
     return ()=>{
       ativo=false;
       marcadores.current=[];
       mapa.current?.remove();
       mapa.current=null;
-      script?.remove();
     };
   },[]);
   useEffect(()=>{
-    const L=typeof window!=="undefined"?API():undefined;
     const m=mapa.current;
-    if(!pronto || !L || !m)return;
+    if(!pronto || !m)return;
+    let ativo=true;
+    void carregarLeaflet().then(L=>{
+    if(!ativo || !mapa.current)return;
     marcadores.current.forEach(marker=>m.removeLayer(marker));
     marcadores.current=[];
     const repeticoes=new Map<string,number>();
@@ -118,9 +98,10 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
       marker.bindPopup(conteudo,{maxWidth:270,minWidth:180});
       marcadores.current.push(marker);
     }
+    }).catch(()=>{ if(ativo)setErro("Não foi possível atualizar o mapa."); });
+    return ()=>{ativo=false;};
   },[pronto,ocorrencias]);
   return <div>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <div ref={el} className="mapa-publico" aria-label="Mapa interativo de animais perdidos e encontrados em Votorantim" />
     {erro && <p role="alert" className="note note-warning">{erro}</p>}
     {!pronto && !erro && <p role="status">Carregando mapa...</p>}
