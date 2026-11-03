@@ -92,7 +92,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
                   </svg>
                 </button>
                 <div className={styles.campoBusca}>
-                  <input type="search" value={busca} onChange={evento => { setBusca(evento.target.value); setResultadoBusca(""); }} aria-label="Pesquisar serviços da Prefeitura" placeholder="O que você procura?" className={styles.inputBusca}/>
+                  <input type="search" value={busca} onChange={evento => { setBusca(evento.target.value); setResultadoBusca(""); }} aria-label="Pesquisar serviços" placeholder="O que você procura?" className={styles.inputBusca}/>
                   {resultadoBusca && <p className={styles.buscaFeedback} role="status">{resultadoBusca}</p>}
                 </div>
               </form>
@@ -146,8 +146,8 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
             <div className={styles.rodapeConteudo}>
               <div className={styles.rodapeTexto}>
                 <strong>Proteção e Bem-Estar Animal — Votorantim</strong>
-                <p>Projeto Integrador FATEC Votorantim. Interface de serviços municipais, com módulo de resgate e mapeamento de animais.</p>
-                <p>Por segurança, não informe endereços residenciais nem contatos pessoais nas ocorrências.</p>
+                <p>Consulte animais perdidos e encontrados, divulgue ocorrências e ajude famílias a se reencontrarem com seus pets.</p>
+                <p>Atendimento e contato entre usuários realizados pela própria plataforma.</p>
               </div>
               <div className={styles.rodapeLogos}>
                 <Image src={logoBemEstar} unoptimized width={110} height={90} alt="Departamento de Bem-Estar Animal" className={styles.logo}/>
@@ -157,7 +157,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className={styles.rodapeBase}>
-          <div className={styles.container}>Sistema acadêmico de serviços municipais • Votorantim/SP <Link href="/admin/login" className={styles.linkAdministracao}>Área administrativa</Link></div>
+          <div className={styles.container}>Proteção e Bem-Estar Animal • Votorantim/SP <Link href="/admin/login" className={styles.linkAdministracao}>Área administrativa</Link></div>
         </div>
       </footer>
     </>

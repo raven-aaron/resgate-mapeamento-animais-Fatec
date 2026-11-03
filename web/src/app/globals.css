@@ -164,3 +164,45 @@ body.modo-alto-contraste .inline-action { background: #222; }
 @media(max-width:600px){.admin-cartao{grid-template-columns:1fr;}.admin-cartao>img,.admin-sem-foto{width:100%;height:200px;}.admin-kpis{grid-template-columns:1fr;}.admin-barra{grid-template-columns:95px 1fr 28px;}}
 
 .filtros-admin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 22px;}@media(max-width:650px){.filtros-admin{grid-template-columns:1fr;}}
+
+
+/* Miniaturas, tipografia e ações do popup público do mapa */
+.leaflet-popup-content-wrapper { border-radius:18px;box-shadow:0 12px 35px rgba(22,73,70,.22); }
+.leaflet-popup-content { margin:16px 18px; }
+.popup-pet { width:246px;max-width:100%;min-width:0;color:#283634; }
+.popup-pet > strong { display:inline-block;font-size:12px;letter-spacing:.055em;margin:0 0 12px; }
+.popup-pet-identidade { display:flex;align-items:center;gap:12px;margin-bottom:12px;min-width:0; }
+.popup-pet-miniatura { flex:0 0 74px;width:74px;height:74px;overflow:hidden;display:grid;place-items:center;background:#e4f3ee;border:1px solid #ccded7;border-radius:13px; }
+.popup-pet .popup-pet-miniatura img { width:100%;height:100%;object-fit:cover;margin:0;border-radius:12px;display:block; }
+.popup-pet-miniatura.sem-imagem { color:#348888;font-size:32px; }
+.popup-pet-identidade-texto { min-width:0;display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere; }
+.popup-pet .popup-pet-nome { font-size:17px;line-height:1.3;font-weight:800; }
+.popup-pet-especie { font-size:13px;color:#61716e; }
+.popup-pet .action { width:100%;margin:13px 0 0;min-height:42px;border-radius:11px;box-shadow:none; }
+.legenda-mapa-publico {font-size:13px;color:var(--cor-cinza);line-height:1.6;margin:12px 4px;}
+
+/* Padrão de acessibilidade e adaptação para telas pequenas */
+.form-field { min-width:0; }
+.form-field :is(input,select,textarea) { max-width:100%; }
+.form-field input[type="file"] { white-space:normal; }
+.form-field small { line-height:1.5; }
+.action-row > :is(a,button) { max-width:100%; }
+.mapa-publico { max-width:100%; }
+@media(max-width:700px) {
+  .form-heading h1 { overflow-wrap:anywhere; }
+  .form-panel { padding:20px 18px; }
+  .popup-pet { width:min(246px,calc(100vw - 92px)); }
+  .leaflet-popup-content { margin:12px 14px; }
+  .mapa-publico { height: min(65dvh,520px); min-height:320px; }
+  .action-row { gap:10px; }
+  .action-row > :is(a,button) { flex-grow:1; }
+}
+@media(max-width:390px) {
+ .form-shell,.site-wrap { width:calc(100% - 24px); }
+ .form-panel { padding:17px 14px; }
+ .review-list { gap:8px; }
+ .popup-pet-miniatura {flex-basis:64px;width:64px;height:64px;}
+}
+@media(prefers-reduced-motion:reduce) {
+ .action,.inline-action,.cartao-ocorrencia {transition:none!important;}
+}

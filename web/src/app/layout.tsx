@@ -7,7 +7,7 @@ const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"], display: 
 
 export const metadata: Metadata = {
   title: "Resgate e Mapeamento de Animais | Votorantim",
-  description: "Projeto Integrador de registro e mapeamento de animais perdidos e encontrados em Votorantim/SP.",
+  description: "Encontre animais perdidos e encontrados em Votorantim. Cadastre ocorrências, consulte o mapa e entre em contato de forma segura.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

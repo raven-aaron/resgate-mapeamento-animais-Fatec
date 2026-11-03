@@ -17,7 +17,7 @@ export default async function AdminPage() {
   );
   const r=rows[0];
   return <AdminShell nome={usuario.nome} titulo="PAINEL ADMINISTRATIVO">
-    <p>Gestão municipal do módulo de Resgate e Mapeamento. Os números são consultados diretamente no MySQL.</p>
+    <p>Acompanhe os registros, as solicitações recebidas e a situação dos animais cadastrados.</p>
     <div className="admin-kpis">
       <div><strong>{Number(r.total||0)}</strong><span>Ocorrências registradas</span></div>
       <div><strong>{Number(r.pendentes||0)}</strong><span>Aguardando análise</span></div>

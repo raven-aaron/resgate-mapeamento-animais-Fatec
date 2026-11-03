@@ -19,7 +19,7 @@ export default function Home() {
               </div>
             </div>
             <div className={styles.colImg}>
-              <Image src="/assets/cachorrogatoinicial.jpg" alt="Cachorro e gato, imagem do PI original" width={750} height={400} className={styles.imgBorda} priority />
+              <Image src="/assets/cachorrogatoinicial.jpg" alt="Cachorro e gato juntos" width={750} height={400} className={styles.imgBorda} priority />
             </div>
           </div>
         </div>

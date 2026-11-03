@@ -43,9 +43,9 @@ export default function ConsultaOcorrencias() {
   return (
     <main className="site-wrap" style={{padding:"34px 0 50px"}}>
       <header className="form-heading">
-        <span className="eyebrow">Resgate e Mapeamento</span>
+        <span className="eyebrow">Proteção e Bem-Estar Animal</span>
         <h1>ANIMAIS PERDIDOS E ENCONTRADOS</h1>
-        <p>Consulte as ocorrências aprovadas em Votorantim. Explore cada pin ou alterne para os cards; os mesmos filtros são aplicados às duas visualizações.</p>
+        <p>Encontre animais perdidos e encontrados em Votorantim. Utilize o mapa ou a lista para localizar um pet e consultar seu cartaz completo.</p>
       </header>
       <section className="form-panel">
         <h2>Filtrar ocorrências</h2>
@@ -65,7 +65,7 @@ export default function ConsultaOcorrencias() {
         </div>
         <div className="filtros-acoes">
           <button type="button" className="inline-action" style={{marginTop:0}} onClick={()=>{setEspecie("");setPorte("");setTipo("");setSexo("");}}>Limpar filtros</button>
-          <span role="status">{carregando ? "Buscando ocorrências..." : ocorrencias.length + " ocorrência(s) encontrada(s) · Atualização automática"}</span>
+          <span role="status">{carregando ? "Buscando ocorrências..." : ocorrencias.length + " ocorrência(s) encontrada(s)"}</span>
           <div className="seletor-modo" aria-label="Modo de visualização">
             <button type="button" aria-pressed={modo==="mapa"} className={modo==="mapa"?"ativo":""} onClick={()=>setModo("mapa")}>Mapa</button>
             <button type="button" aria-pressed={modo==="cards"} className={modo==="cards"?"ativo":""} onClick={()=>setModo("cards")}>Cards</button>
@@ -75,7 +75,7 @@ export default function ConsultaOcorrencias() {
       {erro && <p className="note note-warning" role="alert">{erro}</p>}
       {modo==="mapa" ? <section aria-label="Mapa de ocorrências">
         <MapaPublico ocorrencias={ocorrencias} />
-        <p style={{fontSize:13,color:"var(--cor-cinza)"}}>Cada marcador representa uma ocorrência aprovada e ativa. Os pontos públicos são aproximados para preservar a privacidade.</p>
+        <p className="legenda-mapa-publico">Os marcadores indicam regiões aproximadas, sem divulgar endereços residenciais.</p>
       </section> : <section className="cards-ocorrencias" aria-label="Lista de animais">
         {ocorrencias.map(o=><article className="cartao-ocorrencia" key={o.id}>
           {o.foto ? <Image src={o.foto} alt={"Foto do animal "+o.id} unoptimized width={340} height={220}/> : <div className="sem-foto">🐾</div>}

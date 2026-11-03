@@ -23,7 +23,7 @@ export default function CartazPet({ o, fotos, administrativo=false }: { o: Ocorr
   return <div className={styles.cartaz}>
     {administrativo && <div className={styles.avisoAdm} role="status">
       <strong>PRÉ-VISUALIZAÇÃO ADMINISTRATIVA</strong> · Situação: {o.status_aprovacao} / {o.status_caso}.
-      Este é o cartaz que será exibido à população após a aprovação.
+      Revise os dados e as fotografias antes de decidir sobre a publicação.
     </div>}
     <section className={styles.hero}>
       <div className={styles.introducao}>

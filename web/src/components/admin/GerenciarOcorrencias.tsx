@@ -53,7 +53,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   }
 
   return <div>
-    <p>As ações abaixo alteram o banco de dados. Novas solicitações são verificadas automaticamente.</p>
+    <p>Revise as informações e acompanhe as solicitações recebidas. A lista é atualizada automaticamente.</p>
     <button type="button" className="inline-action" onClick={()=>{void carregar().catch(e=>setErro(e instanceof Error?e.message:"Falha ao atualizar."));}}>ATUALIZAR SOLICITAÇÕES</button>
     {carregando && <p role="status">Carregando solicitações...</p>}
     {erro && <p role="alert" className="note note-warning">{erro}</p>}
@@ -90,7 +90,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     {confirmacao && <div className="admin-modal-fundo" role="presentation">
       <section className="admin-modal" role="dialog" aria-modal="true" aria-label="Confirmar moderação">
         <h2>CONFIRMAR {confirmacao.acao==="APROVAR"?"APROVAÇÃO":confirmacao.acao==="REJEITAR"?"REJEIÇÃO":"OCULTAÇÃO"}</h2>
-        <p>Ocorrência #{confirmacao.id}. A ação será salva no MySQL e registrada no histórico.</p>
+        <p>Ocorrência #{confirmacao.id}. Confirme esta decisão para atualizar a situação do cadastro.</p>
         {confirmacao.acao!=="APROVAR" && <label className="form-field">Motivo
           <textarea required minLength={5} maxLength={500} value={motivo} onChange={e=>setMotivo(e.target.value)} placeholder="Descreva o motivo da decisão." />
         </label>}
