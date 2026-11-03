@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     );
     const [ocorrencia] = await conexao.execute<ResultSetHeader>(
       "INSERT INTO ocorrencias (id_usuario_criador,id_animal,id_bairro,ponto_referencia,tipo_ocorrencia,status_aprovacao,data_evento,descricao,cep,logradouro,latitude_aproximada,longitude_aproximada,origem_localizacao,precisao_localizacao) VALUES (?,?,?,?,?,'PENDENTE',?,?,?,?,?,?,?,?)",
-      [usuario.id,animal.insertId,bairros.insertId,referencia || null,tipo,dataEvento,descricao || null,cep,endereco.logradouro?.trim().slice(0,160) || null,loc!.latitude_aproximada,loc!.longitude_aproximada,loc!.origem_localizacao,loc!.precisao_localizacao]
+      [usuario.id,animal.insertId,bairros.insertId,referencia || null,tipo,dataEvento,descricao || null,cep,endereco.logradouro?.trim().slice(0,160) || null,Number(loc!.latitude_aproximada),Number(loc!.longitude_aproximada),String(loc!.origem_localizacao),String(loc!.precisao_localizacao)]
     );
     if (cor) {
       const [cores] = await conexao.execute<RowDataPacket[]>("SELECT id_cor AS id FROM cores WHERE nome=? AND ativo=1 LIMIT 1", [cor]);
