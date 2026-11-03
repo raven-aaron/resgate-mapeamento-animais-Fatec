@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MapaPublico from "./MapaPublico";
 import type { Ocorrencia } from "../../lib/tipos";
 
@@ -15,6 +15,8 @@ export default function ConsultaOcorrencias() {
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [versao, setVersao] = useState(0);
+  const assinaturaAtual = useRef("");
 
   useEffect(() => {
     const controlador = new AbortController();
@@ -30,15 +32,21 @@ export default function ConsultaOcorrencias() {
         const resposta = await fetch("/api/ocorrencias?" + params.toString(), { cache:"no-store",signal:controlador.signal });
         const dados = await resposta.json() as { ocorrencias?: Ocorrencia[]; erro?: string };
         if (!resposta.ok) throw new Error(dados.erro || "Falha na consulta.");
-        setOcorrencias(dados.ocorrencias || []);
+        const novos=dados.ocorrencias || [];
+        const assinatura=JSON.stringify(novos);
+        // Evita destruir os marcadores e fechar popups quando nada mudou.
+        if(assinaturaAtual.current!==assinatura){
+          assinaturaAtual.current=assinatura;
+          setOcorrencias(novos);
+        }
       } catch (e) {
         if (!controlador.signal.aborted) setErro(e instanceof Error ? e.message : "Falha na consulta.");
       } finally { if (!controlador.signal.aborted) setCarregando(false); }
     }
     void carregar(true);
-    const intervalo=setInterval(()=>{void carregar();},8000);
+    const intervalo=setInterval(()=>{if(document.visibilityState==="visible")void carregar();},20000);
     return () => {clearInterval(intervalo);controlador.abort();};
-  }, [especie, porte, sexo, tipo]);
+  }, [especie, porte, sexo, tipo, versao]);
 
   return (
     <main className="site-wrap" style={{padding:"34px 0 50px"}}>
@@ -65,6 +73,7 @@ export default function ConsultaOcorrencias() {
         </div>
         <div className="filtros-acoes">
           <button type="button" className="inline-action" style={{marginTop:0}} onClick={()=>{setEspecie("");setPorte("");setTipo("");setSexo("");}}>Limpar filtros</button>
+          <button type="button" className="inline-action" style={{marginTop:0}} onClick={()=>setVersao(v=>v+1)}>Atualizar resultados</button>
           <span role="status">{carregando ? "Buscando ocorrências..." : ocorrencias.length + " ocorrência(s) encontrada(s)"}</span>
           <div className="seletor-modo" aria-label="Modo de visualização">
             <button type="button" aria-pressed={modo==="mapa"} className={modo==="mapa"?"ativo":""} onClick={()=>setModo("mapa")}>Mapa</button>
