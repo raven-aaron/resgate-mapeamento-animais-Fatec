@@ -1,2 +1,3 @@
+import { Suspense } from "react";
 import LoginForm from "../../components/auth/LoginForm";
-export default function LoginPage() { return <LoginForm />; }
+export default function LoginPage(){return <Suspense fallback={<main className="form-shell"><p>Carregando acesso...</p></main>}><LoginForm/></Suspense>;}

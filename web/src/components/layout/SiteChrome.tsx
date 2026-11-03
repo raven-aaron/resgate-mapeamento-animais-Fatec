@@ -133,6 +133,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
               <Link href="/ocorrencias/nova?tipo=ENCONTRADO" onClick={() => setMenuAberto(false)}>Registrar animal encontrado</Link>
               <Link href="/mapa" onClick={() => setMenuAberto(false)}>Mapa de animais</Link>
               <Link href="/minhas-ocorrencias" onClick={() => setMenuAberto(false)}>Minhas ocorrências</Link>
+              <Link href="/mensagens" onClick={() => setMenuAberto(false)}>Minhas conversas</Link>
               <Link href="/login" onClick={() => setMenuAberto(false)}>Entrar na minha conta</Link>
             </div>
           </aside>

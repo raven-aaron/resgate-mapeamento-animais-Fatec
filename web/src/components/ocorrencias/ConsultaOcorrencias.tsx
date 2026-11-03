@@ -84,7 +84,7 @@ export default function ConsultaOcorrencias() {
             <p>{o.especie} • {o.bairro} • Votorantim/SP</p>
             <p>Porte: {o.porte==="INDETERMINADO"?"Não informado":o.porte.toLowerCase()} · Sexo: {o.sexo==="INDETERMINADO"?"Não informado":o.sexo.toLowerCase()}</p>
             <p>Data: {String(o.data).slice(0,10).split("-").reverse().join("/")}</p>
-            <Link href={"/ocorrencias/"+o.id} className="action action-primary">VER INFORMAÇÕES</Link>
+            <Link href={"/ocorrencias/"+o.id} className="action action-primary">VER CARTAZ</Link>
           </div>
         </article>)}
         {!carregando && !erro && ocorrencias.length===0 && <div className="form-panel"><p>Nenhuma ocorrência aprovada e ativa corresponde aos filtros selecionados.</p></div>}

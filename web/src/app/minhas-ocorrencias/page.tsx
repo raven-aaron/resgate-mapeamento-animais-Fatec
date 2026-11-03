@@ -35,6 +35,6 @@ export default async function MinhasOcorrencias() {
       </article>)}
     </div>
     {rows.length===0 && <p className="note">Você ainda não cadastrou ocorrências.</p>}
-    <div className="action-row"><Link href="/ocorrencias/nova" className="action action-primary">CADASTRAR ANIMAL</Link><Link href="/mapa" className="action action-secondary">Ver mapa público</Link></div>
+    <div className="action-row"><Link className="action action-secondary" href="/mensagens">Minhas conversas</Link><Link href="/ocorrencias/nova" className="action action-primary">CADASTRAR ANIMAL</Link><Link href="/mapa" className="action action-secondary">Ver mapa público</Link></div>
   </main>;
 }

@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 
-export default function CadastroPage() {
+function CadastroFormulario() {
   const router = useRouter();
   const params=useSearchParams();
   const pedido=params.get("retorno") || "";
@@ -47,3 +47,5 @@ export default function CadastroPage() {
     </form>
   </main>;
 }
+
+export default function CadastroPage(){return <Suspense fallback={<main className="form-shell"><p>Carregando cadastro...</p></main>}><CadastroFormulario/></Suspense>;}

@@ -149,7 +149,7 @@ export default function MapaOcorrencia({ cep, onConfirm }: Props) {
       precisao_localizacao: "RUA_APROXIMADA",
     });
     setConfirmado(true);
-    setAviso("Ponto aproximado confirmado no formulário. Os dados ainda não foram gravados no MySQL.");
+    setAviso("Ponto aproximado confirmado no formulário. O cadastro será enviado ao MySQL após a revisão e confirmação do formulário.");
   }
 
   return (

@@ -14,6 +14,9 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   const [confirmacao,setConfirmacao] = useState<{ id: number; acao: Acao } | null>(null);
   const [motivo,setMotivo] = useState("");
   const [enviando,setEnviando] = useState(false);
+  const [especie,setEspecie]=useState("");
+  const [situacao,setSituacao]=useState("");
+  const [ordem,setOrdem]=useState("RECENTE");
 
   const carregar = useCallback(async (signal?:AbortSignal) => {
     const resposta = await fetch("/api/admin/ocorrencias?status="+status, {cache:"no-store",signal});
@@ -53,9 +56,14 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     {carregando && <p role="status">Carregando solicitações...</p>}
     {erro && <p role="alert" className="note note-warning">{erro}</p>}
     {sucesso && <p role="status" className="note">{sucesso}</p>}
-    <p><strong>{ocorrencias.length} ocorrência(s)</strong> na consulta atual.</p>
+    <div className="filtros-admin">
+      <label className="form-field">Espécie<select value={especie} onChange={e=>setEspecie(e.target.value)}><option value="">Todas</option><option value="Cachorro">Cachorro</option><option value="Gato">Gato</option></select></label>
+      <label className="form-field">Situação<select value={situacao} onChange={e=>setSituacao(e.target.value)}><option value="">Todas</option><option value="PERDIDO">Perdido</option><option value="ENCONTRADO">Encontrado</option></select></label>
+      <label className="form-field">Ordenar<select value={ordem} onChange={e=>setOrdem(e.target.value)}><option value="RECENTE">Mais recente</option><option value="ANTIGO">Mais antiga</option></select></label>
+    </div>
+    <p><strong>{ocorrencias.filter(o=>(!especie||o.especie===especie)&&(!situacao||o.tipo===situacao)).length} ocorrência(s)</strong> na consulta atual.</p>
     <div className="admin-cards">
-      {ocorrencias.map(o=><article className="admin-cartao" key={o.id}>
+      {ocorrencias.filter(o=>(!especie||o.especie===especie)&&(!situacao||o.tipo===situacao)).sort((a,b)=>ordem==="RECENTE"?b.id-a.id:a.id-b.id).map(o=><article className="admin-cartao" key={o.id}>
         {o.foto?<Image unoptimized src={o.foto} alt={"Foto do pet "+o.id} width={180} height={180}/>:<div className="admin-sem-foto">🐾</div>}
         <div className="admin-info">
           <strong className={o.tipo==="PERDIDO"?"status-perdido":"status-encontrado"}>{o.tipo==="PERDIDO"?"PROCURA-SE":"ENCONTRADO"}</strong>
@@ -65,6 +73,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
           {o.descricao && <p><strong>Observações:</strong> {o.descricao}</p>}
           {o.referencia && <p><strong>Referência:</strong> {o.referencia}</p>}
           <div className="action-row">
+            <Link className="action action-primary" href={"/admin/ocorrencias/"+o.id}>SAIBA MAIS · VER CARTAZ</Link>
             {o.status_aprovacao==="PENDENTE" && <>
               <button type="button" className="action action-primary" onClick={()=>setConfirmacao({id:o.id,acao:"APROVAR"})}>ACEITAR</button>
               <button type="button" className="action action-secondary" onClick={()=>setConfirmacao({id:o.id,acao:"REJEITAR"})}>NEGAR</button>
