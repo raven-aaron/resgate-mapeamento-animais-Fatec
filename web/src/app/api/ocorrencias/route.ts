@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     if (endereco.erro || endereco.ibge !== "3557006" || endereco.uf !== "SP" || !endereco.bairro?.trim()) {
       return NextResponse.json({ erro: "Informe um CEP válido de Votorantim com bairro identificado." }, { status: 422 });
     }
-    const pasta = join(process.cwd(), "public", "uploads");
+    const pasta = join(process.cwd(), "storage", "uploads");
     await mkdir(pasta, { recursive: true });
     for (const arquivo of arquivos) {
       const path = join(pasta, arquivo.nome);
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
     }
     for (let i=0;i<arquivos.length;i++) {
       await conexao.execute("INSERT INTO fotos_ocorrencias (id_ocorrencia,provedor,identificador_arquivo,url_foto,ordem) VALUES (?,'LOCAL',?,?,?)",
-        [ocorrencia.insertId,arquivos[i].nome,"/uploads/"+arquivos[i].nome,i+1]);
+        [ocorrencia.insertId,arquivos[i].nome,"/api/fotos/"+arquivos[i].nome,i+1]);
     }
     await conexao.execute(
       "INSERT INTO historico_ocorrencias (id_ocorrencia,id_usuario_responsavel,acao) VALUES (?,?,'CRIACAO')",

@@ -45,6 +45,7 @@ services:
       - ./web:/app
       - web_node_modules:/app/node_modules
       - web_next:/app/.next
+      - media_data:/app/storage
     depends_on:
       mysql:
         condition: service_healthy
@@ -53,3 +54,4 @@ volumes:
   mysql_data:
   web_node_modules:
   web_next:
+  media_data:

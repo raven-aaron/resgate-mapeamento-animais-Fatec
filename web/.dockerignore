@@ -12,3 +12,6 @@ coverage
 
 # Fotos dos testes nao devem entrar nas imagens Docker
 public/uploads/
+
+# Fotos nao devem ser incorporadas a imagens
+storage/
