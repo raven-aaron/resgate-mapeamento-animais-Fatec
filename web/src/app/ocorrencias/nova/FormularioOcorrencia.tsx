@@ -23,8 +23,8 @@ export default function FormularioOcorrencia() {
   const [especie, setEspecie] = useState("");
   const [nome, setNome] = useState("");
   const [raca, setRaca] = useState("");
-  const [sexo, setSexo] = useState("INDETERMINADO");
-  const [porte, setPorte] = useState("INDETERMINADO");
+  const [sexo, setSexo] = useState("");
+  const [porte, setPorte] = useState("");
   const [cor, setCor] = useState("");
   const [idade, setIdade] = useState("");
   const [microchip, setMicrochip] = useState("");
@@ -37,6 +37,10 @@ export default function FormularioOcorrencia() {
   const [consultaCep, setConsultaCep] = useState("");
   const [consultando, setConsultando] = useState(false);
   const [revisao, setRevisao] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState("");
+  const [registro, setRegistro] = useState<number | null>(null);
+  const [precisaLogin, setPrecisaLogin] = useState(false);
   const [fotos, setFotos] = useState<File[]>([]);
   const [previas, setPrevias] = useState<string[]>([]);
   const [erroFotos, setErroFotos] = useState("");
@@ -117,12 +121,40 @@ export default function FormularioOcorrencia() {
     setRevisao(true);
   }
 
+  async function enviarRegistro() {
+    if (!revisao || !endereco || !localizacao || enviando || registro) return;
+    setEnviando(true);
+    setErroEnvio("");
+    setPrecisaLogin(false);
+    try {
+      const formulario = new FormData();
+      formulario.append("dados", JSON.stringify({
+        tipo, especie, nome, raca, sexo, porte, cor, idade, microchip, dataEvento, descricao,
+        cep: endereco.cep, referencia, localizacao,
+      }));
+      fotos.forEach(foto => formulario.append("fotos", foto));
+      const resposta = await fetch("/api/ocorrencias", { method: "POST", body: formulario });
+      const dados = await resposta.json() as { id?: number; erro?: string; login?: boolean };
+      if (!resposta.ok) {
+        if (resposta.status === 401) setPrecisaLogin(true);
+        throw new Error(dados.erro || "Não foi possível registrar a ocorrência.");
+      }
+      if (typeof dados.id !== "number") throw new Error("O servidor não retornou o registro criado.");
+      setRegistro(dados.id);
+    } catch (error) {
+      setErroEnvio(error instanceof Error ? error.message : "Falha ao enviar o cadastro.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
   return (
     <main className="form-shell">
       <header className="form-heading">
         <Link href="/resgate">← Voltar ao módulo de resgate</Link>
         <h1>{tipo === "PERDIDO" ? "REGISTRO PET PERDIDO" : "REGISTRO PET ENCONTRADO"} 🐾</h1>
-        <p>Preencha os dados do pet conforme o formulário original. Informe apenas uma localização pública aproximada, sem número de residência nem dados de contato.</p>
+        <p>Preencha os dados do pet. Confirme a região aproximada no mapa; após o envio, a ocorrência ficará aguardando aprovação da Prefeitura.</p>
+        <p><Link href="/login">Entrar na minha conta</Link> · <Link href="/cadastro">Criar conta</Link></p>
       </header>
       <form onSubmit={revisar}>
         <section className="form-panel">
@@ -157,7 +189,7 @@ export default function FormularioOcorrencia() {
             <label className="form-field">
               O pet possui microchip?
               <select value={microchip} onChange={e => { setMicrochip(e.target.value); setRevisao(false); }}>
-                <option value="">Não sei</option>
+                <option value="">Selecione</option>
                 <option value="SIM">Sim</option>
                 <option value="NAO">Não</option>
               </select>
@@ -166,7 +198,7 @@ export default function FormularioOcorrencia() {
             <label className="form-field">
               Sexo
               <select value={sexo} onChange={e => { setSexo(e.target.value); setRevisao(false); }}>
-                <option value="INDETERMINADO">Não sei</option>
+                <option value="">Selecione</option>
                 <option value="MACHO">Macho</option>
                 <option value="FEMEA">Fêmea</option>
               </select>
@@ -175,7 +207,7 @@ export default function FormularioOcorrencia() {
             <label className="form-field">
               Porte
               <select value={porte} onChange={e => { setPorte(e.target.value); setRevisao(false); }}>
-                <option value="INDETERMINADO">Não sei</option>
+                <option value="">Selecione</option>
                 <option value="PEQUENO">Pequeno</option>
                 <option value="MEDIO">Médio</option>
                 <option value="GRANDE">Grande</option>
@@ -239,7 +271,7 @@ export default function FormularioOcorrencia() {
               <div className="area-upload-foto">
                 <input id="fotos-pet" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={trocarFotos} aria-describedby="instrucao-fotos" />
               </div>
-              <small id="instrucao-fotos">Até 5 fotos JPG, PNG ou WebP, com no máximo 5 MB cada. Pré-visualização local; o envio será integrado à API.</small>
+              <small id="instrucao-fotos">Até 5 fotos JPG, PNG ou WebP, com no máximo 5 MB cada.</small>
               {erroFotos && <p role="alert" className="note note-warning">{erroFotos}</p>}
               {previas.length > 0 && <div className="galeria-previas">
                 {previas.map((url,indice) => <Image key={url} src={url} alt={"Prévia da foto " + (indice + 1)} width={106} height={106} unoptimized />)}
@@ -252,7 +284,7 @@ export default function FormularioOcorrencia() {
             </label>
           </div>
 
-          <p className="note note-warning" style={{marginTop:24}}>O formulário ainda não envia dados ao banco de dados. A ação abaixo mostra uma revisão local, sem registrar ou publicar a ocorrência.</p>
+          <p className="note" style={{marginTop:24}}>Revise os dados antes de enviar. O registro será salvo no banco com status PENDENTE e só ficará visível no mapa após aprovação administrativa.</p>
           <div className="action-row">
             <Link href="/resgate" className="action action-secondary">CANCELAR</Link>
             <button className="action action-primary" type="submit">REVISAR CADASTRO</button>
@@ -260,14 +292,14 @@ export default function FormularioOcorrencia() {
         </section>
 
         {revisao && <section className="form-panel" aria-live="polite">
-          <h2>Revisão da ocorrência — não salva</h2>
+          <h2>Revisão da ocorrência</h2>
           <dl className="review-list">
             <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Perdido" : "Encontrado"}</dd></div>
             <div><dt>Espécie / nome</dt><dd>{especie}{nome ? " — " + nome : ""}</dd></div>
             <div><dt>Raça</dt><dd>{especie === "Gato" ? "Não informada" : raca || "Não informada"}</dd></div>
-            <div><dt>Sexo / porte</dt><dd>{sexo} / {porte}</dd></div>
+            <div><dt>Sexo / porte</dt><dd>{sexo || "Não informado"} / {porte || "Não informado"}</dd></div>
             <div><dt>Cor/pelagem</dt><dd>{cor || "Não informada"}</dd></div>
-            <div><dt>Idade / microchip</dt><dd>{idade || "Não informada"} / {microchip || "Desconhecido"}</dd></div>
+            <div><dt>Idade / microchip</dt><dd>{idade || "Não informada"} / {microchip || "Não informado"}</dd></div>
             <div><dt>Região</dt><dd>{endereco?.bairro}, Votorantim/SP</dd></div>
             <div><dt>Local de referência</dt><dd>{referencia || "Não informado"}</dd></div>
             <div><dt>Data</dt><dd>{dataEvento}</dd></div>
@@ -275,7 +307,23 @@ export default function FormularioOcorrencia() {
             <div><dt>Pin aproximado</dt><dd>{localizacao?.latitude_aproximada}, {localizacao?.longitude_aproximada}</dd></div>
             <div><dt>Observações</dt><dd>{descricao || "Não informadas"}</dd></div>
           </dl>
-          <p className="note">A próxima integração permitirá autenticar o usuário e gravar a ocorrência, com status PENDENTE, no MySQL. Nenhuma publicação foi feita.</p>
+          {registro ? (
+            <div className="note" role="status">
+              <strong>Ocorrência #{registro} registrada com sucesso no MySQL.</strong>
+              <p>Status: PENDENTE. Ela aparecerá no mapa e nos cards depois da aprovação administrativa.</p>
+              <Link href="/minhas-ocorrencias" className="action action-primary">ACOMPANHAR MINHAS OCORRÊNCIAS</Link>
+            </div>
+          ) : (
+            <>
+              {erroEnvio && <p role="alert" className="note note-warning">{erroEnvio}</p>}
+              {precisaLogin && <div className="action-row"><Link href="/login" className="action action-secondary">ENTRAR</Link><Link href="/cadastro" className="action action-secondary">CRIAR CONTA</Link></div>}
+              <div className="action-row">
+                <button type="button" className="action action-primary" disabled={enviando} onClick={() => { void enviarRegistro(); }}>
+                  {enviando ? "Enviando para análise..." : "ENVIAR PARA ANÁLISE"}
+                </button>
+              </div>
+            </>
+          )}
         </section>}
       </form>
     </main>
