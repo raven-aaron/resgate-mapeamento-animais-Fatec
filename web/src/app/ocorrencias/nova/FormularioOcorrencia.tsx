@@ -1,30 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import MapaOcorrencia, { type LocalizacaoConfirmada } from "../../../components/localizacao/MapaOcorrencia";
 
 type Tipo = "PERDIDO" | "ENCONTRADO";
 type Endereco = { bairro: string | null; logradouro: string | null; cidade: string; uf: string; cep: string };
 type ViaCepResposta = Endereco & { erro?: string };
+const racasCaninas = ["Sem raça definida","Beagle","Border Collie","Boxer","Bulldog Francês","Chow Chow","Cocker Spaniel","Salsicha","Golden Retriever","Husky Siberiano","Labrador","Lhasa","Maltês","Pastor Alemão","Sheltie","Pequinês","Pinscher","Pitbull / American Staffordshire Terrier","Spitz Alemão","Poodle","Pug","Rottweiler","Shih-tzu","Yorkshire Terrier"];
+const cores = ["Preta", "Branca", "Marrom", "Caramelo", "Cinza", "Amarela", "Laranja", "Outra"];
 
-function hojeLocal(): string {
+function hojeLocal() {
   const agora = new Date();
-  const ano = agora.getFullYear();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const dia = String(agora.getDate()).padStart(2, "0");
-  return `${ano}-${mes}-${dia}`;
+  return [String(agora.getFullYear()), String(agora.getMonth() + 1).padStart(2, "0"), String(agora.getDate()).padStart(2, "0")].join("-");
 }
-
-const especies = ["Cachorro", "Gato", "Outro"];
-const cores = ["", "Preta", "Branca", "Marrom", "Caramelo", "Cinza", "Amarela", "Laranja", "Outra"];
 
 export default function FormularioOcorrencia() {
   const parametros = useSearchParams();
   const [tipo, setTipo] = useState<Tipo>(parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO");
   const [especie, setEspecie] = useState("");
   const [nome, setNome] = useState("");
+  const [raca, setRaca] = useState("");
   const [sexo, setSexo] = useState("INDETERMINADO");
   const [porte, setPorte] = useState("INDETERMINADO");
   const [cor, setCor] = useState("");
@@ -39,8 +37,36 @@ export default function FormularioOcorrencia() {
   const [consultaCep, setConsultaCep] = useState("");
   const [consultando, setConsultando] = useState(false);
   const [revisao, setRevisao] = useState(false);
-  // Invalida respostas antigas se o usuário mudar o CEP durante a consulta.
+  const [fotos, setFotos] = useState<File[]>([]);
+  const [previas, setPrevias] = useState<string[]>([]);
+  const [erroFotos, setErroFotos] = useState("");
+  const urlsPrevias = useRef<string[]>([]);
   const versaoCep = useRef(0);
+
+  useEffect(() => () => {
+    urlsPrevias.current.forEach(url => URL.revokeObjectURL(url));
+  }, []);
+
+  function trocarFotos(evento: ChangeEvent<HTMLInputElement>) {
+    const arquivos = Array.from(evento.currentTarget.files || []);
+    if (arquivos.length > 5) {
+      setErroFotos("Selecione no máximo 5 fotos.");
+      evento.currentTarget.value = "";
+      return;
+    }
+    if (arquivos.some(arquivo => !["image/jpeg", "image/png", "image/webp"].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024)) {
+      setErroFotos("Use fotos JPG, PNG ou WebP com até 5 MB cada.");
+      evento.currentTarget.value = "";
+      return;
+    }
+    urlsPrevias.current.forEach(url => URL.revokeObjectURL(url));
+    const urls = arquivos.map(arquivo => URL.createObjectURL(arquivo));
+    urlsPrevias.current = urls;
+    setFotos(arquivos);
+    setPrevias(urls);
+    setErroFotos("");
+    setRevisao(false);
+  }
 
   async function buscarCep() {
     const versao = ++versaoCep.current;
@@ -49,13 +75,14 @@ export default function FormularioOcorrencia() {
     setLocalizacao(null);
     setRevisao(false);
     if (!/^\d{8}$/.test(limpo)) {
+      setConsultando(false);
       setConsultaCep("Informe um CEP com oito dígitos.");
       return;
     }
     setConsultando(true);
     setConsultaCep("");
     try {
-      const resposta = await fetch(`/api/localizacao/cep?cep=${limpo}`, { cache: "no-store" });
+      const resposta = await fetch("/api/localizacao/cep?cep=" + limpo, { cache: "no-store" });
       const dados = await resposta.json() as ViaCepResposta;
       if (versao !== versaoCep.current) return;
       if (!resposta.ok) throw new Error(dados.erro || "Não foi possível consultar o CEP.");
@@ -74,12 +101,12 @@ export default function FormularioOcorrencia() {
       setConsultaCep("Consulte e valide o CEP antes de revisar os dados.");
       return;
     }
-    if (!localizacao) {
-      setConsultaCep("Confirme a posição aproximada no mapa antes de revisar.");
+    if (!endereco.bairro) {
+      setConsultaCep("O CEP não retornou bairro. Não é possível continuar sem validar a região.");
       return;
     }
-    if (!endereco.bairro) {
-      setConsultaCep("O ViaCEP não informou o bairro. Ainda não é possível finalizar este registro; precisamos validar o bairro antes de salvar.");
+    if (!localizacao) {
+      setConsultaCep("Confirme a posição aproximada no mapa antes de revisar.");
       return;
     }
     if (dataEvento > hojeLocal()) {
@@ -93,109 +120,163 @@ export default function FormularioOcorrencia() {
   return (
     <main className="form-shell">
       <header className="form-heading">
-        <Link href="/" style={{color:"var(--brand)", fontSize:13, fontWeight:700}}>← Voltar ao início</Link>
-        <span className="eyebrow" style={{display:"block",marginTop:23}}>Novo registro</span>
-        <h1>{tipo === "PERDIDO" ? "REGISTRO PET PERDIDO" : "REGISTRO PET ENCONTRADO"}</h1>
-        <p>Estamos construindo o formulário de registro. Nesta etapa já é possível preencher os dados, validar o CEP e revisar as informações; a gravação no MySQL ainda será integrada.</p>
+        <Link href="/resgate">← Voltar ao módulo de resgate</Link>
+        <h1>{tipo === "PERDIDO" ? "REGISTRO PET PERDIDO" : "REGISTRO PET ENCONTRADO"} 🐾</h1>
+        <p>Preencha os dados do pet conforme o formulário original. Informe apenas uma localização pública aproximada, sem número de residência nem dados de contato.</p>
       </header>
       <form onSubmit={revisar}>
         <section className="form-panel">
-          <h2>1. Tipo de ocorrência</h2>
           <div className="form-grid">
-            <label className="form-field">O que aconteceu?
+            <label className="form-field">
+              Tipo de ocorrência
               <select value={tipo} onChange={e => { setTipo(e.target.value as Tipo); setRevisao(false); }}>
-                <option value="PERDIDO">Perdi um animal</option>
-                <option value="ENCONTRADO">Encontrei um animal</option>
+                <option value="PERDIDO">Pet perdido</option>
+                <option value="ENCONTRADO">Pet encontrado</option>
               </select>
             </label>
-            <label className="form-field">Data do ocorrido
-              <input required type="date" max={hojeLocal()} value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
+
+            <label className="form-field">
+              {tipo === "PERDIDO" ? "Nome do pet" : "Nome (se souber)"}
+              <input maxLength={80} required={tipo === "PERDIDO"} value={nome} onChange={e => { setNome(e.target.value); setRevisao(false); }} placeholder="Digite aqui..." />
             </label>
-          </div>
-        </section>
-        <section className="form-panel">
-          <h2>2. Informações do animal</h2>
-          <div className="form-grid">
-            <label className="form-field">Espécie
-              <select required value={especie} onChange={e => { setEspecie(e.target.value); setRevisao(false); }}>
+
+            <label className="form-field">
+              Espécie
+              <select required value={especie} onChange={e => { const valor = e.target.value; setEspecie(valor); setRaca(""); setRevisao(false); }}>
                 <option value="">Selecione</option>
-                {especies.map(opcao => <option key={opcao} value={opcao}>{opcao}</option>)}
+                <option value="Cachorro">Cachorro</option>
+                <option value="Gato">Gato</option>
               </select>
             </label>
-            <label className="form-field">Nome, se souber
-              <input maxLength={80} value={nome} onChange={e => { setNome(e.target.value); setRevisao(false); }} placeholder="Ex.: Bob" />
+
+            <label className="form-field">
+              {tipo === "PERDIDO" ? "Idade" : "Idade aparente"}
+              <input maxLength={30} value={idade} onChange={e => { setIdade(e.target.value); setRevisao(false); }} placeholder="Ex.: 3 anos ou 6 meses" />
             </label>
-            <label className="form-field">Sexo
-              <select value={sexo} onChange={e => { setSexo(e.target.value); setRevisao(false); }}>
-                <option value="INDETERMINADO">Não sei</option><option value="MACHO">Macho</option><option value="FEMEA">Fêmea</option>
-              </select>
-            </label>
-            <label className="form-field">Porte
-              <select value={porte} onChange={e => { setPorte(e.target.value); setRevisao(false); }}>
-                <option value="INDETERMINADO">Não sei</option><option value="PEQUENO">Pequeno</option><option value="MEDIO">Médio</option><option value="GRANDE">Grande</option>
-              </select>
-            </label>
-            <label className="form-field">Cor predominante
-              <select value={cor} onChange={e => { setCor(e.target.value); setRevisao(false); }}>
-                <option value="">Não sei</option>{cores.filter(Boolean).map(opcao => <option key={opcao} value={opcao}>{opcao}</option>)}
-              </select>
-            </label>
-            <label className="form-field">Idade aproximada
-              <input maxLength={30} value={idade} onChange={e => { setIdade(e.target.value); setRevisao(false); }} placeholder="Ex.: adulto, cerca de 2 anos" />
-            </label>
-            <label className="form-field">Possui microchip?
+
+            <label className="form-field">
+              O pet possui microchip?
               <select value={microchip} onChange={e => { setMicrochip(e.target.value); setRevisao(false); }}>
-                <option value="">Não sei</option><option value="SIM">Sim</option><option value="NAO">Não</option>
+                <option value="">Não sei</option>
+                <option value="SIM">Sim</option>
+                <option value="NAO">Não</option>
               </select>
             </label>
-            <label className="form-field form-field-full">Características e informações úteis
-              <textarea value={descricao} onChange={e => { setDescricao(e.target.value); setRevisao(false); }} placeholder="Pelagem, coleira, comportamento, sinais particulares..." />
+
+            <label className="form-field">
+              Sexo
+              <select value={sexo} onChange={e => { setSexo(e.target.value); setRevisao(false); }}>
+                <option value="INDETERMINADO">Não sei</option>
+                <option value="MACHO">Macho</option>
+                <option value="FEMEA">Fêmea</option>
+              </select>
             </label>
-          </div>
-        </section>
-        <section className="form-panel">
-          <h2>3. Região aproximada</h2>
-          <p className="note">Informe apenas a região do ocorrido. Não adicione número de residência, complemento nem dados de contato.</p>
-          <div className="form-grid" style={{marginTop:18}}>
+
+            <label className="form-field">
+              Porte
+              <select value={porte} onChange={e => { setPorte(e.target.value); setRevisao(false); }}>
+                <option value="INDETERMINADO">Não sei</option>
+                <option value="PEQUENO">Pequeno</option>
+                <option value="MEDIO">Médio</option>
+                <option value="GRANDE">Grande</option>
+              </select>
+            </label>
+
+            <label className="form-field">
+              Cor/Pelagem
+              <select value={cor} onChange={e => { setCor(e.target.value); setRevisao(false); }}>
+                <option value="">Selecione a cor predominante</option>
+                {cores.map(opcao => <option key={opcao} value={opcao}>{opcao}</option>)}
+              </select>
+              <small>Detalhes de pelagem e mais de uma cor podem ser informados nas observações.</small>
+            </label>
+
+            <label className="form-field">
+              Raça
+              <select value={raca} disabled={especie !== "Cachorro"} onChange={e => { setRaca(e.target.value); setRevisao(false); }}>
+                <option value="">{especie === "Gato" ? "Raça desabilitada para gatos" : "Selecione"}</option>
+                {racasCaninas.map(opcao => <option key={opcao} value={opcao}>{opcao === "Sem raça definida" ? "SRD (Sem Raça Definida)" : opcao}</option>)}
+              </select>
+              {especie === "Gato" && <small>Conforme o formulário do primeiro semestre, este campo é desabilitado para gatos.</small>}
+            </label>
+
             <div className="form-field">
               <label htmlFor="cep">CEP de Votorantim</label>
-              <input id="cep" required inputMode="numeric" maxLength={9} value={cep}
-                onChange={e => { ++versaoCep.current; setConsultando(false); setCep(e.target.value); setEndereco(null); setLocalizacao(null); setConsultaCep(""); setRevisao(false); }} placeholder="00000-000" />
-              <button type="button" className="inline-action" onClick={() => { void buscarCep(); }} disabled={consultando}>
-                {consultando ? "Consultando..." : "Consultar CEP"}
-              </button>
+              <input id="cep" required inputMode="numeric" maxLength={9} value={cep} onChange={e => {
+                ++versaoCep.current;
+                setConsultando(false);
+                setCep(e.target.value);
+                setEndereco(null);
+                setLocalizacao(null);
+                setConsultaCep("");
+                setRevisao(false);
+              }} placeholder="00000-000" />
+              <button type="button" className="inline-action" onClick={() => { void buscarCep(); }} disabled={consultando}>{consultando ? "Consultando..." : "Consultar CEP"}</button>
             </div>
-            <label className="form-field">Referência pública (opcional)
+
+            {consultaCep && <p role="status" className={"note" + (endereco ? "" : " note-warning")}>{consultaCep}</p>}
+            {endereco && <p><strong>Região consultada:</strong> {endereco.logradouro || "Rua não informada"}, {endereco.bairro || "Bairro não informado"} — {endereco.cidade}/{endereco.uf}</p>}
+
+            <label className="form-field">
+              {tipo === "PERDIDO" ? "Local onde foi visto pela última vez" : "Local onde o animal foi encontrado"}
               <input maxLength={255} value={referencia} onChange={e => { setReferencia(e.target.value); setRevisao(false); }} placeholder="Ex.: próximo ao parque do bairro" />
-              <small>Não informe endereços residenciais.</small>
+              <small>Somente referência pública; não informe número de residência.</small>
+            </label>
+
+            {endereco && <div className="form-field">
+              <span>Posição no mapa</span>
+              <MapaOcorrencia key={endereco.cep} cep={endereco.cep} onConfirm={valor => { setLocalizacao(valor); setRevisao(false); }} />
+            </div>}
+            {!endereco && <p className="note">Consulte o CEP para selecionar e confirmar uma posição aproximada no mapa.</p>}
+
+            <label className="form-field">
+              {tipo === "PERDIDO" ? "Data em que o animal foi perdido" : "Data em que o animal foi encontrado"}
+              <input type="date" required max={hojeLocal()} value={dataEvento} onChange={e => { setDataEvento(e.target.value); setRevisao(false); }} />
+            </label>
+
+            <div className="form-field">
+              <label htmlFor="fotos-pet">Foto do pet</label>
+              <div className="area-upload-foto">
+                <input id="fotos-pet" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={trocarFotos} aria-describedby="instrucao-fotos" />
+              </div>
+              <small id="instrucao-fotos">Até 5 fotos JPG, PNG ou WebP, com no máximo 5 MB cada. Pré-visualização local; o envio será integrado à API.</small>
+              {erroFotos && <p role="alert" className="note note-warning">{erroFotos}</p>}
+              {previas.length > 0 && <div className="galeria-previas">
+                {previas.map((url,indice) => <Image key={url} src={url} alt={"Prévia da foto " + (indice + 1)} width={106} height={106} unoptimized />)}
+              </div>}
+            </div>
+
+            <label className="form-field">
+              Observações adicionais
+              <textarea value={descricao} onChange={e => { setDescricao(e.target.value); setRevisao(false); }} placeholder="Coleira, pelagem, comportamento, sinais particulares..." rows={4} />
             </label>
           </div>
-          {consultaCep && <p role="status" className={`note ${endereco ? "" : "note-warning"}`} style={{marginTop:15}}>{consultaCep}</p>}
-          {endereco && <p style={{fontSize:14,lineHeight:1.7}}><strong>Endereço consultado:</strong> {endereco.logradouro || "Rua não informada"}, {endereco.bairro || "Bairro não informado"} — {endereco.cidade}/{endereco.uf}</p>}
-          {endereco && <MapaOcorrencia cep={endereco.cep} onConfirm={valor => { setLocalizacao(valor); setRevisao(false); }} />}
-          {!endereco && <p style={{marginTop:20,fontSize:14}}>Valide o CEP para habilitar a seleção do ponto aproximado no mapa.</p>}
+
+          <p className="note note-warning" style={{marginTop:24}}>O formulário ainda não envia dados ao banco de dados. A ação abaixo mostra uma revisão local, sem registrar ou publicar a ocorrência.</p>
+          <div className="action-row">
+            <Link href="/resgate" className="action action-secondary">CANCELAR</Link>
+            <button className="action action-primary" type="submit">REVISAR CADASTRO</button>
+          </div>
         </section>
-        <section className="form-panel">
-          <h2>4. Revisão do cadastro</h2>
-          <p className="note note-warning">A revisão é apenas uma prévia. Não existe envio de ocorrência nem mensagem de cadastro concluído nesta versão; autenticação, upload de fotos e persistência ainda serão implementados.</p>
-          <button className="action action-primary" type="submit" style={{marginTop:18}}>Revisar informações</button>
-          {revisao && (
-            <div aria-live="polite">
-              <h3>Prévia da ocorrência — não salva</h3>
-              <dl className="review-list">
-                <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Animal perdido" : "Animal encontrado"}</dd></div>
-                <div><dt>Data</dt><dd>{dataEvento}</dd></div>
-                <div><dt>Espécie / nome</dt><dd>{especie}{nome ? ` — ${nome}` : ""}</dd></div>
-                <div><dt>Características</dt><dd>{cor || "Não informada"} · {porte} · {sexo} · {idade || "Idade não informada"} · microchip: {microchip || "Não sei"}</dd></div>
-                <div><dt>Região</dt><dd>{endereco?.bairro || "Bairro não informado"} — Votorantim/SP</dd></div>
-                <div><dt>Referência</dt><dd>{referencia || "Não informada"}</dd></div>
-                <div><dt>Pin aproximado</dt><dd>{localizacao ? String(localizacao.latitude_aproximada) + ", " + String(localizacao.longitude_aproximada) : "Não confirmado"}</dd></div>
-                <div style={{gridColumn:"1 / -1"}}><dt>Descrição</dt><dd>{descricao || "Não informada"}</dd></div>
-              </dl>
-              <p className="note">Próxima etapa de desenvolvimento: incluir fotos, autenticar o usuário e gravar os dados e o pin no MySQL com status PENDENTE.</p>
-            </div>
-          )}
-        </section>
+
+        {revisao && <section className="form-panel" aria-live="polite">
+          <h2>Revisão da ocorrência — não salva</h2>
+          <dl className="review-list">
+            <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Perdido" : "Encontrado"}</dd></div>
+            <div><dt>Espécie / nome</dt><dd>{especie}{nome ? " — " + nome : ""}</dd></div>
+            <div><dt>Raça</dt><dd>{especie === "Gato" ? "Não informada" : raca || "Não informada"}</dd></div>
+            <div><dt>Sexo / porte</dt><dd>{sexo} / {porte}</dd></div>
+            <div><dt>Cor/pelagem</dt><dd>{cor || "Não informada"}</dd></div>
+            <div><dt>Idade / microchip</dt><dd>{idade || "Não informada"} / {microchip || "Desconhecido"}</dd></div>
+            <div><dt>Região</dt><dd>{endereco?.bairro}, Votorantim/SP</dd></div>
+            <div><dt>Local de referência</dt><dd>{referencia || "Não informado"}</dd></div>
+            <div><dt>Data</dt><dd>{dataEvento}</dd></div>
+            <div><dt>Fotos selecionadas</dt><dd>{fotos.length}</dd></div>
+            <div><dt>Pin aproximado</dt><dd>{localizacao?.latitude_aproximada}, {localizacao?.longitude_aproximada}</dd></div>
+            <div><dt>Observações</dt><dd>{descricao || "Não informadas"}</dd></div>
+          </dl>
+          <p className="note">A próxima integração permitirá autenticar o usuário e gravar a ocorrência, com status PENDENTE, no MySQL. Nenhuma publicação foi feita.</p>
+        </section>}
       </form>
     </main>
   );
