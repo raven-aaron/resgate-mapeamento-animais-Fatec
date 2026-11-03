@@ -118,21 +118,21 @@ export default function LocalizacaoPage() {
   }
 
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: "28px 16px", width: "100%", color: "#202b25" }}>
+    <main style={{ maxWidth: 960, margin: "0 auto", padding: "28px 16px", width: "100%", color: "var(--cor-escuro)" }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <h1 style={{ fontSize: 28, marginBottom: 10 }}>Localização da ocorrência</h1>
       <p style={{ marginBottom: 18 }}>Consulte o CEP, visualize a sugestão e clique no mapa para ajustar o marcador. Não marque residências ou endereços exatos.</p>
       <form onSubmit={(e) => { e.preventDefault(); void consultar(); }} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <input aria-label="CEP" value={cep} onChange={(e) => setCep(e.target.value)} maxLength={9} placeholder="CEP de Votorantim" style={{ padding: 12, border: "1px solid #888", borderRadius: 6, flex: "1 1 180px", color: "#202b25", background: "white" }} />
-        <button disabled={carregando || !mapaPronto} style={{ padding: "12px 20px", border: 0, borderRadius: 6, background: "#226b45", color: "white", cursor: "pointer" }}>{carregando ? "Consultando..." : "Buscar CEP"}</button>
+        <input aria-label="CEP" value={cep} onChange={(e) => setCep(e.target.value)} maxLength={9} placeholder="CEP de Votorantim" style={{ padding: 12, border: "1px solid #888", borderRadius: 6, flex: "1 1 180px", color: "var(--cor-escuro)", background: "white" }} />
+        <button disabled={carregando || !mapaPronto} style={{ padding: "12px 20px", border: 0, borderRadius: 6, background: "var(--cor-verde-agua)", color: "white", cursor: "pointer" }}>{carregando ? "Consultando..." : "Buscar CEP"}</button>
       </form>
-      <div ref={mapaEl} aria-label="Mapa interativo para seleção aproximada" style={{ height: 460, width: "100%", borderRadius: 10, background: "#e5e9e4", zIndex: 0 }} />
+      <div ref={mapaEl} aria-label="Mapa interativo para seleção aproximada" style={{ height: 460, width: "100%", borderRadius: 10, background: "var(--cor-verde-agua-claro)", zIndex: 0 }} />
       <p role="status" style={{ padding: "14px 0", lineHeight: 1.5 }}>{mensagem}</p>
       {ponto && <section style={{ padding: 16, border: "1px solid #b9c6bd", borderRadius: 8 }}>
         <p><strong>Posição selecionada:</strong> {numero(ponto.lat)}, {numero(ponto.lng)}</p>
         {sugestao && <p style={{ marginTop: 6 }}>O ponto inicial foi sugerido pelo Nominatim. Ajuste-o se necessário.</p>}
         <p style={{ marginTop: 8 }}>A confirmação não publica a ocorrência nem grava dados no banco nesta versão.</p>
-        <button onClick={confirmar} disabled={confirmado} style={{ marginTop: 12, padding: "10px 16px", background: "#226b45", color: "white", border: 0, borderRadius: 6, cursor: "pointer" }}>{confirmado ? "Posição confirmada" : "Confirmar posição aproximada"}</button>
+        <button onClick={confirmar} disabled={confirmado} style={{ marginTop: 12, padding: "10px 16px", background: "var(--cor-verde-agua)", color: "white", border: 0, borderRadius: 6, cursor: "pointer" }}>{confirmado ? "Posição confirmada" : "Confirmar posição aproximada"}</button>
       </section>}
       <p style={{ marginTop: 18, fontSize: 13 }}>Mapas e dados: © OpenStreetMap contributors. Protótipo acadêmico.</p>
     </main>

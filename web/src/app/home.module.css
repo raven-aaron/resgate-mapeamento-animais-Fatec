@@ -1,0 +1,14 @@
+/* Layout do PI original do primeiro semestre, adaptado às rotas novas. */
+.container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+.tituloDestaque { color: var(--cor-verde-agua); font-weight: 800; font-size: 45px; text-align: center; margin-bottom: 50px; }
+.gridHome { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.reverso { direction: rtl; }
+.reverso > * { direction: ltr; }
+.textos { font-size: 28px; line-height: 1.4; margin-bottom: 30px; }
+.botoes { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+.btnCustom { background-color: var(--cor-laranja); color: white; padding: 12px 25px; border-radius: 10px; font-weight: bold; box-shadow: 3px 3px 3px #5c5c5c; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+.btnCustom:hover { background-color: #df7105; }
+.imgBorda { border: 5px solid var(--cor-verde-agua); border-radius: 20px; filter: drop-shadow(10px 10px 8px #5c5c5c); object-fit: cover; width: 100%; height: auto; aspect-ratio: 750 / 400; }
+.aviso { margin-top: 40px; color: var(--cor-cinza); text-align: center; font-size: 13px; line-height: 1.6; }
+@media (max-width: 850px) { .gridHome { grid-template-columns: 1fr; } .reverso { direction: ltr; } .textos { font-size: 21px; } .tituloDestaque { font-size: clamp(29px, 6vw, 42px); margin-bottom: 30px; } }
+@media (max-width: 480px) { .container { padding: 40px 16px; } .textos { font-size: 18px; } .btnCustom { width: 100%; } }

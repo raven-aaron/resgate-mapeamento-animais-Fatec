@@ -1,16 +1,28 @@
 :root {
-  --background: #f6f8f6;
-  --foreground: #1a302c;
-  --brand: #287c78;
-  --brand-dark: #175c59;
-  --accent: #ec8a2e;
-  --muted: #51615e;
+  /* Identidade visual preservada do PI do primeiro semestre */
+  --cor-verde-agua: #348888;
+  --cor-verde-agua-claro: #d5f1ef;
+  --cor-laranja: #FA7F08;
+  --cor-escuro: #2d2d2d;
+  --cor-cinza: #707070;
+  --cor-branco: #ffffff;
+  --cor-vermelho: #F24405;
+  --cor-ciano-medio: #22BABB;
+  --cor-ciano-claro: #9EF8EE;
+  --cor-verde-petroleo: #348888;
+  /* Aliases para o formulário e os componentes Next.js novos */
+  --background: #fbf9f7;
+  --foreground: var(--cor-escuro);
+  --brand: var(--cor-verde-agua);
+  --brand-dark: #286e6e;
+  --accent: var(--cor-laranja);
+  --muted: var(--cor-cinza);
   --line: #dae5e1;
-  --card: #fff;
+  --card: var(--cor-branco);
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body { display: flex; flex-direction: column; min-height: 100vh; color: var(--foreground); background: var(--background); font-family: Arial, Helvetica, sans-serif; }
+body { display: flex; flex-direction: column; min-height: 100vh; color: var(--foreground); background: var(--background); font-family: var(--font-outfit), "Outfit", sans-serif; }
 main { flex: 1; }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
@@ -84,3 +96,10 @@ button { cursor: pointer; }
   .form-grid, .review-list { grid-template-columns: 1fr; }
   .form-panel { padding: 20px; }
 }
+
+/* Ajustes do formulário para seguir a identidade visual original. */
+.form-heading h1 { color: var(--cor-verde-agua); font-weight: 800; text-transform: uppercase; letter-spacing: 0; }
+.form-panel h2 { color: var(--cor-verde-agua); font-weight: 800; }
+.action-primary { background: var(--cor-laranja); border-color: var(--cor-laranja); color: white; box-shadow: 3px 3px 3px #5c5c5c55; }
+.action-primary:hover { background: #df7003; border-color: #df7003; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--cor-laranja); }

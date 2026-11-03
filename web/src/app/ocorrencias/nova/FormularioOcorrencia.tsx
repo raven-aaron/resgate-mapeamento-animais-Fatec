@@ -95,7 +95,7 @@ export default function FormularioOcorrencia() {
       <header className="form-heading">
         <Link href="/" style={{color:"var(--brand)", fontSize:13, fontWeight:700}}>← Voltar ao início</Link>
         <span className="eyebrow" style={{display:"block",marginTop:23}}>Novo registro</span>
-        <h1>Cadastrar ocorrência</h1>
+        <h1>{tipo === "PERDIDO" ? "REGISTRO PET PERDIDO" : "REGISTRO PET ENCONTRADO"}</h1>
         <p>Estamos construindo o formulário de registro. Nesta etapa já é possível preencher os dados, validar o CEP e revisar as informações; a gravação no MySQL ainda será integrada.</p>
       </header>
       <form onSubmit={revisar}>
