@@ -45,6 +45,9 @@ jobs:
       - name: Test same-origin / Docker proxy
         run: npm run test:origem
 
+      - name: Test map photo URLs
+        run: npm run test:fotos
+
       - name: Lint
         run: npm run lint
 

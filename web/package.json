@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:versions": "node scripts/check-versions.mjs",
-    "test:origem": "node --test tests/seguranca.test.mjs"
+    "test:origem": "node --test tests/seguranca.test.mjs",
+    "test:fotos": "node --test tests/fotos.test.mjs"
   },
   "dependencies": {
     "next": "16.4.2",

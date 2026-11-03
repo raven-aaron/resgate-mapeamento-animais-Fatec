@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Ocorrencia } from "../../lib/tipos";
+import { fotoPermitidaNoMapa } from "../../lib/foto-url";
 
 type Mapa = {
   setView: (pos: [number, number], zoom: number) => Mapa;
@@ -86,14 +87,35 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
       const deslocamento=n>1?0.00036:0;
       const marker=L.marker([o.latitude+Math.sin(angulo)*deslocamento,o.longitude+Math.cos(angulo)*deslocamento],{icon:icone}).addTo(m);
       const conteudo=document.createElement("div");conteudo.className="popup-pet";
-      const titulo=document.createElement("strong");titulo.textContent=perdido?"PROCURA-SE":"ENCONTRADO";titulo.className=perdido?"status-perdido":"status-encontrado";conteudo.append(titulo);
-      if(o.foto && /^\/uploads\/[0-9a-f-]+\.(jpg|png|webp)$/.test(o.foto)){
-        const img=document.createElement("img");img.src=o.foto;img.alt="Foto do animal";img.loading="lazy";conteudo.append(img);
+      const titulo=document.createElement("strong");
+      titulo.textContent=perdido?"PROCURA-SE":"ENCONTRADO";
+      titulo.className=perdido?"status-perdido":"status-encontrado";
+      conteudo.append(titulo);
+
+      // A foto principal deve aparecer ao lado do nome do animal.
+      const identidade=document.createElement("div");identidade.className="popup-pet-identidade";
+      const miniatura=document.createElement("div");miniatura.className="popup-pet-miniatura";
+      const nomeAnimal=o.nome || o.especie;
+      if(fotoPermitidaNoMapa(o.foto)){
+        const img=document.createElement("img");
+        img.src=o.foto;img.alt="Foto principal de "+nomeAnimal;img.loading="lazy";img.decoding="async";
+        img.onerror=()=>{img.remove();miniatura.textContent="🐾";miniatura.classList.add("sem-imagem");};
+        miniatura.append(img);
+      } else {
+        miniatura.textContent="🐾";
+        miniatura.classList.add("sem-imagem");
       }
-      conteudo.append(linha("Animal: ",o.nome || o.especie));
+      const identidadeTexto=document.createElement("div");identidadeTexto.className="popup-pet-identidade-texto";
+      const nome=document.createElement("strong");nome.className="popup-pet-nome";nome.textContent=nomeAnimal;
+      const especie=document.createElement("span");especie.className="popup-pet-especie";especie.textContent=o.especie;
+      identidadeTexto.append(nome,especie);
+      identidade.append(miniatura,identidadeTexto);
+      conteudo.append(identidade);
       conteudo.append(linha("Região: ",o.bairro));
-      const botao=document.createElement("a");botao.href="/ocorrencias/"+o.id;botao.className="action action-primary";botao.textContent="Ver informações";conteudo.append(botao);
-      marker.bindPopup(conteudo,{maxWidth:250});
+      const botao=document.createElement("a");
+      botao.href="/ocorrencias/"+o.id;botao.className="action action-primary";
+      botao.textContent="Ver cartaz completo";conteudo.append(botao);
+      marker.bindPopup(conteudo,{maxWidth:270,minWidth:180});
       marcadores.current.push(marker);
     }
   },[pronto,ocorrencias]);
