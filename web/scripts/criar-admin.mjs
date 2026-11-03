@@ -7,31 +7,55 @@
 import { randomBytes, scryptSync } from "node:crypto";
 import mysql from "mysql2/promise";
 import { createInterface } from "node:readline/promises";
-import { execFileSync } from "node:child_process";
+
 
 let nome = (process.env.ADMIN_NOME || "").trim();
 let email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
 let senha = process.env.ADMIN_SENHA || "";
+
+async function solicitarSenhaOculta() {
+  if (!process.stdin.isTTY) throw new Error("O terminal não é interativo. Informe ADMIN_SENHA pelo ambiente.");
+  const entrada = process.stdin;
+  const modoAnterior = entrada.isRaw;
+  process.stdout.write("Senha do administrador (10+ caracteres; entrada oculta): ");
+  return await new Promise((resolve, reject) => {
+    let resultado = "";
+    function limpar() {
+      entrada.off("data", receber);
+      entrada.setRawMode(Boolean(modoAnterior));
+      process.stdout.write("\n");
+    }
+    function receber(bytes) {
+      for (const caractere of bytes.toString("utf8")) {
+        if (caractere === "\r" || caractere === "\n") {
+          limpar();
+          resolve(resultado);
+          return;
+        }
+        if (caractere === "\u0003") {
+          limpar();
+          reject(new Error("Entrada interrompida pelo usuário."));
+          return;
+        }
+        if (caractere === "\u007f" || caractere === "\b") resultado = resultado.slice(0, -1);
+        else if (caractere >= " ") resultado += caractere;
+      }
+    }
+    entrada.setRawMode(true);
+    entrada.resume();
+    entrada.on("data", receber);
+  });
+}
 
 if ((!nome || !email || !senha) && process.stdin.isTTY) {
   const terminal = createInterface({ input: process.stdin, output: process.stdout });
   try {
     if (!nome) nome = (await terminal.question("Nome do administrador: ")).trim();
     if (!email) email = (await terminal.question("E-mail administrativo: ")).trim().toLowerCase();
-    if (!senha) {
-      let ocultou = false;
-      try {
-        execFileSync("stty", ["-echo"], { stdio: "inherit" });
-        ocultou = true;
-        senha = await terminal.question("Senha (mínimo 10 caracteres; não será exibida): ");
-      } finally {
-        if (ocultou) execFileSync("stty", ["echo"], { stdio: "inherit" });
-        process.stdout.write("\n");
-      }
-    }
   } finally {
     terminal.close();
   }
+  if (!senha) senha = await solicitarSenhaOculta();
 }
 if (nome.length < 2 || nome.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || senha.length < 10 || senha.length > 128) {
   console.error("Defina ADMIN_NOME, ADMIN_EMAIL e ADMIN_SENHA (10 a 128 caracteres) no ambiente.");
