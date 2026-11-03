@@ -54,3 +54,8 @@
   .rodapeConteudo { align-items: start; flex-direction: column; gap: 20px; }
   .rodapeLogos { gap: 16px; }
 }
+
+.prefeituraWrapper { display:flex;flex-direction:column;align-items:center;gap:8px; }
+.acessoPrefeitura { color:var(--cor-verde-agua);font-weight:700;font-size:12px;text-align:center;text-decoration:underline;white-space:nowrap; }
+.linkAdministracao { float:right;font-weight:700;text-decoration:underline; }
+@media(max-width:680px){.acessoPrefeitura{white-space:normal;font-size:10px;}.linkAdministracao{float:none;display:block;margin-top:10px;}}

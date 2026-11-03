@@ -15,7 +15,7 @@ const servicos = [
   { nome: "Perdi meu Pet", href: "/resgate", termos: "pet animal resgate animais perdido perdi encontrei achados" },
   { nome: "Registrar animal perdido", href: "/ocorrencias/nova?tipo=PERDIDO", termos: "cadastrar registrar desaparecido perda" },
   { nome: "Registrar animal encontrado", href: "/ocorrencias/nova?tipo=ENCONTRADO", termos: "encontrado encontrei achei rua cadastro" },
-  { nome: "Mapa do resgate", href: "/localizacao", termos: "mapa localizacao cep pontos" },
+  { nome: "Mapa do resgate", href: "/mapa", termos: "mapa localizacao cep pontos" },
 ];
 
 function normalizar(entrada: string) {
@@ -98,6 +98,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
               </form>
               <div className={styles.prefeituraWrapper}>
                 <Image src="/assets/logo_prefeituraVotorantim.png" width={120} height={80} alt="Prefeitura Municipal de Votorantim" className={styles.logoPrefeitura}/>
+                <Link href="/admin/login" className={styles.acessoPrefeitura}>Acesso da Prefeitura</Link>
               </div>
             </div>
           </div>
@@ -130,7 +131,9 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
               <h2>ANIMAIS PERDIDOS E ENCONTRADOS</h2>
               <Link href="/ocorrencias/nova?tipo=PERDIDO" onClick={() => setMenuAberto(false)}>Registrar animal perdido</Link>
               <Link href="/ocorrencias/nova?tipo=ENCONTRADO" onClick={() => setMenuAberto(false)}>Registrar animal encontrado</Link>
-              <Link href="/localizacao" onClick={() => setMenuAberto(false)}>Mapa de localização</Link>
+              <Link href="/mapa" onClick={() => setMenuAberto(false)}>Mapa de animais</Link>
+              <Link href="/minhas-ocorrencias" onClick={() => setMenuAberto(false)}>Minhas ocorrências</Link>
+              <Link href="/login" onClick={() => setMenuAberto(false)}>Entrar na minha conta</Link>
             </div>
           </aside>
         </div>
@@ -153,7 +156,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className={styles.rodapeBase}>
-          <div className={styles.container}>Sistema acadêmico de serviços municipais • Votorantim/SP</div>
+          <div className={styles.container}>Sistema acadêmico de serviços municipais • Votorantim/SP <Link href="/admin/login" className={styles.linkAdministracao}>Área administrativa</Link></div>
         </div>
       </footer>
     </>
