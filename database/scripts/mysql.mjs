@@ -3,6 +3,12 @@ import { fileURLToPath } from 'node:url';
 
 export const raiz = fileURLToPath(new URL('../../', import.meta.url));
 
+// A opção de demonstração altera apenas o projeto Docker que os scripts acessam.
+// Sem RESGATE_DEMO=1, todos os comandos existentes continuam no projeto normal.
+export const composeArgs = process.env.RESGATE_DEMO === '1'
+  ? ['compose', '--env-file', '.env.demo', '-p', 'resgate-animais-demo']
+  : ['compose'];
+
 // As credenciais são lidas DENTRO do contêiner. Não aparecem nos argumentos do host.
 // execFileSync evita a interpretação de aspas pelo PowerShell.
 export function consultar(sql, { administrador = false } = {}) {
@@ -13,7 +19,7 @@ export function consultar(sql, { administrador = false } = {}) {
     : 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql --protocol=tcp -h 127.0.0.1 -u "$MYSQL_USER"';
   const comando = autenticacao + ' --database="$MYSQL_DATABASE" --default-character-set=utf8mb4 --batch --raw --skip-column-names';
   try {
-    return execFileSync('docker', ['compose', 'exec', '-T', 'mysql', 'sh', '-c', comando], {
+    return execFileSync('docker', [...composeArgs, 'exec', '-T', 'mysql', 'sh', '-c', comando], {
       cwd: raiz,
       input: "SET time_zone = '+00:00';\nSET SESSION sql_mode = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE';\n" + sql,
       encoding: 'utf8',
