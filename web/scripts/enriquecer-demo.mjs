@@ -129,7 +129,9 @@ async function executar(){
       const [latitude,longitude]=coordenadaDemo(i);
       await db.execute(
         "UPDATE ocorrencias SET id_bairro=?,cep=?,latitude_aproximada=?,longitude_aproximada=?,"+
-        "ponto_referencia=NULL,logradouro=NULL,origem_localizacao='BAIRRO',precisao_localizacao='BAIRRO_APROXIMADO' "+
+        "ponto_referencia=NULL,logradouro=NULL,"+
+        "descricao=REPLACE(descricao,' Registro sintético DEMO, sem tutor ou endereço real.',''),"+
+        "origem_localizacao='BAIRRO',precisao_localizacao='BAIRRO_APROXIMADO' "+
         "WHERE id_ocorrencia=?",
         [bairros[setor],BAIRROS_DEMO[setor].cep,latitude,longitude,o.id]
       );
@@ -162,7 +164,7 @@ async function executar(){
 }
 executar().catch(error=>{console.error("Enriquecimento interrompido:",error.message);process.exitCode=1;});
  "+
-      "AND o.descricao LIKE '%Registro sintético DEMO, sem tutor ou endereço real.%' "+
+      "AND a.caracteristicas LIKE '%Registro sintético DEMO, sem tutor ou endereço real.%' "+
       "ORDER BY o.id_ocorrencia"
     );
     if(!ocorrencias.length)throw new Error("Não encontrei ocorrências geradas pelo seed. Banco preservado.");

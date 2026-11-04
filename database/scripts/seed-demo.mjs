@@ -155,12 +155,13 @@ function produzirSql(opcoes,senha) {
     const regiao = BAIRROS_DEMO[bairro];
     const sexo = escolher(rnd,["MACHO","FEMEA","INDETERMINADO"]);
     const porte = escolher(rnd,["PEQUENO","MEDIO","GRANDE"]);
-    const descricao = escolher(rnd,descricoes)+" Registro sintético DEMO, sem tutor ou endereço real.";
+    const descricao = escolher(rnd,descricoes);
+    const marcaInterna = descricao+" Registro sintético DEMO, sem tutor ou endereço real.";
     const [latitude,longitude] = coordenadaDemo(i);
     sql.push("INSERT INTO animais (nome,id_especie,sexo,porte,possui_microchip,idade_aproximada,caracteristicas) "+
       "SELECT "+valorSql(nome)+",id_especie,"+valorSql(sexo)+","+
       valorSql(porte)+","+(tipo==="PERDIDO" ? (rnd()<0.25?"1":"0") : "NULL")+","+
-      valorSql(inteiro(rnd,1,10)+" anos")+","+valorSql(descricao)+
+      valorSql(inteiro(rnd,1,10)+" anos")+","+valorSql(marcaInterna)+
       " FROM especies WHERE nome="+valorSql(especie)+" LIMIT 1;");
     sql.push("SET @demo_a"+i+" = LAST_INSERT_ID();");
     sql.push("INSERT INTO animais_cores (id_animal,id_cor) "+
