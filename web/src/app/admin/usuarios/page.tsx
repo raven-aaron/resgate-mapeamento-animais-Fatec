@@ -44,7 +44,7 @@ export default async function UsuariosAdmin({searchParams}:{
       <button type="submit" className="action action-primary">BUSCAR</button>
       <Link href="/admin/usuarios" className="action action-secondary">LIMPAR</Link>
     </form>
-    <p><strong>{rows.length}</strong> conta(s) nesta consulta (limite de 100 por página).</p>
+    <p><strong>{rows.length}</strong> conta(s) nesta consulta. Permissões editáveis somente no módulo Resgate.</p>
     <div className="tabela-usuarios-wrap">
       <table className="tabela-usuarios">
         <thead><tr><th>Conta</th><th>Situação</th><th>Papel no resgate</th><th>Ocorrências</th><th>Cadastro</th><th>Gerenciar</th></tr></thead>

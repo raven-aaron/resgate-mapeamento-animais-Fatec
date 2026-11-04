@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-type Acao="SUSPENDER"|"REATIVAR"|"CONCEDER_ADMIN"|"REVOGAR_ADMIN";
+type Acao="CONCEDER_ADMIN"|"REVOGAR_ADMIN";
 export default function ControleUsuario({id,email,situacao,adminResgate,proprio}:{
   id:number;email:string;situacao:string;adminResgate:boolean;proprio:boolean;
 }){
@@ -15,11 +15,8 @@ export default function ControleUsuario({id,email,situacao,adminResgate,proprio}
   if(proprio)return <small>Conta atual — alterações bloqueadas</small>;
   const opcoes: {valor:Acao;texto:string}[]=[];
   if(situacao==="ATIVO"){
-    if(!adminResgate)opcoes.push({valor:"SUSPENDER",texto:"Suspender conta"});
     opcoes.push({valor:adminResgate?"REVOGAR_ADMIN":"CONCEDER_ADMIN",
       texto:adminResgate?"Remover administrador do Resgate":"Conceder acesso administrativo ao Resgate"});
-  }else if(situacao==="SUSPENSO"){
-    opcoes.push({valor:"REATIVAR",texto:"Reativar conta"});
   }
   async function salvar(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
@@ -49,7 +46,6 @@ export default function ControleUsuario({id,email,situacao,adminResgate,proprio}
         </select>
       </label>
       {acao&&<>
-        {acao==="SUSPENDER"&&<p style={{fontSize:12}}>A suspensão bloqueia o acesso a todos os módulos.</p>}
         <label className="form-field">Confirme digitando o e-mail completo
           <input type="email" required autoComplete="off" value={confirmacao}
             onChange={e=>setConfirmacao(e.target.value)} placeholder={email}/>

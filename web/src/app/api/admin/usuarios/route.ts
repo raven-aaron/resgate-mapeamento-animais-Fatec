@@ -5,8 +5,10 @@ import { administradorAtual } from "../../../../lib/auth";
 import { mesmaOrigem } from "../../../../lib/seguranca";
 
 export const runtime="nodejs";
-type Acao="SUSPENDER"|"REATIVAR"|"CONCEDER_ADMIN"|"REVOGAR_ADMIN";
-const acoes:Acao[]=["SUSPENDER","REATIVAR","CONCEDER_ADMIN","REVOGAR_ADMIN"];
+// A conta é compartilhada com outros módulos. Apenas privilégios de RESGATE
+// podem ser administrados por um administrador de RESGATE.
+type Acao="CONCEDER_ADMIN"|"REVOGAR_ADMIN";
+const acoes:Acao[]=["CONCEDER_ADMIN","REVOGAR_ADMIN"];
 
 export async function PATCH(request:Request){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem não permitida."},{status:403});
@@ -47,12 +49,6 @@ export async function PATCH(request:Request){
       let sql="";
       let valores:number[]=[];
       switch(acao){
-        case "SUSPENDER":
-          if(!ativo||alvoAdmin)break;
-          sql="UPDATE usuarios SET situacao='SUSPENSO' WHERE id_usuario=?";valores=[id];break;
-        case "REATIVAR":
-          if(alvo.situacao!=="SUSPENSO")break;
-          sql="UPDATE usuarios SET situacao='ATIVO' WHERE id_usuario=?";valores=[id];break;
         case "CONCEDER_ADMIN":
           if(!ativo||alvoAdmin)break;
           sql="INSERT INTO permissoes_usuarios (id_usuario,modulo,papel) VALUES (?,'RESGATE','ADMIN')";
@@ -63,7 +59,7 @@ export async function PATCH(request:Request){
       }
       if(!sql){
         await conn.rollback();
-        return NextResponse.json({erro:"Ação não permitida nesta situação. É necessário manter ao menos um administrador ativo."},{status:409});
+        return NextResponse.json({erro:"Ação não permitida. A conta deve estar ativa e ao menos um administrador deve permanecer."},{status:409});
       }
       await conn.execute(sql,valores);
       // Elimina sessões antigas após promoção, revogação ou suspensão.
