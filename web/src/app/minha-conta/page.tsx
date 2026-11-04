@@ -11,12 +11,11 @@ export default async function MinhaContaPage(){
     <header className="form-heading">
       <span className="eyebrow">Área do cidadão</span>
       <h1>MINHA CONTA</h1>
-      <p>Você está conectado. Seu acesso continuará disponível neste dispositivo até a expiração da sessão ou até escolher sair.</p>
+      <p>Gerencie seus dados e ocorrências.</p>
     </header>
     <section className="form-panel" aria-label="Dados da conta conectada">
       <h2>{usuario.nome}</h2>
       <p><strong>E-mail:</strong> {usuario.email}</p>
-      <p><strong>Perfil nesta sessão:</strong> Cidadão</p>
       <div className="action-row">
         <Link className="action action-primary" href="/mensagens">Minhas conversas</Link>
         <Link className="action action-secondary" href="/notificacoes">Notificações</Link>

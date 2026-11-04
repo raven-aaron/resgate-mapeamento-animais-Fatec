@@ -23,7 +23,6 @@ export default function CartazPet({ o, fotos, administrativo=false }: { o: Ocorr
   return <div className={styles.cartaz}>
     {administrativo && <div className={styles.avisoAdm} role="status">
       <strong>PRÉ-VISUALIZAÇÃO ADMINISTRATIVA</strong> · Situação: {o.status_aprovacao} / {o.status_caso}.
-      Revise os dados e as fotografias antes de decidir sobre a publicação.
     </div>}
     <section className={styles.hero}>
       <div className={styles.introducao}>
@@ -59,8 +58,7 @@ export default function CartazPet({ o, fotos, administrativo=false }: { o: Ocorr
         <h2>{perdido?"CONTATO DO TUTOR":"CONTATO DO RESPONSÁVEL"}</h2>
         <dl><Campo titulo="NOME" valor={exibir(o.autor)} /></dl>
         {!administrativo && <ContatoUsuario ocorrencia={o.id} />}
-        {administrativo && <p className={styles.nota}>A opção de contato ficará disponível após a aprovação; somente usuários autenticados poderão conversar.</p>}
-        <p className={styles.nota}>Telefone e e-mail ficam protegidos na conta e não são divulgados no cartaz. A posição pública do mapa é aproximada.</p>
+        <p className={styles.nota}>Contato pelo chat. Localização aproximada.</p>
       </div>
     </section>
     <div className={styles.voltar}>

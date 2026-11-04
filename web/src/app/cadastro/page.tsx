@@ -34,11 +34,11 @@ function CadastroFormulario() {
     finally { setSalvando(false); }
   }
   return <main className="form-shell">
-    <header className="form-heading"><h1>CRIAR CONTA</h1><p>Cadastro de cidadão. Contas criadas aqui não possuem permissões administrativas.</p></header>
+    <header className="form-heading"><h1>CRIAR CONTA</h1><p></p></header>
     <form className="form-panel" onSubmit={enviar}>
       <div className="form-grid">
         <label className="form-field">Nome completo<input required minLength={2} maxLength={100} value={nome} autoComplete="name" onChange={e=>setNome(e.target.value)} /></label>
-        <label className="form-field">Telefone com DDD<input type="tel" required inputMode="tel" minLength={10} maxLength={20} autoComplete="tel" placeholder="(15) 99999-9999" value={telefone} onChange={e=>setTelefone(e.target.value)} /><small>Uso privado da conta. O número não será divulgado no cartaz.</small></label>
+        <label className="form-field">Telefone com DDD<input type="tel" required inputMode="tel" minLength={10} maxLength={20} autoComplete="tel" placeholder="(15) 99999-9999" value={telefone} onChange={e=>setTelefone(e.target.value)} /><small>Número privado.</small></label>
         <label className="form-field">E-mail<input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} /></label>
         <label className="form-field">Senha<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={senha} onChange={e=>setSenha(e.target.value)} /><small>Use pelo menos 10 caracteres.</small></label>
         <label className="form-field">Confirmar senha<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={confirmacao} onChange={e=>setConfirmacao(e.target.value)}/></label>

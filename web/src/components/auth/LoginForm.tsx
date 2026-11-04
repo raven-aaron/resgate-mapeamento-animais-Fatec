@@ -41,16 +41,15 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
       <header className="form-heading">
         <span className="eyebrow">{admin ? "Acesso restrito • Prefeitura" : "Área do cidadão"}</span>
         <h1>{admin ? "ACESSO ADMINISTRATIVO" : "ENTRAR"}</h1>
-        <p>{admin ? "Somente servidores com permissão administrativa no módulo Resgate." : "Entre para cadastrar e acompanhar suas ocorrências."}</p>
+        {!admin&&<p>Entre para registrar animais e conversar com outros usuários.</p>}
       </header>
       <form className="form-panel" onSubmit={enviar}>
         <div className="form-grid">
           <label className="form-field">E-mail<input type="email" required autoComplete="username" maxLength={254} value={email} onChange={e => setEmail(e.target.value)}/></label>
           <label className="form-field">Senha<input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)}/></label>
         </div>
-        {admin?<p className="note">Somente administradores autorizados. Esta sessão administrativa é temporária e independente da conta do cidadão.</p>:<>
-          <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter minha conta conectada por 30 dias neste dispositivo</label>
-          <small className="login-persistencia-aviso">Em computadores compartilhados, deixe desmarcado e saia ao terminar.</small>
+        {!admin&&<>
+          <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter conectado</label>
         </>}
         {erro && <p role="alert" className="note note-warning" style={{marginTop:18}}>{erro}</p>}
         <div className="action-row">

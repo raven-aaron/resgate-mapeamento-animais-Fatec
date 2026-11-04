@@ -174,8 +174,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
             <div className={styles.rodapeConteudo}>
               <div className={styles.rodapeTexto}>
                 <strong>Proteção e Bem-Estar Animal — Votorantim</strong>
-                <p>Consulte animais perdidos e encontrados, divulgue ocorrências e ajude famílias a se reencontrarem com seus pets.</p>
-                <p>Atendimento e contato entre usuários realizados pela própria plataforma.</p>
+                <p>Animais perdidos e encontrados em Votorantim.</p>
               </div>
               <div className={styles.rodapeLogos}>
                 <Image src={logoBemEstar} unoptimized width={110} height={90} alt="Departamento de Bem-Estar Animal" className={styles.logo}/>

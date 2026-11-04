@@ -19,7 +19,7 @@ export default function RecuperarSenha(){
     finally{setEnviando(false);}
   }
   return <main className="form-shell">
-    <header className="form-heading"><h1>RECUPERAR SENHA</h1><p>Informe o nome e o e-mail usados no cadastro. Se a recuperação por e-mail estiver configurada, receberá um link válido por 30 minutos.</p></header>
+    <header className="form-heading"><h1>RECUPERAR SENHA</h1><p>Informe seu nome e e-mail para recuperar a senha.</p></header>
     <form className="form-panel" onSubmit={enviar}>
       <div className="form-grid">
         <label className="form-field">Nome completo<input required maxLength={100} minLength={2} value={nome} onChange={e=>setNome(e.target.value)}/></label>

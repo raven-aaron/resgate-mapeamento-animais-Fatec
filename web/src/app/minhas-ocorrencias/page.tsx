@@ -21,7 +21,7 @@ export default async function MinhasOcorrencias() {
   );
   return <main className="site-wrap" style={{padding:"44px 0"}}>
     <header className="form-heading">
-      <span className="eyebrow">Área do cidadão</span><h1>MINHAS OCORRÊNCIAS</h1><p>Olá, {usuario.nome}. Acompanhe o status de seus registros.</p>
+      <span className="eyebrow">Área do cidadão</span><h1>MINHAS OCORRÊNCIAS</h1><p>Olá, {usuario.nome}.</p>
     </header>
     <div className="cards-ocorrencias">
       {rows.map(o=><article className="cartao-ocorrencia" key={o.id}>
@@ -31,7 +31,7 @@ export default async function MinhasOcorrencias() {
           <h3>{o.nome||o.especie}</h3>
           <p>{o.especie} • {o.bairro} • {String(o.data).slice(0,10).split("-").reverse().join("/")}</p>
           <p><strong>Situação do cadastro:</strong> {o.status_aprovacao === "PENDENTE" ? "Em análise" : o.status_aprovacao === "APROVADO" ? "Aprovado" : o.status_aprovacao === "REJEITADO" ? "Não aprovado" : o.status_aprovacao === "OCULTO" ? "Não publicado" : o.status_aprovacao}</p>
-          {o.status_aprovacao==="REJEITADO"&&<p className="note note-warning" role="status"><strong>Motivo da rejeição:</strong> {o.motivo_rejeicao||"Consulte a administração para obter detalhes."} Corrija o cadastro e envie novamente para análise.</p>}
+          {o.status_aprovacao==="REJEITADO"&&<p className="note note-warning" role="status"><strong>Motivo da rejeição:</strong> {o.motivo_rejeicao||"Consulte a administração para obter detalhes."}</p>}
           <p><strong>Ocorrência:</strong> {o.status_caso === "ABERTO" ? "Ativa" : o.status_caso === "RESOLVIDO" ? "Resolvida" : "Encerrada"}</p>
           {o.status_aprovacao==="APROVADO" && o.status_caso==="ABERTO" && <Link className="action action-primary" href={"/ocorrencias/"+o.id}>Ver publicação</Link>}
           <AcoesMinhaOcorrencia id={o.id} tipo={o.tipo} statusAprovacao={o.status_aprovacao} statusCaso={o.status_caso}/>

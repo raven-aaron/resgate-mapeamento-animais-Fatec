@@ -38,7 +38,7 @@ export default function VitrinePublica(){
         <div>
           <span className={styles.sobretitulo}>Módulo de Resgate</span>
           <h2 id="titulo-vitrine">Animais perdidos e encontrados</h2>
-          <p>Confira os animais cadastrados e aprovados pela comunidade de Votorantim.</p>
+          <p>Animais registrados em Votorantim.</p>
         </div>
         <Link href="/ocorrencias/nova?tipo=PERDIDO" className={styles.cadastrar}>
           <span aria-hidden="true">＋</span>Cadastrar ocorrência
@@ -66,7 +66,7 @@ export default function VitrinePublica(){
       </div>}
       <div className={styles.rodape}>
         <Link href="/mapa">Ver todos os animais e mapa interativo</Link>
-        <span>Consulta pública: não é necessário entrar na conta para visualizar os pets.</span>
+
       </div>
     </div>
   </section>;

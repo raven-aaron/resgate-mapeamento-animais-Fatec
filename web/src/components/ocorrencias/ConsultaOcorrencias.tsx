@@ -65,7 +65,7 @@ export default function ConsultaOcorrencias() {
       <header className="form-heading">
         <span className="eyebrow">Proteção e Bem-Estar Animal</span>
         <h1>ANIMAIS PERDIDOS E ENCONTRADOS</h1>
-        <p>Encontre animais perdidos e encontrados em Votorantim. Utilize o mapa ou a lista para localizar um pet e consultar seu cartaz completo.</p>
+        <p>Busque por nome, bairro ou características.</p>
       </header>
       <section className="form-panel">
         <h2>Filtrar ocorrências</h2>
@@ -100,7 +100,7 @@ export default function ConsultaOcorrencias() {
       {erro && <p className="note note-warning" role="alert">{erro}</p>}
       {modo==="mapa" ? <section aria-label="Mapa de ocorrências">
         <MapaPublico ocorrencias={filtradas} />
-        <p className="legenda-mapa-publico">Os marcadores indicam regiões aproximadas, sem divulgar endereços residenciais.</p>
+        <p className="legenda-mapa-publico">Localizações aproximadas.</p>
       </section> : <section className="cards-ocorrencias" aria-label="Lista de animais">
         {filtradas.map(o=><article className="cartao-ocorrencia" key={o.id}>
           {o.foto ? <Image src={o.foto} alt={"Foto do animal "+o.id} unoptimized width={340} height={220}/> : <div className="sem-foto">🐾</div>}
@@ -113,7 +113,7 @@ export default function ConsultaOcorrencias() {
             <Link href={"/ocorrencias/"+o.id} className="action action-primary">VER CARTAZ</Link>
           </div>
         </article>)}
-        {!carregando && !erro && filtradas.length===0 && <div className="form-panel"><p>Nenhuma ocorrência aprovada e ativa corresponde aos filtros selecionados.</p></div>}
+        {!carregando && !erro && filtradas.length===0 && <div className="form-panel"><p>Nenhum animal encontrado.</p></div>}
       </section>}
       <div className="action-row"><Link className="action action-secondary" href="/resgate">Voltar ao módulo de resgate</Link></div>
     </main>
