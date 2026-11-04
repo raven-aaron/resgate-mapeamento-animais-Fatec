@@ -50,7 +50,7 @@ try{
   iniciou=true;
   let pronto=false;
   for(let i=0;i<90;i++){
-    const ping=await executar(["exec","-e","MYSQL_PWD",nome,"mysqladmin","-uroot","ping","--silent"],{ignorarErro:true});
+    const ping=await executar(["exec","-e","MYSQL_PWD",nome,"mysqladmin","--protocol=tcp","-h","127.0.0.1","-uroot","ping","--silent"],{ignorarErro:true});
     if(ping.codigo===0){pronto=true;break;}
     await aguardar(1000);
   }
