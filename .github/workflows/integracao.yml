@@ -50,6 +50,13 @@ jobs:
         env:
           INTEGRACAO_TESTE: "1"
         run: node web/tests/integracao-http.mjs
+      - name: Criar backup local de CI (MySQL e fotos)
+        run: node database/scripts/backup-local.mjs
+      - name: Verificar restauração em MySQL isolado
+        run: |
+          BACKUP=$(find backups -maxdepth 1 -type d -name 'resgate-*' | head -n 1)
+          test -n "$BACKUP"
+          node database/scripts/verificar-restauracao.mjs "$BACKUP"
       - name: Logs de diagnóstico
         if: failure()
         run: docker compose logs --tail=120 mysql web
