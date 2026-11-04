@@ -6,6 +6,7 @@
 import { randomBytes, scryptSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { consultar } from "./mysql.mjs";
+import { PONTOS_DEMO, regiaoDemo, coordenadaDemo } from "./demo-localidades.mjs";
 
 const ajuda = [
   "Uso: RESGATE_DEMO=1 node database/scripts/seed-demo.mjs [--dry-run | --apply] [--count N] [--users N] [--chats N] [--seed N]",
@@ -132,10 +133,9 @@ function produzirSql(opcoes,senha) {
   }
   sql.push("INSERT INTO permissoes_usuarios (id_usuario,modulo,papel) VALUES (@demo_u0,'RESGATE','ADMIN');");
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < PONTOS_DEMO.length; i++) {
     const nome = "Região Demo "+String(i+1).padStart(2,"0");
-    const latitude = (-23.535 - (i%4)*0.005).toFixed(6);
-    const longitude = (-47.433 - Math.floor(i/4)*0.007).toFixed(6);
+    const [latitude,longitude] = PONTOS_DEMO[i];
     sql.push("INSERT INTO bairros (nome,latitude_aproximada,longitude_aproximada) VALUES ("+
       [nome,latitude,longitude].map(valorSql).join(",")+");");
     sql.push("SET @demo_b"+i+" = LAST_INSERT_ID();");
@@ -152,12 +152,11 @@ function produzirSql(opcoes,senha) {
     const situacao = i%10 <= 5 ? "APROVADO" : i%10===6 ? "PENDENTE" : i%10===7 ? "REJEITADO" : i%10===8 ? "OCULTO" : "RESOLVIDO";
     const aprovado = situacao==="APROVADO" || situacao==="RESOLVIDO";
     const encerrado = situacao==="RESOLVIDO";
-    const bairro = i%12;
+    const bairro = regiaoDemo(i);
     const sexo = escolher(rnd,["MACHO","FEMEA","INDETERMINADO"]);
     const porte = escolher(rnd,["PEQUENO","MEDIO","GRANDE"]);
     const descricao = escolher(rnd,descricoes)+" Registro sintético DEMO, sem tutor ou endereço real.";
-    const latitude = (-23.535 - (bairro%4)*0.005).toFixed(6);
-    const longitude = (-47.433 - Math.floor(bairro/4)*0.007).toFixed(6);
+    const [latitude,longitude] = coordenadaDemo(i);
     sql.push("INSERT INTO animais (nome,id_especie,sexo,porte,possui_microchip,idade_aproximada,caracteristicas) "+
       "SELECT "+valorSql(nome)+",id_especie,"+valorSql(sexo)+","+
       valorSql(porte)+","+(tipo==="PERDIDO" ? (rnd()<0.25?"1":"0") : "NULL")+","+
@@ -171,7 +170,7 @@ function produzirSql(opcoes,senha) {
     sql.push("INSERT INTO ocorrencias (id_usuario_criador,id_animal,id_bairro,ponto_referencia,"+
       "tipo_ocorrencia,status_aprovacao,status_caso,motivo_encerramento,encerrado_em,data_evento,descricao,"+
       "latitude_aproximada,longitude_aproximada,origem_localizacao,precisao_localizacao) VALUES ("+
-      ["@demo_u"+owner,"@demo_a"+i,"@demo_b"+bairro,valorSql("Região simulada "+String(bairro+1).padStart(2,"0")),
+      ["@demo_u"+owner,"@demo_a"+i,"@demo_b"+bairro,valorSql("Setor fictício "+String(bairro+1).padStart(2,"0")+", localização ilustrativa"),
         valorSql(tipo),valorSql(status),valorSql(encerrado?"RESOLVIDO":"ABERTO"),valorSql(motivo),
         encerrado?"UTC_TIMESTAMP(3)":"NULL","DATE_SUB(CURDATE(), INTERVAL "+inteiro(rnd,1,75)+" DAY)",
         valorSql(descricao),valorSql(latitude),valorSql(longitude),"'BAIRRO'","'BAIRRO_APROXIMADO'"].join(",")+");");
