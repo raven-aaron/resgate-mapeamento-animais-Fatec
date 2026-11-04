@@ -2,9 +2,9 @@ name: CI - Banco de dados
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feat/banco-resgate-modulos]
   push:
-    branches: [main]
+    branches: [main, feat/banco-resgate-modulos, "fix/**"]
 
 permissions:
   contents: read

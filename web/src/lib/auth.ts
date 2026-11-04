@@ -42,7 +42,8 @@ export async function criarSessao(idUsuario: number, manterConectado = true) {
     await banco().execute("UPDATE sessoes SET revogada_em=UTC_TIMESTAMP(3) WHERE token_hash=UNHEX(?) AND revogada_em IS NULL",[hashAnterior]);
   }
   jar.set(COOKIE, token, {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: duracaoSegundos,
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/",
+    ...(manterConectado ? { maxAge: duracaoSegundos } : {}),
   });
 }
 
