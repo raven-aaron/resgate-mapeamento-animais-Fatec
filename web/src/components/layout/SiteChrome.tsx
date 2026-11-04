@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,8 @@ function normalizar(entrada: string) {
 export default function SiteChrome({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [menuAberto, setMenuAberto] = useState(false);
+  const abrirMenuRef = useRef<HTMLButtonElement>(null);
+  const fecharMenuRef = useRef<HTMLButtonElement>(null);
   const [altoContraste, setAltoContraste] = useState(false);
   const [tamanhoFonte, setTamanhoFonte] = useState(16);
   const [busca, setBusca] = useState("");
@@ -43,11 +45,31 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!menuAberto) return;
+    fecharMenuRef.current?.focus();
     function aoTeclar(evento: KeyboardEvent) {
-      if (evento.key === "Escape") setMenuAberto(false);
+      if (evento.key === "Escape") {
+        evento.preventDefault();
+        setMenuAberto(false);
+      }
+      if (evento.key === "Tab") {
+        const painel=document.getElementById("menu-resgate");
+        const focaveis=Array.from(painel?.querySelectorAll<HTMLElement>(
+          'a[href],button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        )||[]);
+        if(!focaveis.length)return;
+        const primeiro=focaveis[0],ultimo=focaveis[focaveis.length-1];
+        if(evento.shiftKey && document.activeElement===primeiro){
+          evento.preventDefault();ultimo.focus();
+        } else if(!evento.shiftKey && document.activeElement===ultimo){
+          evento.preventDefault();primeiro.focus();
+        }
+      }
     }
     document.addEventListener("keydown", aoTeclar);
-    return () => document.removeEventListener("keydown", aoTeclar);
+    return () => {
+      document.removeEventListener("keydown", aoTeclar);
+      abrirMenuRef.current?.focus();
+    };
   }, [menuAberto]);
 
   function pesquisar(evento: FormEvent<HTMLFormElement>) {
@@ -70,6 +92,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <a className={styles.pularConteudo} href="#conteudo-principal">Pular para o conteúdo principal</a>
       <header className={styles.cabecalhoGeral}>
         <div className={styles.barraAcessibilidade}>
           <div className={styles.container}>
@@ -107,7 +130,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
         <nav className={styles.navegacao} aria-label="Serviços do município">
           <div className={styles.container}>
             <div className={styles.flexNav}>
-              <button type="button" className={styles.btnMenu} onClick={() => setMenuAberto(true)} aria-expanded={menuAberto} aria-controls="menu-resgate">
+              <button ref={abrirMenuRef} type="button" className={styles.btnMenu} onClick={() => setMenuAberto(true)} aria-expanded={menuAberto} aria-controls="menu-resgate">
                 <span aria-hidden="true">🐾</span><span>Menu</span>
               </button>
               <div className={styles.barraNav}>
@@ -127,7 +150,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
           <aside id="menu-resgate" role="dialog" aria-modal="true" aria-label="Menu do módulo de resgate" className={styles.menuLateral}>
             <div className={styles.menuTopo}>
               <strong>🐾 MENU DE RESGATE</strong>
-              <button type="button" aria-label="Fechar menu lateral" className={styles.fechar} onClick={() => setMenuAberto(false)}>×</button>
+              <button ref={fecharMenuRef} type="button" aria-label="Fechar menu lateral" className={styles.fechar} onClick={() => setMenuAberto(false)}>×</button>
             </div>
             <div className={styles.menuCorpo}>
               <h2>ANIMAIS PERDIDOS E ENCONTRADOS</h2>
@@ -141,7 +164,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
           </aside>
         </div>
       )}
-      {children}
+      <div id="conteudo-principal" tabIndex={-1}>{children}</div>
       <footer className={styles.rodape}>
         <div className={styles.rodapeTopo}>
           <div className={styles.container}>

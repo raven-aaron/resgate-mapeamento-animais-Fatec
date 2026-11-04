@@ -9,6 +9,7 @@ export default function LogoutButton() {
     try {
       const resposta = await fetch("/api/auth/logout", { method:"POST" });
       if(!resposta.ok) throw new Error("Falha ao sair");
+      window.dispatchEvent(new Event("resgate-auth"));
       router.replace("/admin/login");
       router.refresh();
     } catch {setSaindo(false);}
