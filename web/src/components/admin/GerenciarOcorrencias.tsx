@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Ocorrencia } from "../../lib/tipos";
 
 type Acao = "APROVAR" | "REJEITAR" | "OCULTAR";
@@ -14,6 +14,8 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   const [confirmacao,setConfirmacao] = useState<{ id: number; acao: Acao } | null>(null);
   const [motivo,setMotivo] = useState("");
   const [enviando,setEnviando] = useState(false);
+  const modalRef=useRef<HTMLElement>(null);
+  const aguardando=useRef(false);
   const [especie,setEspecie]=useState("");
   const [situacao,setSituacao]=useState("");
   const [ordem,setOrdem]=useState("RECENTE");
@@ -33,6 +35,29 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     const intervalo=setInterval(()=>{void carregar(controlador.signal).catch(()=>undefined);},7000);
     return ()=>{clearInterval(intervalo);controlador.abort();};
   },[carregar]);
+
+  useEffect(()=>{aguardando.current=enviando;},[enviando]);
+  useEffect(()=>{
+    if(!confirmacao)return;
+    const focoAnterior=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const modal=modalRef.current;
+    const focaveis=()=>Array.from(modal?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]),textarea:not([disabled]),input:not([disabled]),a[href]'
+    )||[]);
+    focaveis()[0]?.focus();
+    function tratarTeclado(evento:KeyboardEvent){
+      if(evento.key==="Escape"&&!aguardando.current){
+        evento.preventDefault();setConfirmacao(null);setMotivo("");return;
+      }
+      if(evento.key!=="Tab")return;
+      const itens=focaveis();if(!itens.length)return;
+      const primeiro=itens[0],ultimo=itens[itens.length-1];
+      if(evento.shiftKey&&document.activeElement===primeiro){evento.preventDefault();ultimo.focus();}
+      else if(!evento.shiftKey&&document.activeElement===ultimo){evento.preventDefault();primeiro.focus();}
+    }
+    document.addEventListener("keydown",tratarTeclado);
+    return ()=>{document.removeEventListener("keydown",tratarTeclado);focoAnterior?.focus();};
+  },[confirmacao]);
 
   async function confirmar() {
     if(!confirmacao)return;
@@ -92,7 +117,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
       {!carregando && ocorrencias.length===0 && <p className="note">Não há solicitações nesta situação.</p>}
     </div>
     {confirmacao && <div className="admin-modal-fundo" role="presentation">
-      <section className="admin-modal" role="dialog" aria-modal="true" aria-label="Confirmar moderação">
+      <section ref={modalRef} className="admin-modal" role="dialog" aria-modal="true" aria-label="Confirmar moderação">
         <h2>CONFIRMAR {confirmacao.acao==="APROVAR"?"APROVAÇÃO":confirmacao.acao==="REJEITAR"?"REJEIÇÃO":"OCULTAÇÃO"}</h2>
         <p>Ocorrência #{confirmacao.id}. Confirme esta decisão para atualizar a situação do cadastro.</p>
         {confirmacao.acao!=="APROVAR" && <label className="form-field">Motivo
