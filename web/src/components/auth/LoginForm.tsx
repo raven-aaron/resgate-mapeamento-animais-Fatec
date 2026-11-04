@@ -26,11 +26,11 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
       const resultado = await resposta.json();
       if (!resposta.ok) throw new Error(resultado.erro || "Falha ao entrar.");
       // Confirma que o navegador recebeu o cookie antes de acessar páginas protegidas.
-      const sessao = await fetch("/api/auth/me", { cache: "no-store", credentials: "same-origin" });
+      const sessao = await fetch(admin?"/api/auth/admin/me":"/api/auth/me", { cache: "no-store", credentials: "same-origin" });
       const atual = await sessao.json() as { usuario?: { id: number } | null };
       if (!sessao.ok || !atual.usuario) throw new Error("Não foi possível confirmar a sessão. Confira se os cookies estão habilitados.");
       window.dispatchEvent(new Event("resgate-auth"));
-      router.push(admin ? "/admin" : retorno);
+      router.replace(admin ? "/admin" : retorno);
       router.refresh();
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Não foi possível entrar.");
@@ -48,12 +48,14 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
           <label className="form-field">E-mail<input type="email" required autoComplete="username" maxLength={254} value={email} onChange={e => setEmail(e.target.value)}/></label>
           <label className="form-field">Senha<input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)}/></label>
         </div>
-        <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter minha conta conectada por 30 dias neste dispositivo</label>
-        <small className="login-persistencia-aviso">Em computadores compartilhados, deixe desmarcado e use Sair da conta ao terminar.</small>
+        {admin?<p className="note">Somente administradores autorizados. Esta sessão administrativa é temporária e independente da conta do cidadão.</p>:<>
+          <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter minha conta conectada por 30 dias neste dispositivo</label>
+          <small className="login-persistencia-aviso">Em computadores compartilhados, deixe desmarcado e saia ao terminar.</small>
+        </>}
         {erro && <p role="alert" className="note note-warning" style={{marginTop:18}}>{erro}</p>}
         <div className="action-row">
           <button className="action action-primary" type="submit" disabled={carregando}>{carregando ? "Autenticando..." : "ENTRAR"}</button>
-          <Link href="/resgate" className="action action-secondary">Voltar</Link>
+          <Link href={admin?"/":"/resgate"} className="action action-secondary">Voltar</Link>
         </div>
         {!admin && <p style={{marginTop:22}}>Ainda não possui conta? <Link href={"/cadastro?retorno="+encodeURIComponent(retorno)} style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Cadastre-se</Link> · <Link href="/recuperar-senha" style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Esqueci minha senha</Link></p>}
       </form>

@@ -1,14 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-export default function LogoutButton({destino="/admin/login",texto="Sair da administração"}:{destino?:string;texto?:string}={}) {
+export default function LogoutButton({destino="/",texto="Sair",administrativo=false}:{destino?:string;texto?:string;administrativo?:boolean}={}) {
   const router = useRouter();
   const [saindo,setSaindo] = useState(false);
   const [erro,setErro] = useState("");
   async function sair() {
     setSaindo(true);setErro("");
     try {
-      const resposta = await fetch("/api/auth/logout", { method:"POST" });
+      const resposta = await fetch(administrativo?"/api/auth/admin/logout":"/api/auth/logout",{method:"POST",credentials:"same-origin"});
       if(!resposta.ok) throw new Error("Falha ao sair");
       window.dispatchEvent(new Event("resgate-auth"));
       router.replace(destino);
