@@ -58,6 +58,12 @@ docs/                  guias de arquitetura, operação e desenvolvimento
 .github/workflows/     pipelines de CI
 ```
 
+## Código e contratos
+
+- [Banco MySQL e migrações](database/README.md)
+- [Rotas HTTP e formatos de requisição](docs/arquitetura/api-http.md)
+- [Organização da aplicação](docs/arquitetura/visao-geral.md)
+
 ## Colaboração
 
 Para começar no front-end, leia o [guia da equipe](docs/frontend/guia-equipe.md) e a [visão geral da arquitetura](docs/arquitetura/visao-geral.md). Regras de branches, revisão e testes: [CONTRIBUTING.md](CONTRIBUTING.md).

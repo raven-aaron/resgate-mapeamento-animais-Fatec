@@ -47,4 +47,6 @@ npm run build
 
 A integração HTTP (`tests/integracao-http.mjs`) **cria dados**; não execute contra um banco pessoal. A CI utiliza MySQL descartável.
 
+Contratos HTTP: [documentação da API](../docs/arquitetura/api-http.md).
+
 Guia prático de front-end: [docs/frontend/guia-equipe.md](../docs/frontend/guia-equipe.md).
