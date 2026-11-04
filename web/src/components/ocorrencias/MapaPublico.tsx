@@ -14,6 +14,7 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
   const el = useRef<HTMLDivElement>(null);
   const mapa = useRef<MapaLeaflet | null>(null);
   const marcadores = useRef<MarcadorLeaflet[]>([]);
+  const enquadrouPontos = useRef(false);
   const [pronto,setPronto] = useState(false);
   const [erro,setErro] = useState("");
   useEffect(()=>{
@@ -45,6 +46,7 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
     if(!ativo || !mapa.current)return;
     marcadores.current.forEach(marker=>m.removeLayer(marker));
     marcadores.current=[];
+    const pontosVisiveis:[number,number][]=[];
     const repeticoes=new Map<string,number>();
     const totais=new Map<string,number>();
     for(const o of ocorrencias){
@@ -65,7 +67,9 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
       const angulo=2*Math.PI*posicao/n;
       // Deslocamento visual pequeno quando vários animais compartilham um ponto aproximado.
       const deslocamento=n>1?0.00036:0;
-      const marker=L.marker([o.latitude+Math.sin(angulo)*deslocamento,o.longitude+Math.cos(angulo)*deslocamento],{icon:icone}).addTo(m);
+      const coordenadas:[number,number]=[o.latitude+Math.sin(angulo)*deslocamento,o.longitude+Math.cos(angulo)*deslocamento];
+      pontosVisiveis.push(coordenadas);
+      const marker=L.marker(coordenadas,{icon:icone}).addTo(m);
       const conteudo=document.createElement("div");conteudo.className="popup-pet";
       const titulo=document.createElement("strong");
       titulo.textContent=perdido?"PROCURA-SE":"ENCONTRADO";
@@ -97,6 +101,12 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
       botao.textContent="Ver cartaz completo";conteudo.append(botao);
       marker.bindPopup(conteudo,{maxWidth:270,minWidth:180});
       marcadores.current.push(marker);
+    }
+    // Enquadra todos os bairros no primeiro carregamento, sem retirar o zoom manual
+    // escolhido pelo visitante quando os filtros mudam.
+    if(!enquadrouPontos.current && pontosVisiveis.length>1){
+      m.fitBounds(pontosVisiveis,{padding:[28,28],maxZoom:13});
+      enquadrouPontos.current=true;
     }
     }).catch(()=>{ if(ativo)setErro("Não foi possível atualizar o mapa."); });
     return ()=>{ativo=false;};
