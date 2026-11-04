@@ -52,8 +52,8 @@ export default function AcoesMinhaOcorrencia({
     {acao&&<div className="admin-modal-fundo" role="presentation">
       <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby={"gerenciar-"+id}>
         <h2 id={"gerenciar-"+id}>{acao==="EXCLUIR"?"Excluir ocorrência":"Encerrar ocorrência"}</h2>
-        {acao==="EXCLUIR"?<p>Esta ocorrência deixará de aparecer nas listagens e não poderá ser recuperada por esta área. O histórico será preservado para auditoria.</p>:<>
-          <p>Informe o resultado desta ocorrência. Ela deixará de aparecer no mapa e as conversas existentes ficarão disponíveis apenas para consulta.</p>
+        {acao==="EXCLUIR"?<p>A ocorrência será excluída da listagem. Esta ação não pode ser desfeita.</p>:<>
+          <p>A ocorrência sairá das buscas. As conversas anteriores permanecerão disponíveis.</p>
           <label className="form-field">Motivo do encerramento
             <select value={motivo} onChange={e=>setMotivo(e.target.value)}>
               <option value={motivoPadrao}>{tipo==="PERDIDO"?"Animal reencontrado":"Devolvido ao tutor"}</option>

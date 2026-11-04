@@ -36,8 +36,7 @@ export default function PainelNotificacoes(){
     finally{setSalvando(false);}
   }
   return <main className="site-wrap pagina-notificacoes">
-    <div className="form-heading"><span className="eyebrow">Sua conta</span><h1>NOTIFICAÇÕES</h1>
-      <p>Mensagens recebidas e decisões sobre os animais cadastrados.</p></div>
+    <div className="form-heading"><span className="eyebrow">Sua conta</span><h1>NOTIFICAÇÕES</h1></div>
     <div className="action-row">
       <Link className="action action-secondary" href="/mensagens">Ver conversas</Link>
       <button className="action action-primary" type="button" disabled={salvando||!avisos.some(a=>!a.lida)}

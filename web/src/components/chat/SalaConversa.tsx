@@ -77,13 +77,13 @@ export default function SalaConversa({id}:{id:number}){
           <p>{m.conteudo}</p>
           <small>{String(m.data).replace("T"," ").slice(0,16)}</small>
         </div>)}
-        {!dados.mensagens.length&&<p className={styles.inicio}>Envie uma mensagem para começar a conversa sobre o pet.</p>}
+        {!dados.mensagens.length&&<p className={styles.inicio}>Envie a primeira mensagem.</p>}
       </div>
       {dados.conversa.podeEnviar?<form className={styles.compor} onSubmit={enviar}>
         <label htmlFor="mensagem-texto">Mensagem</label>
         <textarea id="mensagem-texto" required maxLength={2000} rows={3} value={texto} onChange={e=>setTexto(e.target.value)} placeholder="Escreva sua mensagem ao responsável..." />
         <button type="submit" disabled={enviando||!texto.trim()} className="action action-primary">{enviando?"Enviando...":"ENVIAR MENSAGEM"}</button>
-      </form>:<p className="note note-warning">Esta conversa está encerrada ou a publicação não está mais ativa. O histórico permanece disponível aos participantes.</p>}
+      </form>:<p className="note note-warning">Conversa encerrada. O histórico continua disponível.</p>}
     </section>}
   </main>;
 }

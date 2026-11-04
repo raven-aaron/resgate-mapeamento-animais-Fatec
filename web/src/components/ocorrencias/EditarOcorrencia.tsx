@@ -108,14 +108,12 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
       <Link href="/minhas-ocorrencias">← Voltar às minhas ocorrências</Link>
       <span className="eyebrow">Gerenciamento da ocorrência</span>
       <h1>EDITAR CADASTRO Nº {dados.id}</h1>
-      <p>Atualize as informações do animal e confira os dados antes de salvar.</p>
     </header>
     <form className="form-panel cadastro-pet-painel" onSubmit={salvar}>
       <div className="edicao-contexto">
         <strong>{dados.tipo==="PERDIDO"?"Animal perdido":"Animal encontrado"} • {dados.especie}</strong>
         <span>Região: {dados.bairro}, Votorantim/SP</span>
-        <p>A espécie permanece vinculada ao cadastro original. Você pode corrigir o CEP e as fotos; qualquer alteração retorna para aprovação administrativa.</p>
-        <p><strong>Atenção:</strong> após editar, a ocorrência voltará para análise e ficará temporariamente fora do mapa público.</p>
+        <p>As alterações serão analisadas novamente.</p>
       </div>
       <div className="form-grid cadastro-pet-grid">
         <label className="form-field">Nome do animal {dados.tipo==="ENCONTRADO"&&<small>Opcional</small>}
@@ -160,7 +158,7 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
             onChange={e=>{setCep(e.target.value);setCepConfirmado(null);}} placeholder="00000-000"/>
           <button type="button" className="inline-action" disabled={consultando} onClick={()=>void consultarCep()}>
             {consultando?"Consultando...":"VALIDAR NOVO CEP"}</button>
-          <p role="status">Região: <strong>{bairroConfirmado}, Votorantim/SP</strong>. O ponto público é aproximado e validado no servidor.</p>
+          <p role="status">Região: <strong>{bairroConfirmado}, Votorantim/SP</strong></p>
         </div>
         <label className="form-field form-field-full">Referência pública aproximada
           <input value={referencia} maxLength={255} onChange={e=>setReferencia(e.target.value)} placeholder="Ex.: próximo à praça do bairro"/>
@@ -172,7 +170,7 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
       </div>
       <section className="edicao-fotos" aria-label="Gerenciar fotografias do animal">
         <h2>FOTOGRAFIAS DO ANIMAL</h2>
-        <p>Adicione, substitua ou remova as imagens. O limite total é de cinco.</p>
+        <p>Até cinco fotos.</p>
         <div className="edicao-fotos-grid">
           {fotos.map(f=><div key={f.id} className="edicao-foto">
             <Image src={f.url} unoptimized width={135} height={112} alt={"Foto cadastrada "+f.id}/>

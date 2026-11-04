@@ -166,9 +166,6 @@ export default function FormularioOcorrencia() {
         <Link href="/resgate">← Voltar para animais perdidos e encontrados</Link>
         <span className="eyebrow">Cadastro de ocorrência</span>
         <h1>{tipo === "PERDIDO" ? "REGISTRAR ANIMAL PERDIDO" : "REGISTRAR ANIMAL ENCONTRADO"}</h1>
-        <p>{tipo==="PERDIDO"
-          ?"Informe os dados do seu animal desaparecido e onde foi visto pela última vez."
-          :"Informe as características do animal encontrado, mesmo que você não saiba seu nome ou tutor."} Após o envio, a publicação será analisada antes de aparecer no mapa.</p>
         <div className="etapas-cadastro" aria-label="Etapas do cadastro">
           <span><b>01</b> Animal</span><span><b>02</b> Localização</span><span><b>03</b> Fotos</span><span><b>04</b> Revisão</span>
         </div>
@@ -178,7 +175,7 @@ export default function FormularioOcorrencia() {
           <div className="form-grid cadastro-pet-grid">
             <div className="pet-form-section-title form-field-full">
               <span className="pet-form-numero">01</span>
-              <div><h2>{tipo==="PERDIDO"?"Dados do animal perdido":"Dados do animal encontrado"}</h2><p>{tipo==="PERDIDO"?"Identifique seu pet para facilitar a busca.":"Descreva o pet para que o tutor possa reconhecê-lo."}</p></div>
+              <div><h2>{tipo==="PERDIDO"?"Dados do animal perdido":"Dados do animal encontrado"}</h2></div>
             </div>
             <label className="form-field">
               Tipo de ocorrência
@@ -197,7 +194,6 @@ export default function FormularioOcorrencia() {
             <label className="form-field">
               Nome do animal {tipo === "ENCONTRADO" && <span className="campo-opcional">Opcional</span>}
               <input maxLength={80} required={tipo === "PERDIDO"} value={nome} onChange={e => { setNome(e.target.value); setRevisao(false); }} placeholder={tipo === "PERDIDO" ? "Nome pelo qual o animal atende" : "Nome identificado na coleira ou plaquinha"} />
-              {tipo === "ENCONTRADO" && <small>Preencha apenas quando houver identificação. Animais sem nome também podem ser cadastrados.</small>}
             </label>
 
             <label className="form-field">
@@ -248,7 +244,6 @@ export default function FormularioOcorrencia() {
                 <option value="">Selecione a cor predominante</option>
                 {cores.map(opcao => <option key={opcao} value={opcao}>{opcao}</option>)}
               </select>
-              <small>Detalhes de pelagem e mais de uma cor podem ser informados nas observações.</small>
             </label>
 
             <label className="form-field">
@@ -257,12 +252,11 @@ export default function FormularioOcorrencia() {
                 <option value="">{especie === "Gato" ? "Raça desabilitada para gatos" : "Selecione"}</option>
                 {racasCaninas.map(opcao => <option key={opcao} value={opcao}>{opcao === "Sem raça definida" ? "SRD (Sem Raça Definida)" : opcao}</option>)}
               </select>
-              {especie === "Gato" && <small>Para gatos, descreva as características da pelagem e os sinais particulares nas observações.</small>}
             </label>
 
             <div className="pet-form-section-title form-field-full">
               <span className="pet-form-numero">02</span>
-              <div><h2>Localização e data</h2><p>{tipo==="PERDIDO"?"Informe a região do último avistamento.":"Informe a região onde você encontrou o animal."} O CEP define uma posição aproximada no mapa.</p></div>
+              <div><h2>Localização e data</h2></div>
             </div>
             <div className="form-field">
               <label htmlFor="cep">CEP da região da ocorrência</label>
@@ -284,17 +278,16 @@ export default function FormularioOcorrencia() {
             <label className="form-field">
               {tipo === "PERDIDO" ? "Local onde foi visto pela última vez" : "Local onde o animal foi encontrado"}
               <input maxLength={255} value={referencia} onChange={e => { setReferencia(e.target.value); setRevisao(false); }} placeholder="Ex.: próximo ao parque do bairro" />
-              <small>Somente referência pública; não informe número de residência.</small>
+              <small>Não informe endereço residencial.</small>
             </label>
 
             {endereco && localizacao && <div className="regiao-publica-card form-field-full" role="status">
               <div className="regiao-publica-simbolo" aria-hidden="true">⌖</div>
               <div>
                 <strong>Região de publicação: {endereco.bairro}, Votorantim/SP</strong>
-                <p>A localização foi definida automaticamente a partir do CEP. O mapa público mostrará um ponto representativo da região, sem identificar um imóvel ou número residencial.</p>
               </div>
             </div>}
-            {!endereco && <p className="note form-field-full">Consulte o CEP para identificar o bairro e definir automaticamente a região da ocorrência.</p>}
+
 
             <label className="form-field">
               {tipo === "PERDIDO" ? "Data em que o animal foi perdido" : "Data em que o animal foi encontrado"}
@@ -303,7 +296,7 @@ export default function FormularioOcorrencia() {
 
             <div className="pet-form-section-title form-field-full">
               <span className="pet-form-numero">03</span>
-              <div><h2>Fotos e informações adicionais</h2><p>Imagens nítidas e detalhes particulares ajudam na identificação.</p></div>
+              <div><h2>Fotos e informações adicionais</h2></div>
             </div>
             <div className="form-field form-field-full">
               <label htmlFor="fotos-pet">Fotografias do animal</label>
@@ -323,7 +316,6 @@ export default function FormularioOcorrencia() {
             </label>
           </div>
 
-          <p className="observacao-envio">Após a revisão, você poderá conferir os dados antes de enviar a ocorrência para análise.</p>
           <div className="action-row">
             <Link href="/resgate" className="action action-secondary">CANCELAR</Link>
             <button className="action action-primary" type="submit">REVISAR CADASTRO</button>
@@ -333,7 +325,7 @@ export default function FormularioOcorrencia() {
         {revisao && <section className="form-panel" aria-live="polite">
           <div className="pet-form-section-title">
             <span className="pet-form-numero">04</span>
-            <div><h2>Confira as informações</h2><p>Verifique os dados antes de enviar para análise.</p></div>
+            <div><h2>Confira as informações</h2></div>
           </div>
           <dl className="review-list">
             <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Perdido" : "Encontrado"}</dd></div>
@@ -353,7 +345,7 @@ export default function FormularioOcorrencia() {
           {registro ? (
             <div className="note" role="status">
               <strong>Solicitação nº {registro} recebida com sucesso.</strong>
-              <p>Seu cadastro está em análise. Após a aprovação, o cartaz ficará disponível no mapa de animais.</p>
+              <p>Em análise.</p>
               <Link href="/minhas-ocorrencias" className="action action-primary">ACOMPANHAR MINHAS OCORRÊNCIAS</Link>
             </div>
           ) : (
@@ -374,7 +366,7 @@ export default function FormularioOcorrencia() {
           <section role="dialog" aria-modal="true" aria-labelledby="orientacoes-titulo" aria-describedby="orientacoes-descricao" className="orientacoes-modal" onKeyDown={evento => { if (evento.key === "Escape" && !enviando) setConfirmacaoAberta(false); }}>
             <div className="orientacoes-topo"><span className="orientacoes-simbolo" aria-hidden="true">!</span><span>Antes de continuar</span></div>
             <h2 id="orientacoes-titulo">Proteja seus dados e sua privacidade</h2>
-            <p id="orientacoes-descricao">Confira estas orientações antes de enviar a ocorrência:</p>
+            <p id="orientacoes-descricao">Antes de publicar:</p>
             <ul>
               <li>Não publique seu endereço residencial, número da casa, telefone, e-mail ou outros dados pessoais no cartaz.</li>
               <li>Indique apenas a região aproximada e referências públicas para facilitar a localização do animal.</li>
