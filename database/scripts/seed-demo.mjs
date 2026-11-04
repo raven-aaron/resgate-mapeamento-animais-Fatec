@@ -6,7 +6,7 @@
 import { randomBytes, scryptSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { consultar } from "./mysql.mjs";
-import { PONTOS_DEMO, regiaoDemo, coordenadaDemo } from "./demo-localidades.mjs";
+import { PONTOS_DEMO, regiaoDemo, coordenadaDemo } from "../../web/scripts/demo-localidades.mjs";
 
 const ajuda = [
   "Uso: RESGATE_DEMO=1 node database/scripts/seed-demo.mjs [--dry-run | --apply] [--count N] [--users N] [--chats N] [--seed N]",
