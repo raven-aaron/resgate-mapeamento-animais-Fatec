@@ -4,6 +4,7 @@ import { buscarPublicaPorId } from "../../../../lib/ocorrencias";
 import { banco } from "../../../../lib/db";
 import { usuarioAtual } from "../../../../lib/auth";
 import { mesmaOrigem } from "../../../../lib/seguranca";
+import { ErroLocalizacao, localizarBairroPorCep } from "../../../../lib/localizacao-cep";
 
 export const runtime = "nodejs";
 type Contexto = { params: Promise<{ id: string }> };
@@ -76,6 +77,16 @@ export async function PATCH(request:Request,context:Contexto) {
     const acao=dados.acao;
     if(acao!=="EDITAR" && acao!=="ENCERRAR")return respostaErro("Ação inválida.",400);
     const id=Number(identificador);
+    let regiaoNova: Awaited<ReturnType<typeof localizarBairroPorCep>>|null=null;
+    if(acao==="EDITAR" && dados.cep!==undefined){
+      if(typeof dados.cep!=="string")return respostaErro("Informe um CEP válido.",400);
+      try{
+        regiaoNova=await localizarBairroPorCep(dados.cep);
+      }catch(error){
+        if(error instanceof ErroLocalizacao)return respostaErro(error.message,error.status);
+        throw error;
+      }
+    }
     conn=await banco().getConnection();
     await conn.beginTransaction();
     const o=await proprietario(conn,id,usuario.id);
@@ -155,6 +166,21 @@ export async function PATCH(request:Request,context:Contexto) {
     if(idCor)await conn.execute(
       "INSERT INTO animais_cores (id_animal,id_cor) VALUES (?,?)",[o.id_animal,idCor]
     );
+    if(regiaoNova){
+      // Atualizar a região apenas com dados obtidos e validados pelo backend.
+      const [bairros]=await conn.execute<import("mysql2/promise").ResultSetHeader>(
+        "INSERT INTO bairros (nome,latitude_aproximada,longitude_aproximada) VALUES (?,?,?) "+
+        "ON DUPLICATE KEY UPDATE id_bairro=LAST_INSERT_ID(id_bairro),"+
+        "latitude_aproximada=VALUES(latitude_aproximada),longitude_aproximada=VALUES(longitude_aproximada)",
+        [regiaoNova.bairro,regiaoNova.latitude,regiaoNova.longitude]
+      );
+      await conn.execute(
+        "UPDATE ocorrencias SET id_bairro=?,cep=?,latitude_aproximada=?,longitude_aproximada=?,"+
+        "origem_localizacao='BAIRRO',precisao_localizacao='BAIRRO_APROXIMADO',logradouro=NULL "+
+        "WHERE id_ocorrencia=?",
+        [bairros.insertId,regiaoNova.cep,regiaoNova.latitude,regiaoNova.longitude,id]
+      );
+    }
     // Cada edição deve voltar para moderação antes de aparecer publicamente.
     await conn.execute(
       "UPDATE ocorrencias SET ponto_referencia=?,descricao=?,data_evento=?,"+

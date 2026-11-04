@@ -9,7 +9,7 @@ type Registro = RowDataPacket & {
   status_caso:string;nome:string|null;especie:string;id_especie:number;
   sexo:string;porte:string;idade:string|null;microchip:number|null;
   raca:string|null;cor:string|null;data:string;descricao:string|null;
-  referencia:string|null;bairro:string;
+  referencia:string|null;bairro:string;cep:string|null;
 };
 export const dynamic="force-dynamic";
 export default async function PaginaEditar({params}:{params:Promise<{id:string}>}){
@@ -22,7 +22,7 @@ export default async function PaginaEditar({params}:{params:Promise<{id:string}>
     "a.nome,e.nome AS especie,a.id_especie,a.sexo,a.porte,a.idade_aproximada AS idade,"+
     "a.possui_microchip AS microchip,r.nome AS raca,"+
     "(SELECT c.nome FROM animais_cores ac JOIN cores c ON c.id_cor=ac.id_cor WHERE ac.id_animal=a.id_animal ORDER BY c.nome LIMIT 1) AS cor,"+
-    "o.data_evento AS data,o.descricao,o.ponto_referencia AS referencia,b.nome AS bairro "+
+    "o.data_evento AS data,o.descricao,o.ponto_referencia AS referencia,b.nome AS bairro,o.cep "+
     "FROM ocorrencias o JOIN animais a ON a.id_animal=o.id_animal "+
     "JOIN especies e ON e.id_especie=a.id_especie "+
     "JOIN bairros b ON b.id_bairro=o.id_bairro "+
@@ -44,7 +44,13 @@ export default async function PaginaEditar({params}:{params:Promise<{id:string}>
     nome:registro.nome||"",especie:registro.especie,sexo:registro.sexo,porte:registro.porte,
     idade:registro.idade||"",microchip:registro.microchip===null?"":registro.microchip===1?"SIM":"NAO",
     raca:registro.raca||"",cor:registro.cor||"",dataEvento:String(registro.data).slice(0,10),
-    descricao:registro.descricao||"",referencia:registro.referencia||"",bairro:registro.bairro,
+    descricao:registro.descricao||"",referencia:registro.referencia||"",bairro:registro.bairro,cep:registro.cep||"",
   };
-  return <EditarOcorrencia dados={dados} racas={racas.map(r=>String(r.nome))} cores={cores.map(c=>String(c.nome))}/>;
+  const [fotos]=await banco().execute<RowDataPacket[]>(
+    "SELECT id_foto AS id,url_foto AS url FROM fotos_ocorrencias WHERE id_ocorrencia=? ORDER BY ordem",
+    [Number(id)]
+  );
+  return <EditarOcorrencia dados={dados} racas={racas.map(r=>String(r.nome))}
+    cores={cores.map(c=>String(c.nome))}
+    fotosIniciais={fotos.map(f=>({id:Number(f.id),url:String(f.url)}))}/>;
 }
