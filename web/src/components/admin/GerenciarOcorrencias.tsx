@@ -17,6 +17,8 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   const [especie,setEspecie]=useState("");
   const [situacao,setSituacao]=useState("");
   const [ordem,setOrdem]=useState("RECENTE");
+  const [busca,setBusca]=useState("");
+  const [situacaoCadastro,setSituacaoCadastro]=useState("");
 
   const carregar = useCallback(async (signal?:AbortSignal) => {
     const resposta = await fetch("/api/admin/ocorrencias?status="+status, {cache:"no-store",signal});
@@ -59,13 +61,15 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     {erro && <p role="alert" className="note note-warning">{erro}</p>}
     {sucesso && <p role="status" className="note">{sucesso}</p>}
     <div className="filtros-admin">
+      <label className="form-field">Buscar animal ou bairro<input type="search" value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Nome, bairro ou espécie"/></label>
+      <label className="form-field">Aprovação<select value={situacaoCadastro} onChange={e=>setSituacaoCadastro(e.target.value)}><option value="">Todas</option><option value="PENDENTE">Em análise</option><option value="APROVADO">Aprovada</option><option value="REJEITADO">Rejeitada</option><option value="OCULTO">Oculta</option></select></label>
       <label className="form-field">Espécie<select value={especie} onChange={e=>setEspecie(e.target.value)}><option value="">Todas</option><option value="Cachorro">Cachorro</option><option value="Gato">Gato</option></select></label>
       <label className="form-field">Situação<select value={situacao} onChange={e=>setSituacao(e.target.value)}><option value="">Todas</option><option value="PERDIDO">Perdido</option><option value="ENCONTRADO">Encontrado</option></select></label>
       <label className="form-field">Ordenar<select value={ordem} onChange={e=>setOrdem(e.target.value)}><option value="RECENTE">Mais recente</option><option value="ANTIGO">Mais antiga</option></select></label>
     </div>
-    <p><strong>{ocorrencias.filter(o=>(!especie||o.especie===especie)&&(!situacao||o.tipo===situacao)).length} ocorrência(s)</strong> na consulta atual.</p>
+    <p><strong>{ocorrencias.filter(o=>(!especie||o.especie===especie)&&(!situacao||o.tipo===situacao)&&(!situacaoCadastro||o.status_aprovacao===situacaoCadastro)&&(!busca||[o.nome,o.bairro,o.especie].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(busca.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()))).length} ocorrência(s)</strong> na consulta atual.</p>
     <div className="admin-cards">
-      {ocorrencias.filter(o=>(!especie||o.especie===especie)&&(!situacao||o.tipo===situacao)).sort((a,b)=>ordem==="RECENTE"?b.id-a.id:a.id-b.id).map(o=><article className="admin-cartao" key={o.id}>
+      {ocorrencias.filter(o=>(!especie||o.especie===especie)&&(!situacao||o.tipo===situacao)&&(!situacaoCadastro||o.status_aprovacao===situacaoCadastro)&&(!busca||[o.nome,o.bairro,o.especie].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(busca.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()))).sort((a,b)=>ordem==="RECENTE"?b.id-a.id:a.id-b.id).map(o=><article className="admin-cartao" key={o.id}>
         {o.foto?<Image unoptimized src={o.foto} alt={"Foto do pet "+o.id} width={180} height={180}/>:<div className="admin-sem-foto">🐾</div>}
         <div className="admin-info">
           <strong className={o.tipo==="PERDIDO"?"status-perdido":"status-encontrado"}>{o.tipo==="PERDIDO"?"PROCURA-SE":"ENCONTRADO"}</strong>
