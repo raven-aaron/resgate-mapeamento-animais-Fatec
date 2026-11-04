@@ -86,3 +86,16 @@
 .pularConteudo{position:fixed;left:12px;top:-100px;z-index:5000;background:#fff;color:#063f35;border:3px solid #063f35;padding:12px 18px;border-radius:8px;font-weight:750;}
 .pularConteudo:focus{top:12px;}
 .btnMenu:focus-visible,.fechar:focus-visible,.acessibilidadeBotao:focus-visible,.buscaWrapper button:focus-visible{outline:3px solid #175e50;outline-offset:3px;}
+
+/* Navegação pública + conta do cidadão: uma linha organizada no desktop. */
+.linhaNavegacao{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:72px;min-width:0;}
+.contaTopo{display:flex;align-items:center;justify-content:flex-end;flex:1;min-width:0;padding:8px 0;}
+.contaLateral{margin-top:16px;border-top:1px solid #d6e7e2;padding-top:8px;}
+@media(max-width:1100px){
+  .linhaNavegacao{flex-direction:column;align-items:stretch;gap:3px;padding:9px 0;}
+  .contaTopo{justify-content:flex-end;min-height:42px;padding:4px 0;}
+}
+@media(max-width:680px){
+  .linhaNavegacao{padding:4px 0 10px;}
+  .contaTopo{padding-top:9px;}
+}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./SiteChrome.module.css";
 import ContaNoCabecalho from "./ContaNoCabecalho";
 
@@ -25,6 +25,8 @@ function normalizar(entrada: string) {
 
 export default function SiteChrome({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const caminho=usePathname();
+  const paginaAdministrativa=caminho.startsWith("/admin");
   const [menuAberto, setMenuAberto] = useState(false);
   const abrirMenuRef = useRef<HTMLButtonElement>(null);
   const fecharMenuRef = useRef<HTMLButtonElement>(null);
@@ -123,14 +125,15 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
               </form>
               <div className={styles.prefeituraWrapper}>
                 <Image src="/assets/logo_prefeituraVotorantim.png" width={120} height={80} alt="Prefeitura Municipal de Votorantim" className={styles.logoPrefeitura}/>
-                <Link href="/admin/login" className={styles.acessoPrefeitura}>Acesso da Prefeitura</Link>
+
               </div>
             </div>
           </div>
         </div>
-        <nav className={styles.navegacao} aria-label="Serviços do município">
+        <div className={styles.navegacao}>
           <div className={styles.container}>
-            <div className={styles.flexNav}>
+            <div className={styles.linhaNavegacao}>
+              <nav className={styles.flexNav} aria-label="Serviços do município">
               <button ref={abrirMenuRef} type="button" className={styles.btnMenu} onClick={() => setMenuAberto(true)} aria-expanded={menuAberto} aria-controls="menu-resgate">
                 <span aria-hidden="true">🐾</span><span>Menu</span>
               </button>
@@ -140,10 +143,11 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
                 <Link href="/servicos/banco-de-racao">Banco de Ração</Link>
                 <Link href="/resgate">Perdi meu Pet</Link>
               </div>
+              </nav>
+              {!paginaAdministrativa&&<div className={styles.contaTopo}><ContaNoCabecalho/></div>}
             </div>
           </div>
-        </nav>
-        <div className={styles.container}><ContaNoCabecalho /></div>
+        </div>
       </header>
       {menuAberto && (
         <div className={styles.menuOverlay}>
@@ -158,9 +162,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
               <Link href="/ocorrencias/nova?tipo=PERDIDO" onClick={() => setMenuAberto(false)}>Registrar animal perdido</Link>
               <Link href="/ocorrencias/nova?tipo=ENCONTRADO" onClick={() => setMenuAberto(false)}>Registrar animal encontrado</Link>
               <Link href="/mapa" onClick={() => setMenuAberto(false)}>Mapa de animais</Link>
-              <Link href="/minhas-ocorrencias" onClick={() => setMenuAberto(false)}>Minhas ocorrências</Link>
-              <Link href="/mensagens" onClick={() => setMenuAberto(false)}>Minhas conversas</Link>
-              <ContaNoCabecalho compacto />
+              {!paginaAdministrativa&&<div className={styles.contaLateral}><ContaNoCabecalho compacto/></div>}
             </div>
           </aside>
         </div>
