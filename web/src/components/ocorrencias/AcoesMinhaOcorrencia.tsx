@@ -39,7 +39,7 @@ export default function AcoesMinhaOcorrencia({
   }
   return <div className="meus-controles">
     <div className="meus-controles-botoes">
-      {editavel&&<Link href={"/minhas-ocorrencias/"+id+"/editar"} className="inline-action">EDITAR DADOS</Link>}
+      {editavel&&<Link href={"/minhas-ocorrencias/"+id+"/editar"} className="inline-action">{statusAprovacao==="REJEITADO"?"CORRIGIR E REENVIAR":"EDITAR DADOS"}</Link>}
       {aberto&&<button className="inline-action" type="button" onClick={()=>{
         setAcao("ENCERRAR");setMotivo(motivoPadrao);setDetalhe("");setErro("");
       }}>MARCAR COMO RESOLVIDA</button>}
