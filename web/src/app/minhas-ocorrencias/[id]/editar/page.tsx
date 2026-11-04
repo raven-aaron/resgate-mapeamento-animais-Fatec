@@ -14,7 +14,7 @@ type Registro = RowDataPacket & {
 export const dynamic="force-dynamic";
 export default async function PaginaEditar({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
-  if(!/^[1-9]\\d{0,9}$/.test(id))notFound();
+  if(!/^[1-9]\d{0,9}$/.test(id))notFound();
   const usuario=await usuarioAtual();
   if(!usuario)redirect("/login?retorno="+encodeURIComponent("/minhas-ocorrencias/"+id+"/editar"));
   const [registros]=await banco().execute<Registro[]>(

@@ -12,14 +12,14 @@ type Linha = RowDataPacket & {
   tipo_ocorrencia: "PERDIDO" | "ENCONTRADO";
   status_aprovacao: string; status_caso: string;
 };
-const padraoId = /^[1-9]\\d{0,9}$/;
-const nomeValido = /^[\\p{L}\\p{M}\\s.'-]{0,80}$/u;
+const padraoId = /^[1-9]\d{0,9}$/;
+const nomeValido = /^[\p{L}\p{M}\s.'-]{0,80}$/u;
 
 function texto(valor: unknown, max: number) {
   return typeof valor === "string" ? valor.trim().slice(0,max) : "";
 }
 function dataValida(valor: string) {
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(valor))return false;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(valor))return false;
   const data=new Date(valor+"T12:00:00Z");
   return !Number.isNaN(data.getTime()) && data.toISOString().slice(0,10)===valor &&
     valor<=new Date().toISOString().slice(0,10);
@@ -125,7 +125,7 @@ export async function PATCH(request:Request,context:Contexto) {
       !["","SIM","NAO"].includes(microchip)||!dataValida(dataEvento)){
       await conn.rollback();return respostaErro("Revise os campos e a data da ocorrência.",400);
     }
-    if(/@|(?:\\+?\\d[\\s().-]*){10,}/.test(descricao+" "+referencia)){
+    if(/@|(?:\+?\d[\s().-]*){10,}/.test(descricao+" "+referencia)){
       await conn.rollback();return respostaErro("Não informe telefone, e-mail ou endereço residencial.",400);
     }
     let idRaca:number|null=null;
