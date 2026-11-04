@@ -1,0 +1,81 @@
+name: CI — Seed DEMO e Insomnia
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seed-demo-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  seed-demo:
+    name: Seed em MySQL isolado + consulta pública + coleção
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+      - name: Testar contrato do seed e coleção Insomnia sem Docker
+        run: node --test database/tests/seed-demo.test.mjs
+      - name: Preparar ambiente DEMO independente
+        run: |
+          cp .env.demo.example .env.demo
+          sed -i 's/^MYSQL_ROOT_PASSWORD=$/MYSQL_ROOT_PASSWORD=ci_root_demo_local_2026/' .env.demo
+          sed -i 's/^MYSQL_PASSWORD=$/MYSQL_PASSWORD=ci_app_demo_local_2026/' .env.demo
+          docker compose --env-file .env.demo -p resgate-animais-demo config --quiet
+      - name: Iniciar banco DEMO (volumes isolados)
+        run: docker compose --env-file .env.demo -p resgate-animais-demo up -d --wait --wait-timeout 180 mysql
+      - name: Aplicar migrações somente no banco DEMO
+        env:
+          RESGATE_DEMO: "1"
+        run: |
+          node database/scripts/migrar.mjs
+          node database/scripts/migrar.mjs --status
+      - name: Aplicar seed sintético e bloquear duplicação
+        env:
+          RESGATE_DEMO: "1"
+          DEMO_SEED_PASSWORD: "SenhaSomenteRunnerCI2026!"
+        run: |
+          node database/scripts/seed-demo.mjs --apply --count 40 --users 12 --chats 18 --seed 2026
+          if node database/scripts/seed-demo.mjs --apply --count 40 --users 12 --chats 18 --seed 2026; then
+            echo 'ERRO: seed aceitou banco não vazio'
+            exit 1
+          else
+            echo 'OK: reexecução protegida'
+          fi
+      - name: Iniciar aplicação DEMO na porta 3001
+        run: docker compose --env-file .env.demo -p resgate-animais-demo up -d --build web
+      - name: Confirmar dados reais via API pública
+        run: |
+          node --input-type=module -e '
+            let resposta;
+            for (let i=0;i<100;i++){
+              try { resposta=await fetch("http://127.0.0.1:3001/api/ocorrencias",{signal:AbortSignal.timeout(3000)}); if(resposta.ok)break; }catch{}
+              await new Promise(r=>setTimeout(r,1500));
+            }
+            if(!resposta?.ok)throw new Error("API DEMO não respondeu");
+            const json=await resposta.json();
+            if(!Array.isArray(json.ocorrencias)||json.ocorrencias.length<15)
+              throw new Error("Ocorrências sintéticas não apareceram no mapa: "+JSON.stringify(json).slice(0,500));
+            if(!json.ocorrencias.every(o=>o.status_aprovacao==="APROVADO"&&o.status_caso==="ABERTO"))
+              throw new Error("A API revelou registros pendentes ou encerrados");
+            console.log("OK: "+json.ocorrencias.length+" ocorrências públicas DEMO consultadas via HTTP.");
+          '
+      - name: Diagnóstico em caso de falha
+        if: failure()
+        run: docker compose --env-file .env.demo -p resgate-animais-demo logs --tail=120 mysql web
+      - name: Descartar SOMENTE os volumes DEMO do runner
+        if: always()
+        run: |
+          if test -f .env.demo; then
+            docker compose --env-file .env.demo -p resgate-animais-demo down --volumes --remove-orphans
+          fi
