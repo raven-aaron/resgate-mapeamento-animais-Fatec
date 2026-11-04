@@ -1,6 +1,6 @@
 # Dados sintéticos e Insomnia — ambiente DEMO
 
-O seed cria **registros reais em um MySQL de demonstração** (não mocks no navegador). As informações são inventadas: nomes, regiões, coordenadas, mensagens e e-mails sob `*.invalid`. As fotos ilustrativas são obtidas de uma seleção de fotografias de cães e gatos disponibilizadas no Pexels (licença Pexels) e armazenadas **somente no volume local do DEMO**. Elas não retratam animais realmente perdidos ou encontrados.
+O seed cria **registros reais em um MySQL de demonstração** (não mocks no navegador). As contas, animais, ocorrências e mensagens são inventados; **bairros e CEPs de logradouros são reais de Votorantim**, com pontos centrais aproximados de fontes cartográficas públicas. As fotos ilustrativas são obtidas de uma seleção de fotografias de cães e gatos disponibilizadas no Pexels (licença Pexels) e armazenadas **somente no volume local do DEMO**. Elas não retratam animais realmente perdidos ou encontrados.
 
 **Segurança:** o projeto principal continua em `http://localhost:3000` e `127.0.0.1:3307`. O DEMO utiliza **outro projeto Docker** (`resgate-animais-demo`), com volumes próprios, `http://localhost:3001`, MySQL em `127.0.0.1:3308` e banco `resgate_animais_demo`. Nunca execute seed na base utilizada pela equipe.
 
@@ -46,7 +46,7 @@ Remove-Item Env:RESGATE_DEMO
 
 ### Adicionar fotografias e corrigir pontos no mapa sem apagar dados
 
-O seed inicial e o mapa agora distribuem as ocorrências por **30 setores ilustrativos** em uma área mais ampla. Depois de iniciar o serviço `web`, rode este comando **uma única vez** para associar fotos às ocorrências já existentes e reorganizar os pins:
+O seed e o mapa agora distribuem as ocorrências por **15 bairros reais de Votorantim**, com um CEP de logradouro verificado por bairro e coordenadas de referência aproximadas. Depois de iniciar o serviço `web`, rode este comando **uma única vez** para associar fotos às ocorrências já existentes e reorganizar os pins:
 
 ```bash
 docker compose --env-file .env.demo -p resgate-animais-demo exec -e RESGATE_DEMO=1 web node scripts/enriquecer-demo.mjs --apply
@@ -56,11 +56,11 @@ Use `--dry-run` no lugar de `--apply` para visualizar quantos registros serão a
 
 O primeiro uso com fotos precisa de conexão com a Internet para baixar imagens de [Pexels](https://www.pexels.com/pt-br/licenca/); elas ficam em `storage/demo-seed-cache` e `storage/uploads` do contêiner DEMO, nunca no Git. Se a rede falhar, o script interrompe a operação sem alterar o banco; tente novamente. Após completar, fotos já existentes não são substituídas e reexecutar é seguro (adiciona apenas as que ainda faltarem).
 
-As fotos são **ilustrativas**, não das pessoas ou animais de Votorantim; a associação por espécie é apenas para ensaio de interface. As coordenadas são igualmente fictícias, sem endereços residenciais ou dados reais. Para localizar um animal verdadeiro, use somente dados informados e validados pelas APIs normais.
+As fotos são **ilustrativas**, não das pessoas ou animais de Votorantim; a associação por espécie é apenas para ensaio de interface. Os nomes e CEPs dos bairros são reais, mas as ocorrências são inventadas: os CEPs pertencem a logradouros de referência, **não representam o local real de nenhum animal**. Os pontos do mapa ficam próximos de referências cartográficas dos bairros, com pequeno deslocamento artificial para evitar sobreposição. Para localizar um animal verdadeiro, use somente dados informados e validados pelas APIs normais.
 
 ### O que é gerado
 
-Por padrão: 24 contas (uma administradora), 80 animais/ocorrências distribuídos por 30 setores, 35 conversas, mensagens não lidas, notificações, cores, bairros **fictícios** e histórico de moderação. Há registros aprovados e abertos, pendentes, rejeitados, ocultos e resolvidos. Datas e características variam com o `--seed` informado; a senha é aleatória, não versionada.
+Por padrão: 24 contas (uma administradora), 80 animais/ocorrências distribuídos por 15 bairros verdadeiros, 35 conversas, mensagens não lidas, notificações, cores e histórico de moderação. **Os animais e as situações são fictícios; somente os topônimos, CEPs e centros geográficos são de referência real.** Há registros aprovados e abertos, pendentes, rejeitados, ocultos e resolvidos. Datas e características variam com o `--seed` informado; a senha é aleatória, não versionada.
 
 A execução informa o resumo e as credenciais de demonstração **somente no terminal**. Guarde a senha gerada de forma privada. Os dois exemplos de e-mail são:
 
@@ -69,7 +69,36 @@ A execução informa o resumo e as credenciais de demonstração **somente no te
 
 As contas têm a mesma senha aleatória do lote, porém cada hash usa salt próprio. Nunca reaproveite uma senha real. O seed **recusa repetir a inserção** num banco que já tenha usuários/ocorrências; não oferece opção de apagar registros. Para um novo lote, use outro banco de demonstração limpo, após preservar os dados necessários.
 
-As regiões (`Região Demo 01`, etc., até `Região Demo 30`) são fictícias e apenas ilustram o mapa. Não representam bairros confirmados de Votorantim; CEP não é inventado. Para testar cadastro manual via API ou página, informe um CEP **verdadeiro** de Votorantim, validável pelos serviços externos.
+Cada bairro possui um **CEP de logradouro existente**. Não existe um único CEP universal para um bairro: ruas diferentes podem ter CEPs diferentes. O seed usa apenas um CEP verificável de referência por bairro, não um endereço exato de ocorrência. Para cadastrar um animal verdadeiro, continue utilizando exclusivamente a validação via CEP do servidor.
+
+
+### Catálogo geográfico verificável
+
+O catálogo em `web/scripts/demo-localidades.mjs` reúne 15 bairros efetivos de Votorantim, com um CEP real de logradouro por bairro e pontos de referência retirados do OpenStreetMap/Mapcarta. Por exemplo:
+
+| Bairro | CEP de referência | 
+| --- | --- |
+| Jardim Novo Mundo | 18119-016 |
+| Jardim Tatiana | 18119-153 |
+| Parque Santa Márcia | 18119-256 |
+| Parque Bela Vista | 18110-560 |
+| Jardim Icatu | 18110-210 |
+| Vossoroca | 18116-000 |
+| Parque Jataí | 18117-330 |
+| Barra Funda | 18114-350 |
+| Parque São João | 18115-750 |
+
+Fontes de CEP: [relação de bairros de Votorantim](https://cepbrasil.com/sp/votorantim), com detalhes de **cada logradouro**; coordenadas: referências no [OpenStreetMap, consultáveis via Mapcarta](https://mapcarta.com/pt/19235410). O arquivo do catálogo contém as URLs individuais das fontes para auditoria.
+
+**Atualizar um banco DEMO já existente (inclusive com fotos e conversas):** depois de fazer `git pull` e recriar o serviço `web`, execute somente:
+
+```powershell
+docker compose --env-file .env.demo -p resgate-animais-demo up -d --build web
+docker compose --env-file .env.demo -p resgate-animais-demo exec -e RESGATE_DEMO=1 web node scripts/enriquecer-demo.mjs --dry-run
+docker compose --env-file .env.demo -p resgate-animais-demo exec -e RESGATE_DEMO=1 web node scripts/enriquecer-demo.mjs --apply
+```
+
+O script reconhece apenas as ocorrências originalmente criadas pelo seed, preserva seus IDs, status, donos, conversas, notificações e fotografias e substitui as referências artificiais por bairro e CEP reais. **Não execute novamente o seed nem remova volumes.** Uma nova execução é segura: não duplica fotografias nem cria novas ocorrências.
 
 ### Parar o DEMO, preservando volumes
 
