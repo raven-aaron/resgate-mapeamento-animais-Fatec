@@ -23,7 +23,7 @@ export default function FormularioOcorrencia() {
   // O tipo vem sempre da URL; mudar apenas o querystring nao deve manter o estado anterior.
   const tipoDaUrl: Tipo = parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO";
   const [tipo,setTipo] = useState<Tipo>(tipoDaUrl);
-  useEffect(()=>{setTipo(tipoDaUrl);},[tipoDaUrl]);
+
   const [especie, setEspecie] = useState("");
   const [nome, setNome] = useState("");
   const [raca, setRaca] = useState("");

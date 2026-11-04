@@ -46,6 +46,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!menuAberto) return;
     fecharMenuRef.current?.focus();
+    const botaoAbertura=abrirMenuRef.current;
     function aoTeclar(evento: KeyboardEvent) {
       if (evento.key === "Escape") {
         evento.preventDefault();
@@ -68,7 +69,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
     document.addEventListener("keydown", aoTeclar);
     return () => {
       document.removeEventListener("keydown", aoTeclar);
-      abrirMenuRef.current?.focus();
+      botaoAbertura?.focus();
     };
   }, [menuAberto]);
 

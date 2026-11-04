@@ -10,7 +10,9 @@ export default function CaixaEntrada(){
   const [somenteNaoLidas,setSomenteNaoLidas]=useState(false);
   const [permissao,setPermissao]=useState<NotificationPermission|"indisponivel">("default");
   useEffect(()=>{
-    if(typeof window.Notification!=="undefined")setPermissao(window.Notification.permission);
+    void Promise.resolve().then(()=>{
+      if(typeof window.Notification!=="undefined")setPermissao(window.Notification.permission);
+    });
     const ctrl=new AbortController();
     async function atualizar(){
       try {
