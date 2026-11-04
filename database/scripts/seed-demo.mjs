@@ -207,14 +207,10 @@ function produzirSql(opcoes,senha) {
   }
   for(let i=0;i<opcoes.chats;i++){
     const ocorrencia = abertas[i%abertas.length];
-    let interessado = 1 + inteiro(rnd,0,opcoes.users-2);
-    if (interessado === ocorrencia.owner)
-      interessado = 1 + (interessado%(opcoes.users-1));
-    // Respeita o índice exclusivo (ocorrência, interessado): uma conversa por par.
+    // Para cada ocorrência, o próximo participante é escolhido em ciclo.
+    // Nunca gera o dono nem repete o par (ocorrência, interessado).
     const chatSlot = Math.floor(i/abertas.length);
-    interessado = 1 + ((interessado - 1 + chatSlot)%(opcoes.users-1));
-    if (interessado === ocorrencia.owner)
-      interessado = 1 + (interessado%(opcoes.users-1));
+    const interessado = 1 + ((ocorrencia.owner + chatSlot)%(opcoes.users-1));
     sql.push("INSERT INTO conversas (id_ocorrencia,id_usuario_interessado) VALUES (@demo_o"+
       ocorrencia.i+",@demo_u"+interessado+");");
     sql.push("SET @demo_chat"+i+"=LAST_INSERT_ID();");
