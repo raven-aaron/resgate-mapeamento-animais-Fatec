@@ -2,29 +2,9 @@ import "server-only";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "./db";
 
-export type Ocorrencia = {
-  id: number;
-  nome: string | null;
-  especie: string;
-  sexo: string;
-  porte: string;
-  tipo: "PERDIDO" | "ENCONTRADO";
-  bairro: string;
-  data: string;
-  descricao: string | null;
-  referencia: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  foto: string | null;
-  raca?: string | null;
-  cores?: string | null;
-  idade?: string | null;
-  microchip?: number | null;
-  autor?: string;
-  id_autor?: number;
-  status_aprovacao?: string;
-  status_caso?: string;
-};
+import type { Ocorrencia } from "./tipos";
+export type { Ocorrencia } from "./tipos";
+
 
 const colunas = [
   "SELECT o.id_ocorrencia AS id, a.nome, e.nome AS especie, a.sexo, a.porte,",

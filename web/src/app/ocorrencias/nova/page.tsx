@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { usuarioAtual } from "../../../lib/auth";
-import FormularioOcorrencia from "./FormularioOcorrencia";
+import FormularioOcorrencia from "../../../components/ocorrencias/FormularioOcorrencia";
 
 export default async function NovaOcorrenciaPage({searchParams}:{searchParams:Promise<{tipo?:string}>}) {
   const parametros=await searchParams;
