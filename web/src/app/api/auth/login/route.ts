@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ erro: "Credenciais inválidas ou acesso não autorizado." }, { status: 401 });
     }
     tentativas.delete(ip);
-    await criarSessao(Number(usuario.id));
+    await criarSessao(Number(usuario.id), body.manterConectado === true);
     return NextResponse.json({ ok: true, adminResgate: Boolean(usuario.adminResgate) });
   } catch (error) {
     console.error("Erro ao autenticar", error);

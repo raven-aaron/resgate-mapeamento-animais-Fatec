@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     const cor = texto(dados.cor, 50);
     const sexo = texto(dados.sexo, 20);
     const porte = texto(dados.porte, 20);
-    const microchip = texto(dados.microchip, 10);
+    const microchip = tipo === "PERDIDO" ? texto(dados.microchip, 10) : "";
     const idade = texto(dados.idade, 30);
     const descricao = texto(dados.descricao, 4000);
     const referencia = texto(dados.referencia, 255);

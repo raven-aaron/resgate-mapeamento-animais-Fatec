@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 type LocalizacaoConfirmada = { latitude_aproximada: number; longitude_aproximada: number };
 
 type Tipo = "PERDIDO" | "ENCONTRADO";
@@ -19,7 +19,9 @@ function hojeLocal() {
 
 export default function FormularioOcorrencia() {
   const parametros = useSearchParams();
-  const [tipo, setTipo] = useState<Tipo>(parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO");
+  const router = useRouter();
+  // O tipo vem sempre da URL; mudar apenas o querystring nao deve manter o estado anterior.
+  const tipo: Tipo = parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO";
   const [especie, setEspecie] = useState("");
   const [nome, setNome] = useState("");
   const [raca, setRaca] = useState("");
@@ -136,7 +138,7 @@ export default function FormularioOcorrencia() {
       const formulario = new FormData();
       formulario.append("confirmacao_privacidade", "confirmado");
       formulario.append("dados", JSON.stringify({
-        tipo, especie, nome, raca, sexo, porte, cor, idade, microchip, dataEvento, descricao,
+        tipo, especie, nome, raca, sexo, porte, cor, idade, microchip: tipo === "PERDIDO" ? microchip : "", dataEvento, descricao,
         cep: endereco.cep, referencia,
       }));
       fotos.forEach(foto => formulario.append("fotos", foto));
@@ -176,7 +178,7 @@ export default function FormularioOcorrencia() {
             </div>
             <label className="form-field">
               Tipo de ocorrência
-              <select value={tipo} onChange={e => { setTipo(e.target.value as Tipo); setRevisao(false); }}>
+              <select value={tipo} onChange={e => { router.replace("/ocorrencias/nova?tipo=" + e.target.value, { scroll: false }); setRevisao(false); }}>
                 <option value="PERDIDO">Pet perdido</option>
                 <option value="ENCONTRADO">Pet encontrado</option>
               </select>
@@ -202,14 +204,14 @@ export default function FormularioOcorrencia() {
               <input maxLength={30} value={idade} onChange={e => { setIdade(e.target.value); setRevisao(false); }} placeholder="Ex.: 3 anos ou 6 meses" />
             </label>
 
-            <label className="form-field">
+            {tipo === "PERDIDO" && <label className="form-field">
               Possui identificação por microchip?
               <select value={microchip} onChange={e => { setMicrochip(e.target.value); setRevisao(false); }}>
                 <option value="">Selecione</option>
                 <option value="SIM">Sim</option>
                 <option value="NAO">Não</option>
               </select>
-            </label>
+            </label>}
 
             <label className="form-field">
               Sexo

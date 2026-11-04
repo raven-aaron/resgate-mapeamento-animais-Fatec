@@ -8,6 +8,7 @@ import { banco } from "./db";
 const scrypt = promisify(scryptCallback);
 const COOKIE = "resgate_sessao";
 const HORAS = 12;
+const DIAS_LONGOS = 7;
 
 export type UsuarioSessao = { id: number; nome: string; email: string; adminResgate: boolean };
 
@@ -25,15 +26,16 @@ export async function compararSenha(senha: string, hash: string) {
   return timingSafeEqual(recebido, esperado);
 }
 
-export async function criarSessao(idUsuario: number) {
+export async function criarSessao(idUsuario: number, manterConectado = false) {
+  const duracaoSegundos = manterConectado ? DIAS_LONGOS * 24 * 3600 : HORAS * 3600;
   const token = randomBytes(32).toString("hex");
   const hashToken = createHash("sha256").update(token).digest("hex");
   await banco().execute(
-    "INSERT INTO sessoes (id_usuario, token_hash, expira_em) VALUES (?, UNHEX(?), DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 12 HOUR))",
-    [idUsuario, hashToken]
+    "INSERT INTO sessoes (id_usuario, token_hash, expira_em) VALUES (?, UNHEX(?), DATE_ADD(UTC_TIMESTAMP(3), INTERVAL ? SECOND))",
+    [idUsuario, hashToken, duracaoSegundos]
   );
   (await cookies()).set(COOKIE, token, {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: HORAS * 3600,
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: duracaoSegundos,
   });
 }
 

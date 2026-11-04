@@ -10,6 +10,7 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
   const retorno = solicitado.startsWith("/") && !solicitado.startsWith("//") && !solicitado.startsWith("/\\") && !solicitado.startsWith("/admin") ? solicitado : "/resgate";
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [manterConectado, setManterConectado] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
@@ -20,10 +21,11 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
     try {
       const resposta = await fetch("/api/auth/login", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha, admin }),
+        body: JSON.stringify({ email, senha, admin, manterConectado }),
       });
       const resultado = await resposta.json();
       if (!resposta.ok) throw new Error(resultado.erro || "Falha ao entrar.");
+      window.dispatchEvent(new Event("resgate-auth"));
       router.push(admin ? "/admin" : retorno);
       router.refresh();
     } catch (error) {
@@ -42,6 +44,8 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
           <label className="form-field">E-mail<input type="email" required autoComplete="username" maxLength={254} value={email} onChange={e => setEmail(e.target.value)}/></label>
           <label className="form-field">Senha<input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)}/></label>
         </div>
+        <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter minha conta conectada por 7 dias neste dispositivo</label>
+        <small className="login-persistencia-aviso">Em computadores compartilhados, deixe desmarcado e use Sair da conta ao terminar.</small>
         {erro && <p role="alert" className="note note-warning" style={{marginTop:18}}>{erro}</p>}
         <div className="action-row">
           <button className="action action-primary" type="submit" disabled={carregando}>{carregando ? "Autenticando..." : "ENTRAR"}</button>

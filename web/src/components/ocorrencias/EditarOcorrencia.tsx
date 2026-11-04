@@ -73,11 +73,11 @@ export default function EditarOcorrencia({dados,racas,cores}:{dados:Registro;rac
         <label className="form-field">Idade aproximada
           <input value={idade} maxLength={30} onChange={e=>setIdade(e.target.value)} placeholder="Ex.: 2 anos"/>
         </label>
-        <label className="form-field">Identificação por microchip
+        {dados.tipo==="PERDIDO"&&<label className="form-field">Identificação por microchip
           <select value={microchip} onChange={e=>setMicrochip(e.target.value)}>
             <option value="">Não informado</option><option value="SIM">Sim</option><option value="NAO">Não</option>
           </select>
-        </label>
+        </label>}
         <label className="form-field">Raça
           <select value={raca} onChange={e=>setRaca(e.target.value)} disabled={!racas.length}>
             <option value="">Não informada</option>
