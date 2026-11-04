@@ -45,7 +45,7 @@ export async function PATCH(request:Request){
       const alvoAdmin=admins.some(a=>Number(a.id_usuario)===id);
       const ativo=String(alvo.situacao)==="ATIVO";
       let sql="";
-      let valores:unknown[]=[];
+      let valores:number[]=[];
       switch(acao){
         case "SUSPENDER":
           if(!ativo||alvoAdmin)break;
