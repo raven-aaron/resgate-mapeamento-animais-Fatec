@@ -4,6 +4,7 @@ import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../lib/db";
 import { usuarioAtual } from "../../../lib/auth";
 import AdminShell from "../../../components/admin/AdminShell";
+import ControleUsuario from "../../../components/admin/ControleUsuario";
 
 export const dynamic="force-dynamic";
 type Registro=RowDataPacket&{
@@ -47,17 +48,20 @@ export default async function UsuariosAdmin({searchParams}:{
     <p><strong>{rows.length}</strong> conta(s) nesta consulta (limite de 100 por página).</p>
     <div className="tabela-usuarios-wrap">
       <table className="tabela-usuarios">
-        <thead><tr><th>Conta</th><th>Situação</th><th>Papel no resgate</th><th>Ocorrências</th><th>Cadastro</th></tr></thead>
+        <thead><tr><th>Conta</th><th>Situação</th><th>Papel no resgate</th><th>Ocorrências</th><th>Cadastro</th><th>Gerenciar</th></tr></thead>
         <tbody>{rows.map(u=><tr key={u.id}>
           <td><strong>{u.nome}</strong><small>{u.email}</small></td>
           <td>{u.situacao==="ATIVO"?"Ativa":u.situacao==="SUSPENSO"?"Suspensa":"Desativada"}</td>
           <td>{u.admin_resgate?"Administrador":"Cidadão"}</td>
           <td>{u.ocorrencias}</td>
           <td>{String(u.criada).replace("T"," ").slice(0,10).split("-").reverse().join("/")}</td>
+          <td><ControleUsuario key={u.id+"-"+u.situacao+"-"+u.admin_resgate}
+            id={u.id} email={u.email} situacao={u.situacao}
+            adminResgate={Boolean(u.admin_resgate)} proprio={u.id===usuario.id}/></td>
         </tr>)}</tbody>
       </table>
     </div>
     {!rows.length&&<p className="note">Nenhuma conta corresponde aos filtros.</p>}
-    <p className="note">As contas são compartilhadas entre os módulos. Para evitar suspensões globais e alterações indevidas de privilégios, a promoção de administradores continua pelo procedimento controlado do sistema, e esta tela é somente de consulta.</p>
+    <p className="note">As contas são compartilhadas entre os módulos: suspender um usuário interrompe o acesso a todos eles. Apenas administradores do Resgate podem executar as ações desta tela. Alterações de permissões são auditadas, revogam as sessões do usuário e impedem que um administrador altere a própria conta.</p>
   </AdminShell>;
 }
