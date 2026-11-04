@@ -21,7 +21,9 @@ export default function FormularioOcorrencia() {
   const parametros = useSearchParams();
   const router = useRouter();
   // O tipo vem sempre da URL; mudar apenas o querystring nao deve manter o estado anterior.
-  const tipo: Tipo = parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO";
+  const tipoDaUrl: Tipo = parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO";
+  const [tipo,setTipo] = useState<Tipo>(tipoDaUrl);
+  useEffect(()=>{setTipo(tipoDaUrl);},[tipoDaUrl]);
   const [especie, setEspecie] = useState("");
   const [nome, setNome] = useState("");
   const [raca, setRaca] = useState("");
@@ -164,7 +166,9 @@ export default function FormularioOcorrencia() {
         <Link href="/resgate">← Voltar para animais perdidos e encontrados</Link>
         <span className="eyebrow">Cadastro de ocorrência</span>
         <h1>{tipo === "PERDIDO" ? "REGISTRAR ANIMAL PERDIDO" : "REGISTRAR ANIMAL ENCONTRADO"}</h1>
-        <p>Preencha as informações com atenção. Após o envio, a publicação será analisada antes de aparecer no mapa.</p>
+        <p>{tipo==="PERDIDO"
+          ?"Informe os dados do seu animal desaparecido e onde foi visto pela última vez."
+          :"Informe as características do animal encontrado, mesmo que você não saiba seu nome ou tutor."} Após o envio, a publicação será analisada antes de aparecer no mapa.</p>
         <div className="etapas-cadastro" aria-label="Etapas do cadastro">
           <span><b>01</b> Animal</span><span><b>02</b> Localização</span><span><b>03</b> Fotos</span><span><b>04</b> Revisão</span>
         </div>
@@ -174,11 +178,17 @@ export default function FormularioOcorrencia() {
           <div className="form-grid cadastro-pet-grid">
             <div className="pet-form-section-title form-field-full">
               <span className="pet-form-numero">01</span>
-              <div><h2>Dados do animal</h2><p>Identifique o animal e descreva suas características principais.</p></div>
+              <div><h2>{tipo==="PERDIDO"?"Dados do animal perdido":"Dados do animal encontrado"}</h2><p>{tipo==="PERDIDO"?"Identifique seu pet para facilitar a busca.":"Descreva o pet para que o tutor possa reconhecê-lo."}</p></div>
             </div>
             <label className="form-field">
               Tipo de ocorrência
-              <select value={tipo} onChange={e => { router.replace("/ocorrencias/nova?tipo=" + e.target.value, { scroll: false }); setRevisao(false); }}>
+              <select value={tipo} onChange={e => {
+                const selecionado=e.target.value==="ENCONTRADO"?"ENCONTRADO":"PERDIDO";
+                setTipo(selecionado);
+                if(selecionado==="ENCONTRADO")setMicrochip("");
+                router.replace("/ocorrencias/nova?tipo=" + selecionado, { scroll: false });
+                setRevisao(false);
+              }}>
                 <option value="PERDIDO">Pet perdido</option>
                 <option value="ENCONTRADO">Pet encontrado</option>
               </select>
@@ -252,7 +262,7 @@ export default function FormularioOcorrencia() {
 
             <div className="pet-form-section-title form-field-full">
               <span className="pet-form-numero">02</span>
-              <div><h2>Localização e data</h2><p>O CEP identifica o bairro e define a posição aproximada do cartaz automaticamente.</p></div>
+              <div><h2>Localização e data</h2><p>{tipo==="PERDIDO"?"Informe a região do último avistamento.":"Informe a região onde você encontrou o animal."} O CEP define uma posição aproximada no mapa.</p></div>
             </div>
             <div className="form-field">
               <label htmlFor="cep">CEP da região da ocorrência</label>

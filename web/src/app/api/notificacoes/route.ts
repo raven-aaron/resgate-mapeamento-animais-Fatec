@@ -20,11 +20,17 @@ export async function GET(){
       "(SELECT COUNT(*) FROM mensagens m JOIN conversas c ON c.id_conversa=m.id_conversa "+
       "JOIN ocorrencias o ON o.id_ocorrencia=c.id_ocorrencia "+
       "WHERE (o.id_usuario_criador=? OR c.id_usuario_interessado=?) "+
-      "AND m.id_remetente<>? AND m.lida_em IS NULL) AS mensagens",
-      [usuario.id,usuario.id,usuario.id,usuario.id]
+      "AND m.id_remetente<>? AND m.lida_em IS NULL) AS mensagens,"+
+      "(SELECT COALESCE(MAX(m.id_mensagem),0) FROM mensagens m "+
+      "JOIN conversas c ON c.id_conversa=m.id_conversa "+
+      "JOIN ocorrencias o ON o.id_ocorrencia=c.id_ocorrencia "+
+      "WHERE (o.id_usuario_criador=? OR c.id_usuario_interessado=?) "+
+      "AND m.id_remetente<>? AND m.lida_em IS NULL) AS ultimaMensagemNaoLida",
+      [usuario.id,usuario.id,usuario.id,usuario.id,usuario.id,usuario.id,usuario.id]
     );
     return NextResponse.json({notificacoes:avisos,naoLidas:Number(contadores[0]?.avisos||0),
-      mensagensNaoLidas:Number(contadores[0]?.mensagens||0)},{headers:{"Cache-Control":"private, no-store"}});
+      mensagensNaoLidas:Number(contadores[0]?.mensagens||0),
+      ultimaMensagemNaoLida:Number(contadores[0]?.ultimaMensagemNaoLida||0)},{headers:{"Cache-Control":"private, no-store"}});
   }catch(error){
     console.error("Erro ao consultar notificações",error);
     return NextResponse.json({erro:"Não foi possível consultar seus avisos."},{status:500});

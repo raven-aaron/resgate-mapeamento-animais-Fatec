@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const [resultado] = await banco().execute<ResultSetHeader>(
       "INSERT INTO usuarios (nome,email,telefone,senha_hash) VALUES (?,?,?,?)", [nome, email, telefone, hash]
     );
-    await criarSessao(resultado.insertId);
+    await criarSessao(resultado.insertId, true);
     return NextResponse.json({ ok: true, nome }, { status: 201 });
   } catch (error) {
     if (typeof error === "object" && error && "code" in error && error.code === "ER_DUP_ENTRY") {

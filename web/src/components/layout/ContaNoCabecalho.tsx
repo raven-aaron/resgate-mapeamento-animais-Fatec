@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./ContaNoCabecalho.module.css";
 
 type Usuario={id:number;nome:string;email:string;adminResgate:boolean};
-type Contagem={naoLidas:number;mensagensNaoLidas:number};
+type Contagem={naoLidas:number;mensagensNaoLidas:number;ultimaMensagemNaoLida?:number};
 export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
   const router=useRouter();
   const caminho=usePathname();
@@ -16,12 +16,17 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
   const [erro,setErro]=useState("");
   const [aviso,setAviso]=useState("");
   const anterior=useRef<number|null>(null);
+  const contaAnterior=useRef<number|null>(null);
   const consultarConta=useCallback(async()=>{
     try{
       const resposta=await fetch("/api/auth/me",{cache:"no-store",credentials:"same-origin"});
       const dados=await resposta.json() as {usuario:Usuario|null};
       if(!resposta.ok)throw new Error("Não foi possível verificar a conta.");
       setUsuario(dados.usuario);
+      if(contaAnterior.current !== (dados.usuario?.id ?? null)){
+        contaAnterior.current=dados.usuario?.id ?? null;
+        anterior.current=null;
+      }
       if(!dados.usuario){setContagem({naoLidas:0,mensagensNaoLidas:0});anterior.current=null;}
       setErro("");
     }catch{
@@ -35,33 +40,42 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
       if(!resposta.ok)return;
       const dados=await resposta.json() as Contagem;
       const numero=Number(dados.mensagensNaoLidas||0);
-      // Mostrar aviso somente quando chegam novas mensagens enquanto a página está aberta.
-      if(anterior.current!==null&&numero>anterior.current){
+      const ultimoId=Number(dados.ultimaMensagemNaoLida||0);
+      // IDs crescentes detectam novas mensagens mesmo quando a contagem não muda.
+      if(anterior.current!==null&&ultimoId>anterior.current&&numero>0){
         setAviso(numero===1?"Você recebeu uma nova mensagem.":"Você tem novas mensagens.");
         if(typeof window.Notification!=="undefined" && window.Notification.permission==="granted"){
           try{new window.Notification("Nova mensagem · Resgate de Animais",{body:"Acesse suas conversas para ler a mensagem."});}catch{}
         }
       }
-      anterior.current=numero;
+      anterior.current=Math.max(anterior.current??0,ultimoId);
       setContagem({naoLidas:Number(dados.naoLidas||0),mensagensNaoLidas:numero});
     }catch{/* A interface continua funcional mesmo com falha pontual na consulta. */}
   },[]);
   useEffect(()=>{
     void Promise.resolve().then(consultarConta);
-    const aoAlterar=()=>{anterior.current=null;void consultarConta();void consultarAvisos();};
-    const aoVisivel=()=>{if(document.visibilityState==="visible"){void consultarConta();void consultarAvisos();}};
+    const aoAlterar=()=>{anterior.current=null;void consultarConta();if(!compacto)void consultarAvisos();};
+    const aoVisivel=()=>{if(document.visibilityState==="visible"){void consultarConta();if(!compacto)void consultarAvisos();}};
     window.addEventListener("resgate-auth",aoAlterar);
-    window.addEventListener("resgate-notificacoes",consultarAvisos);
+    if(!compacto)window.addEventListener("resgate-notificacoes",consultarAvisos);
     document.addEventListener("visibilitychange",aoVisivel);
-    const intervalo=setInterval(()=>{if(document.visibilityState==="visible")void consultarConta();void consultarAvisos();},15000);
+    const intervalo=setInterval(()=>{
+      if(document.visibilityState==="visible"){
+        void consultarConta();
+        if(!compacto)void consultarAvisos();
+      }
+    },10000);
     return ()=>{
       clearInterval(intervalo);
       window.removeEventListener("resgate-auth",aoAlterar);
       window.removeEventListener("resgate-notificacoes",consultarAvisos);
       document.removeEventListener("visibilitychange",aoVisivel);
     };
-  },[consultarConta,consultarAvisos]);
-  useEffect(()=>{void Promise.resolve().then(consultarConta);void Promise.resolve().then(consultarAvisos);},[caminho,consultarConta,consultarAvisos]);
+  },[compacto,consultarConta,consultarAvisos]);
+  useEffect(()=>{
+    void Promise.resolve().then(consultarConta);
+    if(!compacto)void Promise.resolve().then(consultarAvisos);
+  },[caminho,compacto,consultarConta,consultarAvisos]);
   useEffect(()=>{
     if(!aviso)return;
     const id=setTimeout(()=>setAviso(""),6500);

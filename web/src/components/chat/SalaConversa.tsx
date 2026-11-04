@@ -14,7 +14,21 @@ export default function SalaConversa({id}:{id:number}){
     const resposta=await fetch("/api/conversas/"+id+"/mensagens",{signal,cache:"no-store"});
     const corpo=await resposta.json() as Dados & {erro?:string};
     if(!resposta.ok)throw new Error(corpo.erro||"Erro na conversa.");
-    if(!signal?.aborted){setDados(corpo);window.dispatchEvent(new Event("resgate-notificacoes"));}
+    if(!signal?.aborted){
+      setDados(corpo);
+      // Não consumir mensagens de uma aba em segundo plano.
+      if(document.visibilityState==="visible"&&document.hasFocus()){
+        const ultimaExibida=corpo.mensagens.at(-1)?.id;
+        if(ultimaExibida){
+          const leitura=await fetch("/api/conversas/"+id+"/mensagens",{
+            method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ateId:ultimaExibida}),
+          });
+          if(!leitura.ok)throw new Error("Não foi possível confirmar a leitura das mensagens.");
+        }
+        window.dispatchEvent(new Event("resgate-notificacoes"));
+      }
+    }
   },[id]);
   useEffect(()=>{
     const controlador=new AbortController();
@@ -23,8 +37,17 @@ export default function SalaConversa({id}:{id:number}){
       catch(e){if(!controlador.signal.aborted)setErro(e instanceof Error?e.message:"Falha ao carregar");}
     }
     void sincronizar();
-    const intervalo=setInterval(()=>{void sincronizar();},5000);
-    return ()=>{clearInterval(intervalo);controlador.abort();};
+    const intervalo=setInterval(()=>{
+      if(document.visibilityState==="visible"&&document.hasFocus())void sincronizar();
+    },5000);
+    const aoRetomar=()=>{if(document.visibilityState==="visible"&&document.hasFocus())void sincronizar();};
+    document.addEventListener("visibilitychange",aoRetomar);
+    window.addEventListener("focus",aoRetomar);
+    return ()=>{
+      clearInterval(intervalo);controlador.abort();
+      document.removeEventListener("visibilitychange",aoRetomar);
+      window.removeEventListener("focus",aoRetomar);
+    };
   },[buscar]);
   async function enviar(e:FormEvent<HTMLFormElement>){
     e.preventDefault();

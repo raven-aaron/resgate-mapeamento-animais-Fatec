@@ -7,8 +7,10 @@ export default function CaixaEntrada(){
   const [conversas,setConversas]=useState<Conversa[]>([]);
   const [erro,setErro]=useState("");
   const [carregando,setCarregando]=useState(true);
+  const [somenteNaoLidas,setSomenteNaoLidas]=useState(false);
   const [permissao,setPermissao]=useState<NotificationPermission|"indisponivel">("default");
   useEffect(()=>{
+    if(typeof window.Notification!=="undefined")setPermissao(window.Notification.permission);
     const ctrl=new AbortController();
     async function atualizar(){
       try {
@@ -38,18 +40,26 @@ export default function CaixaEntrada(){
       <Link href="/notificacoes" className="action action-secondary">NOTIFICAÇÕES</Link>
     </div>
     <p className="note">As conversas atualizam automaticamente. Os avisos do navegador funcionam com a página aberta, mediante sua autorização.</p>
+    <div className="action-row" style={{marginBottom:12}}>
+      <button type="button" className="action action-secondary" aria-pressed={!somenteNaoLidas}
+        onClick={()=>setSomenteNaoLidas(false)}>Todas as conversas</button>
+      <button type="button" className="action action-secondary" aria-pressed={somenteNaoLidas}
+        onClick={()=>setSomenteNaoLidas(true)}>Não lidas ({conversas.filter(c=>Number(c.naoLidas)>0).length})</button>
+    </div>
     {permissao==="denied"&&<p className="note note-warning">O navegador bloqueou notificações. Altere a permissão nas configurações do site.</p>}
     {permissao==="indisponivel"&&<p className="note note-warning">Seu navegador não oferece avisos do sistema neste ambiente.</p>}
     {carregando&&<p>Carregando conversas...</p>}
     {erro&&<p className="note note-warning" role="alert">{erro}</p>}
     <div className={styles.lista}>
-      {conversas.map(c=><Link href={"/mensagens/"+c.id} key={c.id} className={styles.item}>
+      {conversas.filter(c=>!somenteNaoLidas||Number(c.naoLidas)>0).map(c=><Link href={"/mensagens/"+c.id} key={c.id} className={styles.item}>
         <span className={styles.icone}>🐾</span>
         <span><strong>{c.animal||c.especie} · {c.tipo==="PERDIDO"?"Perdido":"Encontrado"}</strong><small>Conversando com {c.interlocutor}</small><small>{c.ultimaMensagem||"Conversa iniciada. Envie uma mensagem para começar."}</small></span>
         <span className={styles.abrir}>{Number(c.naoLidas)>0?<span className={styles.naoLidas} aria-label={c.naoLidas+" mensagens não lidas"}>{c.naoLidas}</span>:""} Abrir →</span>
       </Link>)}
     </div>
     {!carregando&&!erro&&!conversas.length&&<p className="note">Não há conversas. Para iniciar uma, abra um cartaz público e clique em <strong>Entrar em contato pelo chat</strong>.</p>}
+    {!carregando&&!erro&&somenteNaoLidas&&conversas.length>0&&!conversas.some(c=>Number(c.naoLidas)>0)&&
+      <p className="note">Todas as suas mensagens foram lidas.</p>}
     <div className="action-row"><Link className="action action-secondary" href="/mapa">Ver animais no mapa</Link></div>
   </main>;
 }

@@ -8,7 +8,7 @@ import { banco } from "./db";
 const scrypt = promisify(scryptCallback);
 const COOKIE = "resgate_sessao";
 const HORAS = 12;
-const DIAS_LONGOS = 7;
+const DIAS_LONGOS = 30;
 
 export type UsuarioSessao = { id: number; nome: string; email: string; adminResgate: boolean };
 
@@ -26,7 +26,7 @@ export async function compararSenha(senha: string, hash: string) {
   return timingSafeEqual(recebido, esperado);
 }
 
-export async function criarSessao(idUsuario: number, manterConectado = false) {
+export async function criarSessao(idUsuario: number, manterConectado = true) {
   const duracaoSegundos = manterConectado ? DIAS_LONGOS * 24 * 3600 : HORAS * 3600;
   const token = randomBytes(32).toString("hex");
   const hashToken = createHash("sha256").update(token).digest("hex");

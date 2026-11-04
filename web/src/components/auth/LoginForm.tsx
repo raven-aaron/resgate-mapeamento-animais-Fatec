@@ -10,7 +10,7 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
   const retorno = solicitado.startsWith("/") && !solicitado.startsWith("//") && !solicitado.startsWith("/\\") && !solicitado.startsWith("/admin") ? solicitado : "/resgate";
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [manterConectado, setManterConectado] = useState(false);
+  const [manterConectado, setManterConectado] = useState(true);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
@@ -20,11 +20,15 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
     setErro("");
     try {
       const resposta = await fetch("/api/auth/login", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha, admin, manterConectado }),
       });
       const resultado = await resposta.json();
       if (!resposta.ok) throw new Error(resultado.erro || "Falha ao entrar.");
+      // Confirma que o navegador recebeu o cookie antes de acessar páginas protegidas.
+      const sessao = await fetch("/api/auth/me", { cache: "no-store", credentials: "same-origin" });
+      const atual = await sessao.json() as { usuario?: { id: number } | null };
+      if (!sessao.ok || !atual.usuario) throw new Error("Não foi possível confirmar a sessão. Confira se os cookies estão habilitados.");
       window.dispatchEvent(new Event("resgate-auth"));
       router.push(admin ? "/admin" : retorno);
       router.refresh();
@@ -44,7 +48,7 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
           <label className="form-field">E-mail<input type="email" required autoComplete="username" maxLength={254} value={email} onChange={e => setEmail(e.target.value)}/></label>
           <label className="form-field">Senha<input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)}/></label>
         </div>
-        <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter minha conta conectada por 7 dias neste dispositivo</label>
+        <label className="form-field login-persistencia"><input type="checkbox" checked={manterConectado} onChange={e=>setManterConectado(e.target.checked)} /> Manter minha conta conectada por 30 dias neste dispositivo</label>
         <small className="login-persistencia-aviso">Em computadores compartilhados, deixe desmarcado e use Sair da conta ao terminar.</small>
         {erro && <p role="alert" className="note note-warning" style={{marginTop:18}}>{erro}</p>}
         <div className="action-row">

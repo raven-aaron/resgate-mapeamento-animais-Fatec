@@ -29,15 +29,6 @@ export async function GET(_request:Request,contexto:Contexto){
   try {
     const conversa=await acessoConversa(Number(valor),usuario.id);
     if(!conversa)return NextResponse.json({erro:"Conversa não encontrada."},{status:404});
-    // A leitura da conversa marca como lidas apenas as mensagens recebidas.
-    await banco().execute(
-      "UPDATE mensagens SET lida_em=UTC_TIMESTAMP(3) WHERE id_conversa=? AND id_remetente<>? AND lida_em IS NULL",
-      [Number(valor),usuario.id]
-    );
-    await banco().execute(
-      "UPDATE notificacoes SET lida_em=UTC_TIMESTAMP(3) WHERE id_conversa=? AND id_usuario=? AND tipo='NOVA_MENSAGEM' AND lida_em IS NULL",
-      [Number(valor),usuario.id]
-    );
     const [rows]=await banco().execute<RowDataPacket[]>(
       "SELECT m.id_mensagem AS id,m.conteudo,m.enviado_em AS data,m.id_remetente AS remetente,u.nome AS autor "+
       "FROM mensagens m JOIN usuarios u ON u.id_usuario=m.id_remetente "+
@@ -51,6 +42,41 @@ export async function GET(_request:Request,contexto:Contexto){
       situacao:conversa.situacao,podeEnviar:conversa.situacao==="ATIVA"&&conversa.status_aprovacao==="APROVADO"&&conversa.status_caso==="ABERTO"&&!conversa.excluido_em
     },mensagens:rows.reverse(),meuId:usuario.id},{headers:{"Cache-Control":"no-store"}});
   }catch(error){console.error("Erro na consulta de mensagens",error);return NextResponse.json({erro:"Falha ao consultar mensagens."},{status:500});}
+}
+// GET apenas consulta; o cliente confirma explicitamente a leitura quando o chat está visível.
+export async function PATCH(request:Request,contexto:Contexto){
+  if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem inválida."},{status:403});
+  const usuario=await usuarioAtual();
+  if(!usuario)return NextResponse.json({erro:"Sessão necessária."},{status:401});
+  const {id:valor}=await contexto.params;
+  if(!/^[1-9]\\d{0,9}$/.test(valor))return NextResponse.json({erro:"Conversa inválida."},{status:400});
+  try{
+    const dados=await request.json() as {ateId?:unknown};
+    const ateId=Number(dados?.ateId);
+    if(!Number.isSafeInteger(ateId)||ateId<1)return NextResponse.json({erro:"Mensagem inválida."},{status:400});
+    const id=Number(valor);
+    const conversa=await acessoConversa(id,usuario.id);
+    if(!conversa)return NextResponse.json({erro:"Conversa não encontrada."},{status:404});
+    const conn=await banco().getConnection();
+    try{
+      await conn.beginTransaction();
+      await conn.execute(
+        "UPDATE mensagens SET lida_em=UTC_TIMESTAMP(3) WHERE id_conversa=? AND id_remetente<>? AND id_mensagem<=? AND lida_em IS NULL",
+        [id,usuario.id,ateId]
+      );
+      // Só confirma avisos até a mensagem recebida já exibida ao usuário.
+      await conn.execute(
+        "UPDATE notificacoes SET lida_em=UTC_TIMESTAMP(3) WHERE id_conversa=? AND id_usuario=? AND tipo='NOVA_MENSAGEM' "+
+        "AND lida_em IS NULL AND criado_em <= DATE_ADD((SELECT MAX(enviado_em) FROM mensagens "+
+        "WHERE id_conversa=? AND id_remetente<>? AND id_mensagem<=?), INTERVAL 1 SECOND)",
+        [id,usuario.id,id,usuario.id,ateId]
+      );
+      await conn.commit();
+      return NextResponse.json({ok:true},{headers:{"Cache-Control":"no-store"}});
+    }catch(error){
+      await conn.rollback().catch(()=>undefined);throw error;
+    }finally{conn.release();}
+  }catch(error){console.error("Falha ao confirmar leitura",error);return NextResponse.json({erro:"Não foi possível marcar como lida."},{status:500});}
 }
 export async function POST(request:Request,contexto:Contexto){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem inválida."},{status:403});
