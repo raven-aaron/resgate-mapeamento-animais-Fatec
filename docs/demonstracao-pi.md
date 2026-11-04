@@ -2,12 +2,12 @@
 
 ## Referência para demonstração em 11/11/2026
 
-Confira também [o roteiro de validação ponta a ponta](./roteiro-validacao-11-11.md), incluindo edição, exclusão lógica e encerramento pelo autor.
+Confira também [o roteiro de validação ponta a ponta](./roteiro-validacao-11-11.md), incluindo acesso administrativo isolado, edição, exclusão lógica e encerramento.
 
 ## Ambiente local
 
-1. Abra a pasta do repositório e mantenha a branch `feat/banco-resgate-modulos`.
-2. Execute `git pull origin feat/banco-resgate-modulos`.
+1. Abra a pasta do repositório na versão consolidada da `main` (ou na branch do PR de estabilização, enquanto ele estiver aberto).
+2. Execute `git pull --ff-only` na branch escolhida, com a árvore de trabalho limpa.
 3. Com o Docker Desktop em execução e `.env` configurado, execute `docker compose up -d mysql` e confirme que está **healthy**.
 4. Execute `node database/scripts/migrar.mjs` para aplicar somente as migrações pendentes.
 5. Execute `docker compose up -d --build web`.
@@ -51,8 +51,8 @@ As rotas `/recuperar-senha` e `/redefinir-senha` usam token de uso único (SHA-2
 - Funcionalidades implementadas no código: login cidadão/ADM, criação de conta, envio de ocorrência pendente com fotos, moderação, prévia de cartaz pendente, consulta pública mapa/cards, cartaz completo, chat privado e indicadores.
 - A CI valida migrações, lint, TypeScript e build. **O funcionamento ponta a ponta em navegador + Docker + dois usuários deve ser verificado manualmente**, não presumido a partir da CI.
 - Implementado na branch: edição de dados pelo autor (volta para moderação), encerramento/resolução com motivo, exclusão lógica e registro de histórico. **É obrigatório validar esses fluxos no navegador com dois usuários e um ADM; CI isolada não prova o fluxo ponta a ponta.**
-- Implementados na branch (validar no navegador): notificações no aplicativo, marcação de mensagens lidas, edição de fotos, correção de CEP com nova moderação, motivo de rejeição ao cidadão, busca por bairro/nome/data, lista de contas administrativa somente para consulta e melhorias de acessibilidade.
-- Pendente: alterações globais de status/permissões de contas (dependem de autorização central), recuperação de senha sem provedor de e-mail, integração do Banco de Ração, hospedagem pública segura e testes automatizados de ponta a ponta.
+- Implementados no código (validar no navegador): notificações internas, leitura de mensagens, edição de fotos, correção de CEP com nova moderação, justificativa de rejeição, busca/filtros e gerenciamento **somente das permissões do Resgate**.
+- Pendente: gestão **global** do status de contas (depende de administrador central), envio de recuperação de senha sem provedor configurado, integração do Banco de Ração e hospedagem pública segura. A CI possui testes HTTP com MySQL isolado; testes completos em navegadores diferentes ainda exigem ensaio manual.
 - A localização dos **novos** cadastros é definida no backend: CEP validado por ViaCEP, bairro e posição regional (aproximadamente 1 km de generalização) obtida via Nominatim ou BrasilAPI CEP v2; o visitante não escolhe coordenadas. CEPs sem localização verificável são recusados, não posicionados em qualquer ponto. Isso evita desvios arbitrários, mas **não comprova a veracidade do CEP informado**: a moderação continua necessária.
 - Ocorrências criadas em versões antigas mantêm suas coordenadas anteriores; não há reescrita destrutiva automática do histórico.
 - Posicionamento geográfico ainda usa limites provisórios, não o polígono oficial de Votorantim. ViaCEP, Nominatim, BrasilAPI e os tiles do OpenStreetMap dependem de internet. A biblioteca Leaflet (JS/CSS) agora é empacotada localmente, sem depender do CDN unpkg.

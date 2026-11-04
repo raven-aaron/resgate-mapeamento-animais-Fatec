@@ -3,7 +3,7 @@
 Demonstrar o fluxo completo, real e persistente do módulo de resgate animal: cidadão cria uma ocorrência; a equipe administrativa analisa; o público consulta; outro cidadão conversa com o autor; o autor atualiza ou encerra a ocorrência. Nenhum dado de demonstração é fingido na interface.
 
 ## Preparação (executar no computador usado na apresentação)
-1. `git switch feat/banco-resgate-modulos` e `git pull origin feat/banco-resgate-modulos`.
+1. Use a `main` consolidada após o merge do PR de estabilização; enquanto aberto, use `chore/estabilizacao-entrega-20261104`. Execute `git pull --ff-only`.
 2. Conferir o `.env` local sem expor credenciais. **Nunca enviar o `.env` ao GitHub.**
 3. Com Docker Desktop aberto: `docker compose up -d --build`, `node database/scripts/migrar.mjs`, `node database/scripts/migrar.mjs --status`.
 4. Se o volume npm estiver desatualizado: `docker compose run --rm --no-deps web npm ci` e `docker compose restart web`.
@@ -58,20 +58,20 @@ Todos os itens 1–14 funcionando em um único ambiente de apresentação, com b
 ## Novos testes obrigatórios (atualização de 04/11)
 - **Tipo correto na URL**: alterar entre `/ocorrencias/nova?tipo=PERDIDO` e `?tipo=ENCONTRADO` sem fechar a página. O título e a opção selecionada precisam acompanhar a URL.
 - **Microchip**: opção exibida somente para animal perdido; caso encontrado deve persistir `NULL` (desconhecido), nunca um valor presumido.
-- **Sessão**: após login, o nome e os links da conta aparecem no cabeçalho. Atualizar a página mantém a sessão. A opção "Manter conectado por 7 dias" deve continuar válida após reabrir o navegador (no mesmo dispositivo), salvo expiração/revogação. "Sair da conta" revoga a sessão e bloqueia acesso a rotas protegidas. **Desmarcar a opção em computadores da faculdade** e sair ao terminar.
+- **Sessão**: ao entrar, o nome aparece no cabeçalho. Atualizar a página mantém a sessão. A opção "Manter conectado" conserva o login cidadão por até **30 dias** no mesmo dispositivo; desmarcada, usa cookie de navegador e prazo máximo de 12 horas no banco. "Sair" revoga o token. Na faculdade, desmarque e encerre o acesso. O login ADM tem cookie próprio de sessão e nunca usa persistência de 30 dias.
 - **Notificações**: em duas contas separadas, enviar mensagem de B para A. O cabeçalho de A aumenta o contador e mostra aviso, a caixa de entrada destaca a conversa. A sala marca mensagens recebidas como lidas. O painel `/notificacoes` mostra histórico e permite marcar avisos como lidos. A aprovação/rejeição do ADM também gera aviso para o autor.
 - **Notificações do navegador**: na caixa de entrada, autorizar explicitamente e verificar alerta quando chegar nova mensagem com o site aberto. Não confundir com push fora do site/sem browser: não há service worker de push de produção.
 - **Editar fotos**: o próprio autor deve adicionar/remover fotos (máximo cinco), voltar para moderação e ver a foto publicada depois de aprovada. Usuário B não pode alterar as fotos de A.
 - **Corrigir CEP**: autor corrige CEP, consulta servidor e salva. Verificar novo bairro e ponto aproximado após nova aprovação; CEP de outro município é rejeitado.
 - **Justificativa de rejeição**: ADM rejeita com motivo. Autor visualiza em `/minhas-ocorrencias`, usa "Corrigir e reenviar"; ADM recebe nova pendência.
 - **Busca e filtros**: procurar nome, bairro, período, tipo, sexo/porte em mapa e cards; conferir resultados administrativos.
-- **Consulta de contas**: ADM autorizado acessa `/admin/usuarios`; usuário comum não acessa. Essa tela não suspende contas nem promove administradores globalmente.
+- **Consulta de contas**: ADM do Resgate acessa `/admin/usuarios`; cidadão não acessa. É possível gerenciar **somente a permissão administrativa do Resgate**, mantendo pelo menos um administrador ativo. Suspender/reativar conta global é bloqueado pela API e não aparece na interface.
 - **Backup local**: `node database/scripts/backup-local.mjs` (teste com dados fictícios e em local seguro). Verificar presença do dump e pasta de fotos. **Não restaurar sobre os volumes existentes**.
 - **Acessibilidade**: navegar por Tab e Shift+Tab no menu, testar Esc para fechar e o link "Pular para o conteúdo principal".
 
 ## Funcionalidades que ainda não devem ser anunciadas como prontas
 - Hospedagem pública em produção, HTTPS/segredos externos, monitoramento e backup externo recorrente.
 - Recuperação de senha por e-mail sem configurar remetente verificado e credencial do provedor.
-- Alteração de status global/elevação de privilégios de usuários por administradores do módulo Resgate (regra central do portal ainda não definida).
+- Suspensão e reativação globais de usuários por administradores do módulo Resgate (dependem de uma política central do portal).
 - Banco de Ração e outros módulos dos grupos parceiros sem definição e implementação compartilhada.
-- Testes automatizados ponta a ponta usando contêineres reais, navegadores e várias contas. As pipelines de build e integridade SQL não substituem os testes deste roteiro.
+- Automação completa de navegador e acessibilidade ainda não existe. A pipeline de integração HTTP já verifica sessões, moderação, chat e leitura em MySQL/Next.js descartáveis, mas não substitui o ensaio manual.

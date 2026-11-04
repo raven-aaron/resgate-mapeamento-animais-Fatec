@@ -99,10 +99,6 @@ Remove-Item Env:BANCO_TESTE
 Testes SQL não comprovam autorização da API: antes de publicar, testar acesso de
 usuário anônimo, dono, terceiro e administrador de cada módulo nas rotas reais.
 
-## Limites desta entrega
+## Situação atual (04/11/2026)
 
-Entregue: estrutura SQL, catálogos básicos, migrações versionadas, testes e
-contratos. Ainda não entregue: API/driver do Next.js, autenticação funcional,
-envio de recuperação por e-mail, upload de fotos, telas, hospedagem, lista oficial
-de bairros e regras de negócio de ração. A estrutura está preparada para essas
-etapas; tabelas sozinhas não implementam os fluxos.
+As APIs de Next.js, login, CRUD, fotos, moderação e chat **já estão implementados** em `web/`. Este documento é centrado no banco e nas migrações. A CI inclui testes SQL, testes HTTP reais em MySQL isolado e teste de restauração de backup. A publicação pública, a lista geográfica oficial de bairros, o Banco de Ração e o envio de recuperação de senha sem configurar provedor permanecem fora da entrega local. Não modifique migrações aplicadas; acrescente novas versões.
