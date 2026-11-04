@@ -8,10 +8,11 @@ Confira também [o roteiro de validação ponta a ponta](./roteiro-validacao-11-
 
 1. Abra a pasta do repositório e mantenha a branch `feat/banco-resgate-modulos`.
 2. Execute `git pull origin feat/banco-resgate-modulos`.
-3. Execute `node database/scripts/migrar.mjs` para aplicar somente migrações pendentes.
-4. Execute `docker compose up -d --build web`.
-5. **Ao atualizar dependências do projeto**, o volume `web_node_modules` existente precisa receber os novos pacotes: execute `docker compose run --rm --no-deps web npm ci` (especialmente após a instalação do Leaflet).
-6. Execute `docker compose restart web` e `docker compose ps`. Confira `docker compose logs --tail=40 web` se necessário.
+3. Com o Docker Desktop em execução e `.env` configurado, execute `docker compose up -d mysql` e confirme que está **healthy**.
+4. Execute `node database/scripts/migrar.mjs` para aplicar somente as migrações pendentes.
+5. Execute `docker compose up -d --build web`.
+6. **Ao atualizar dependências do projeto**, o volume `web_node_modules` existente precisa receber os novos pacotes: `docker compose run --rm --no-deps web npm ci`.
+7. Execute `docker compose restart web` e `docker compose ps`. Confira `docker compose logs --tail=40 web` (Next.js **Ready**).
 
 **Não execute `docker compose down -v`: isso apagaria o volume do MySQL.**
 
