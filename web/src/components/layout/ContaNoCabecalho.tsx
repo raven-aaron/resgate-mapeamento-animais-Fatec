@@ -44,7 +44,8 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
       // IDs crescentes detectam novas mensagens mesmo quando a contagem não muda.
       if(anterior.current!==null&&ultimoId>anterior.current&&numero>0){
         setAviso(numero===1?"Você recebeu uma nova mensagem.":"Você tem novas mensagens.");
-        if(typeof window.Notification!=="undefined" && window.Notification.permission==="granted"){
+        if(typeof window.Notification!=="undefined" && window.Notification.permission==="granted" &&
+          (document.visibilityState!=="visible" || !document.hasFocus())){
           try{new window.Notification("Nova mensagem · Resgate de Animais",{body:"Acesse suas conversas para ler a mensagem."});}catch{}
         }
       }
@@ -60,10 +61,9 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
     if(!compacto)window.addEventListener("resgate-notificacoes",consultarAvisos);
     document.addEventListener("visibilitychange",aoVisivel);
     const intervalo=setInterval(()=>{
-      if(document.visibilityState==="visible"){
-        void consultarConta();
-        if(!compacto)void consultarAvisos();
-      }
+      if(document.visibilityState==="visible")void consultarConta();
+      // Um aviso pode chegar mesmo com a aba em segundo plano (enquanto aberta).
+      if(!compacto)void consultarAvisos();
     },10000);
     return ()=>{
       clearInterval(intervalo);
@@ -97,6 +97,7 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
   if(carregando)return <nav className={styles.area} aria-label="Sua conta"><span className={styles.nome}>Verificando sua conta...</span></nav>;
   return <nav className={styles.area+(compacto?" "+styles.compacta:"")} aria-label="Sua conta e mensagens">
     {usuario?<><span className={styles.nome} title={usuario.email}>Olá, {usuario.nome.split(" ")[0]}</span>
+      <Link className={styles.link} href="/minha-conta">Minha conta</Link>
       <Link className={styles.link} href="/minhas-ocorrencias">Minhas ocorrências</Link>
       <Link className={styles.link} href="/mensagens">Conversas {contagem.mensagensNaoLidas>0&&
         <span className={styles.contador} aria-label={contagem.mensagensNaoLidas+" mensagens não lidas"}>{contagem.mensagensNaoLidas>99?"99+":contagem.mensagensNaoLidas}</span>}</Link>

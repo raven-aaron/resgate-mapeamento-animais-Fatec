@@ -28,13 +28,20 @@ export async function compararSenha(senha: string, hash: string) {
 
 export async function criarSessao(idUsuario: number, manterConectado = true) {
   const duracaoSegundos = manterConectado ? DIAS_LONGOS * 24 * 3600 : HORAS * 3600;
+  const jar = await cookies();
+  const tokenAnterior = jar.get(COOKIE)?.value;
   const token = randomBytes(32).toString("hex");
   const hashToken = createHash("sha256").update(token).digest("hex");
   await banco().execute(
     "INSERT INTO sessoes (id_usuario, token_hash, expira_em) VALUES (?, UNHEX(?), DATE_ADD(UTC_TIMESTAMP(3), INTERVAL ? SECOND))",
     [idUsuario, hashToken, duracaoSegundos]
   );
-  (await cookies()).set(COOKIE, token, {
+  // Impede que uma troca de conta mantenha uma sessão antiga válida no servidor.
+  if(tokenAnterior && /^[a-f0-9]{64}$/.test(tokenAnterior)){
+    const hashAnterior=createHash("sha256").update(tokenAnterior).digest("hex");
+    await banco().execute("UPDATE sessoes SET revogada_em=UTC_TIMESTAMP(3) WHERE token_hash=UNHEX(?) AND revogada_em IS NULL",[hashAnterior]);
+  }
+  jar.set(COOKIE, token, {
     httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: duracaoSegundos,
   });
 }

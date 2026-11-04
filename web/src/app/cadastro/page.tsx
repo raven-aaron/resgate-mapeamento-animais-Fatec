@@ -27,6 +27,7 @@ function CadastroFormulario() {
       });
       const dados = await resposta.json();
       if (!resposta.ok) throw new Error(dados.erro || "Erro no cadastro.");
+      window.dispatchEvent(new Event("resgate-auth"));
       router.push(retorno);
       router.refresh();
     } catch (e) { setErro(e instanceof Error ? e.message : "Erro ao criar conta."); }
