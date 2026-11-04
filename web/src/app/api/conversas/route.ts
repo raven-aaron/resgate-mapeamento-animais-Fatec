@@ -15,13 +15,14 @@ export async function GET() {
       "a.nome AS animal,e.nome AS especie,"+
       "IF(c.id_usuario_interessado=?,dono.nome,interessado.nome) AS interlocutor,"+
       "(SELECT m.conteudo FROM mensagens m WHERE m.id_conversa=c.id_conversa ORDER BY m.id_mensagem DESC LIMIT 1) AS ultimaMensagem,"+
-      "(SELECT m.enviado_em FROM mensagens m WHERE m.id_conversa=c.id_conversa ORDER BY m.id_mensagem DESC LIMIT 1) AS ultimaData "+
+      "(SELECT m.enviado_em FROM mensagens m WHERE m.id_conversa=c.id_conversa ORDER BY m.id_mensagem DESC LIMIT 1) AS ultimaData,"+
+      "(SELECT COUNT(*) FROM mensagens m WHERE m.id_conversa=c.id_conversa AND m.id_remetente<>? AND m.lida_em IS NULL) AS naoLidas "+
       "FROM conversas c JOIN ocorrencias o ON o.id_ocorrencia=c.id_ocorrencia "+
       "JOIN animais a ON a.id_animal=o.id_animal JOIN especies e ON e.id_especie=a.id_especie "+
       "JOIN usuarios dono ON dono.id_usuario=o.id_usuario_criador "+
       "JOIN usuarios interessado ON interessado.id_usuario=c.id_usuario_interessado "+
       "WHERE (c.id_usuario_interessado=? OR o.id_usuario_criador=?) AND o.excluido_em IS NULL "+
-      "ORDER BY c.atualizado_em DESC LIMIT 100",[usuario.id,usuario.id,usuario.id]
+      "ORDER BY c.atualizado_em DESC LIMIT 100",[usuario.id,usuario.id,usuario.id,usuario.id]
     );
     return NextResponse.json({conversas:rows},{headers:{"Cache-Control":"no-store"}});
   } catch(error){console.error("Erro de listagem de conversas",error);return NextResponse.json({erro:"Não foi possível carregar conversas."},{status:500});}

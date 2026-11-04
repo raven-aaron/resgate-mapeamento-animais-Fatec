@@ -14,7 +14,7 @@ export default function SalaConversa({id}:{id:number}){
     const resposta=await fetch("/api/conversas/"+id+"/mensagens",{signal,cache:"no-store"});
     const corpo=await resposta.json() as Dados & {erro?:string};
     if(!resposta.ok)throw new Error(corpo.erro||"Erro na conversa.");
-    if(!signal?.aborted)setDados(corpo);
+    if(!signal?.aborted){setDados(corpo);window.dispatchEvent(new Event("resgate-notificacoes"));}
   },[id]);
   useEffect(()=>{
     const controlador=new AbortController();

@@ -37,7 +37,7 @@ export async function PATCH(request: Request) {
     conn = await banco().getConnection();
     await conn.beginTransaction();
     const [rows] = await conn.execute<RowDataPacket[]>(
-      "SELECT status_aprovacao, status_caso FROM ocorrencias WHERE id_ocorrencia=? AND excluido_em IS NULL FOR UPDATE", [id]
+      "SELECT status_aprovacao, status_caso, id_usuario_criador FROM ocorrencias WHERE id_ocorrencia=? AND excluido_em IS NULL FOR UPDATE", [id]
     );
     const anterior = rows[0];
     if (!anterior) {
@@ -61,6 +61,17 @@ export async function PATCH(request: Request) {
     await conn.execute(
       "INSERT INTO auditoria (id_usuario_responsavel,modulo,acao,entidade,id_registro,detalhe) VALUES (?,'RESGATE',?,'ocorrencias',?,?)",
       [usuario.id,historia,id,motivo || null]
+    );
+    await conn.execute(
+      "INSERT INTO notificacoes (id_usuario,modulo,tipo,id_ocorrencia,texto) "+
+      "VALUES (?,'RESGATE',?,?,?)",
+      [Number(anterior.id_usuario_criador),
+        acao==="APROVAR"?"OCORRENCIA_APROVADA":acao==="REJEITAR"?"OCORRENCIA_REJEITADA":"OCORRENCIA_OCULTA",
+        id,
+        acao==="APROVAR"?"Sua ocorrência foi aprovada e está no mapa.":
+        acao==="REJEITAR"?"Sua ocorrência foi rejeitada. Veja o motivo em Minhas ocorrências.":
+        "Sua ocorrência foi ocultada pela administração."
+      ]
     );
     await conn.commit();
     return NextResponse.json({ ok: true, status: estados[acao] });

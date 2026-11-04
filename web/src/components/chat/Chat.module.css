@@ -25,3 +25,6 @@
 .compor textarea{width:100%;resize:vertical;padding:12px;border:1px solid #91aaa3;border-radius:8px;background:var(--card);color:var(--cor-escuro);}
 .compor button{align-self:flex-end;}
 @media(max-width:590px){.pagina{margin-top:22px;}.item{padding:13px;gap:10px;}.icone{width:40px;height:40px;font-size:19px;}.abrir{font-size:12px;}.minha,.outra{max-width:94%;}}
+
+.naoLidas{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:#176b59;color:white;font-size:12px;font-weight:800;}
+.item:focus-visible{outline:3px solid #166957;outline-offset:3px;}

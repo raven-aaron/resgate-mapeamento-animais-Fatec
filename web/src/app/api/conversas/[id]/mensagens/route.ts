@@ -29,6 +29,15 @@ export async function GET(_request:Request,contexto:Contexto){
   try {
     const conversa=await acessoConversa(Number(valor),usuario.id);
     if(!conversa)return NextResponse.json({erro:"Conversa não encontrada."},{status:404});
+    // A leitura da conversa marca como lidas apenas as mensagens recebidas.
+    await banco().execute(
+      "UPDATE mensagens SET lida_em=UTC_TIMESTAMP(3) WHERE id_conversa=? AND id_remetente<>? AND lida_em IS NULL",
+      [Number(valor),usuario.id]
+    );
+    await banco().execute(
+      "UPDATE notificacoes SET lida_em=UTC_TIMESTAMP(3) WHERE id_conversa=? AND id_usuario=? AND tipo='NOVA_MENSAGEM' AND lida_em IS NULL",
+      [Number(valor),usuario.id]
+    );
     const [rows]=await banco().execute<RowDataPacket[]>(
       "SELECT m.id_mensagem AS id,m.conteudo,m.enviado_em AS data,m.id_remetente AS remetente,u.nome AS autor "+
       "FROM mensagens m JOIN usuarios u ON u.id_usuario=m.id_remetente "+
@@ -63,9 +72,26 @@ export async function POST(request:Request,contexto:Contexto){
       [Number(valor),usuario.id]
     );
     if(Number(recentes[0]?.total||0)>=3)return NextResponse.json({erro:"Aguarde um instante antes de enviar mais mensagens."},{status:429});
-    const [ins]=await banco().execute<ResultSetHeader>(
-      "INSERT INTO mensagens (id_conversa,id_remetente,conteudo) VALUES (?,?,?)",[Number(valor),usuario.id,conteudo]
-    );
-    return NextResponse.json({id:ins.insertId},{status:201});
+    // Mensagem e notificação são gravadas na mesma transação.
+    const conn=await banco().getConnection();
+    try {
+      await conn.beginTransaction();
+      const [ins]=await conn.execute<ResultSetHeader>(
+        "INSERT INTO mensagens (id_conversa,id_remetente,conteudo) VALUES (?,?,?)",
+        [Number(valor),usuario.id,conteudo]
+      );
+      const destinatario=Number(conversa.id_dono)===usuario.id?
+        Number(conversa.id_interessado):Number(conversa.id_dono);
+      await conn.execute(
+        "INSERT INTO notificacoes (id_usuario,modulo,tipo,id_ocorrencia,id_conversa,texto) "+
+        "VALUES (?,'RESGATE','NOVA_MENSAGEM',?,?,'Você recebeu uma nova mensagem sobre um animal.')",
+        [destinatario,Number(conversa.id_ocorrencia),Number(valor)]
+      );
+      await conn.commit();
+      return NextResponse.json({id:ins.insertId},{status:201});
+    } catch(error){
+      await conn.rollback().catch(()=>undefined);
+      throw error;
+    } finally{conn.release();}
   }catch(error){console.error("Falha no envio de mensagem",error);return NextResponse.json({erro:"Não foi possível enviar a mensagem."},{status:500});}
 }
