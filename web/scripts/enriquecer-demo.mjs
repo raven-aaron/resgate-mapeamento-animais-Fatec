@@ -4,8 +4,7 @@
  * Uso no container web: RESGATE_DEMO=1 node scripts/enriquecer-demo.mjs --apply
  */
 import { randomUUID } from "node:crypto";
-import { copyFile, mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
-import { constants } from "node:fs";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import mysql from "mysql2/promise";
 import { PONTOS_DEMO, regiaoDemo, coordenadaDemo } from "./demo-localidades.mjs";
