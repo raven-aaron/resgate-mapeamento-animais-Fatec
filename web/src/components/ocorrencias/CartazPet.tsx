@@ -47,7 +47,7 @@ export default function CartazPet({ o, fotos, administrativo=false }: { o: Ocorr
           <Campo titulo="SEXO" valor={rotulo(o.sexo)} />
           <Campo titulo="IDADE APROXIMADA" valor={exibir(o.idade)} />
           <Campo titulo="COR/PELAGEM" valor={exibir(o.cores)} />
-          <Campo titulo="MICROCHIP" valor={o.microchip === 1 ? "Sim" : o.microchip === 0 ? "Não" : "Não informado"} />
+          {perdido && <Campo titulo="MICROCHIP" valor={o.microchip === 1 ? "Sim" : o.microchip === 0 ? "Não" : "Não informado"} />}
         </dl>
       </div>
       <div>

@@ -331,7 +331,8 @@ export default function FormularioOcorrencia() {
             <div><dt>Raça</dt><dd>{especie === "Gato" ? "Não informada" : raca || "Não informada"}</dd></div>
             <div><dt>Sexo / porte</dt><dd>{sexo || "Não informado"} / {porte || "Não informado"}</dd></div>
             <div><dt>Cor/pelagem</dt><dd>{cor || "Não informada"}</dd></div>
-            <div><dt>Idade / microchip</dt><dd>{idade || "Não informada"} / {microchip || "Não informado"}</dd></div>
+            <div><dt>Idade aproximada</dt><dd>{idade || "Não informada"}</dd></div>
+            {tipo==="PERDIDO"&&<div><dt>Microchip</dt><dd>{microchip || "Não informado"}</dd></div>}
             <div><dt>Região</dt><dd>{endereco?.bairro}, Votorantim/SP</dd></div>
             <div><dt>Local de referência</dt><dd>{referencia || "Não informado"}</dd></div>
             <div><dt>Data da ocorrência</dt><dd>{dataEvento.split("-").reverse().join("/")}</dd></div>
