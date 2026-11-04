@@ -49,7 +49,7 @@ export async function PATCH(request:Request,contexto:Contexto){
   const usuario=await usuarioAtual();
   if(!usuario)return NextResponse.json({erro:"Sessão necessária."},{status:401});
   const {id:valor}=await contexto.params;
-  if(!/^[1-9]\\d{0,9}$/.test(valor))return NextResponse.json({erro:"Conversa inválida."},{status:400});
+  if(!/^[1-9]\d{0,9}$/.test(valor))return NextResponse.json({erro:"Conversa inválida."},{status:400});
   try{
     const dados=await request.json() as {ateId?:unknown};
     const ateId=Number(dados?.ateId);
