@@ -1,5 +1,9 @@
 # Demonstração do PI — Resgate e Mapeamento de Animais
 
+## Referência para demonstração em 11/11/2026
+
+Confira também [o roteiro de validação ponta a ponta](./roteiro-validacao-11-11.md), incluindo edição, exclusão lógica e encerramento pelo autor.
+
 ## Ambiente local
 
 1. Abra a pasta do repositório e mantenha a branch `feat/banco-resgate-modulos`.
@@ -45,7 +49,8 @@ As rotas `/recuperar-senha` e `/redefinir-senha` usam token de uso único (SHA-2
 
 - Funcionalidades implementadas no código: login cidadão/ADM, criação de conta, envio de ocorrência pendente com fotos, moderação, prévia de cartaz pendente, consulta pública mapa/cards, cartaz completo, chat privado e indicadores.
 - A CI valida migrações, lint, TypeScript e build. **O funcionamento ponta a ponta em navegador + Docker + dois usuários deve ser verificado manualmente**, não presumido a partir da CI.
-- Pendente para outra etapa: edição/encerramento pelo cidadão, gerenciamento de usuários, notificações, recuperação de senha sem serviço de e-mail, integração do Banco de Ração e melhorias de acessibilidade/produção.
+- Implementado na branch: edição de dados pelo autor (volta para moderação), encerramento/resolução com motivo, exclusão lógica e registro de histórico. **É obrigatório validar esses fluxos no navegador com dois usuários e um ADM; CI isolada não prova o fluxo ponta a ponta.**
+- Pendente para outra etapa: gerenciamento administrativo de usuários, notificações, recuperação de senha sem serviço de e-mail, integração do Banco de Ração, edição de fotos/região e melhorias de acessibilidade/produção.
 - A localização dos **novos** cadastros é definida no backend: CEP validado por ViaCEP, bairro e posição regional (aproximadamente 1 km de generalização) obtida via Nominatim ou BrasilAPI CEP v2; o visitante não escolhe coordenadas. CEPs sem localização verificável são recusados, não posicionados em qualquer ponto. Isso evita desvios arbitrários, mas **não comprova a veracidade do CEP informado**: a moderação continua necessária.
 - Ocorrências criadas em versões antigas mantêm suas coordenadas anteriores; não há reescrita destrutiva automática do histórico.
 - Posicionamento geográfico ainda usa limites provisórios, não o polígono oficial de Votorantim. ViaCEP, Nominatim, BrasilAPI e os tiles do OpenStreetMap dependem de internet. A biblioteca Leaflet (JS/CSS) agora é empacotada localmente, sem depender do CDN unpkg.
