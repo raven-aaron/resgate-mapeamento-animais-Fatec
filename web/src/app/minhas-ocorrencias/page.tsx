@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import AcoesMinhaOcorrencia from "../../components/ocorrencias/AcoesMinhaOcorrencia";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../lib/db";
 import { usuarioAtual } from "../../lib/auth";
@@ -31,6 +32,7 @@ export default async function MinhasOcorrencias() {
           <p><strong>Situação do cadastro:</strong> {o.status_aprovacao === "PENDENTE" ? "Em análise" : o.status_aprovacao === "APROVADO" ? "Aprovado" : o.status_aprovacao === "REJEITADO" ? "Não aprovado" : o.status_aprovacao === "OCULTO" ? "Não publicado" : o.status_aprovacao}</p>
           <p><strong>Ocorrência:</strong> {o.status_caso === "ABERTO" ? "Ativa" : o.status_caso === "RESOLVIDO" ? "Resolvida" : "Encerrada"}</p>
           {o.status_aprovacao==="APROVADO" && o.status_caso==="ABERTO" && <Link className="action action-primary" href={"/ocorrencias/"+o.id}>Ver publicação</Link>}
+          <AcoesMinhaOcorrencia id={o.id} tipo={o.tipo} statusAprovacao={o.status_aprovacao} statusCaso={o.status_caso}/>
         </div>
       </article>)}
     </div>
