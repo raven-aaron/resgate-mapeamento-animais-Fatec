@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { usuarioAtual } from "../../../../lib/auth";
+import { administradorAtual } from "../../../../lib/auth";
 import { buscarAdministrativaPorId, buscarFotosOcorrencia } from "../../../../lib/ocorrencias";
 import CartazPet from "../../../../components/ocorrencias/CartazPet";
 
 export default async function CartazAdministrativo({params}:{params:Promise<{id:string}>}){
-  const usuario=await usuarioAtual();
+  const usuario=await administradorAtual();
   if(!usuario?.adminResgate)redirect("/admin/login");
   const {id}=await params;
   if(!/^[1-9]\d{0,9}$/.test(id))notFound();

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { RowDataPacket } from "mysql2/promise";
-import { usuarioAtual } from "../../../../lib/auth";
+import { administradorAtual } from "../../../../lib/auth";
 import { banco } from "../../../../lib/db";
 export const runtime="nodejs";
 
 export async function GET(){
-  const usuario=await usuarioAtual();
+  const usuario=await administradorAtual();
   if(!usuario?.adminResgate)return NextResponse.json({erro:"Acesso administrativo negado."},{status:403});
   try{
     const [rows]=await banco().query<RowDataPacket[]>(

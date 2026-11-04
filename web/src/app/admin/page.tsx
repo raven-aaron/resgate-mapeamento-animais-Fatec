@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { RowDataPacket } from "mysql2/promise";
-import { usuarioAtual } from "../../lib/auth";
+import { administradorAtual } from "../../lib/auth";
 import { banco } from "../../lib/db";
 import AdminShell from "../../components/admin/AdminShell";
 
 export const dynamic = "force-dynamic";
 export default async function AdminPage() {
-  const usuario=await usuarioAtual();
+  const usuario=await administradorAtual();
   if(!usuario?.adminResgate)redirect("/admin/login");
   const [rows]=await banco().query<RowDataPacket[]>(
     "SELECT COUNT(*) AS total, SUM(status_aprovacao='PENDENTE') AS pendentes, " +

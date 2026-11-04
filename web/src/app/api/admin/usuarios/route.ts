@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../../lib/db";
-import { usuarioAtual } from "../../../../lib/auth";
+import { administradorAtual } from "../../../../lib/auth";
 import { mesmaOrigem } from "../../../../lib/seguranca";
 
 export const runtime="nodejs";
@@ -10,7 +10,7 @@ const acoes:Acao[]=["SUSPENDER","REATIVAR","CONCEDER_ADMIN","REVOGAR_ADMIN"];
 
 export async function PATCH(request:Request){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem não permitida."},{status:403});
-  const solicitante=await usuarioAtual();
+  const solicitante=await administradorAtual();
   if(!solicitante?.adminResgate)return NextResponse.json({erro:"Acesso administrativo negado."},{status:403});
   if(Number(request.headers.get("content-length")||0)>4096)return NextResponse.json({erro:"Dados inválidos."},{status:413});
   try{

@@ -16,12 +16,11 @@ export default async function MinhaContaPage(){
     <section className="form-panel" aria-label="Dados da conta conectada">
       <h2>{usuario.nome}</h2>
       <p><strong>E-mail:</strong> {usuario.email}</p>
-      <p><strong>Acesso:</strong> {usuario.adminResgate?"Cidadão e administrador do Resgate":"Cidadão"}</p>
+      <p><strong>Perfil nesta sessão:</strong> Cidadão</p>
       <div className="action-row">
         <Link className="action action-primary" href="/mensagens">Minhas conversas</Link>
         <Link className="action action-secondary" href="/notificacoes">Notificações</Link>
         <Link className="action action-secondary" href="/minhas-ocorrencias">Minhas ocorrências</Link>
-        {usuario.adminResgate&&<Link className="action action-secondary" href="/admin">Administração</Link>}
       </div>
       <div className="action-row"><LogoutButton destino="/" texto="Sair da minha conta"/></div>
     </section>

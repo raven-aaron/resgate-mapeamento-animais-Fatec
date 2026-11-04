@@ -14,9 +14,8 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
         <Link href="/admin/estatisticas">Estatísticas</Link>
         <Link href="/admin/mapa-termico">Mapa térmico</Link>
         <Link href="/admin/usuarios">Contas cadastradas</Link>
-        <Link href="/ocorrencias/nova?tipo=ENCONTRADO">Cadastrar animal</Link>
       </nav>
-      <div className={styles.menuAcoes}><p>Conectado: <strong>{nome}</strong></p><LogoutButton /></div>
+      <div className={styles.menuAcoes}><p>Conectado: <strong>{nome}</strong></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
     </aside>
     <section className={styles.conteudo}>
       <div className={styles.titulo}>

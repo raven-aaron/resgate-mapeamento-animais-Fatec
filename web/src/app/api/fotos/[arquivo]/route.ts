@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../../lib/db";
-import { usuarioAtual } from "../../../../lib/auth";
+import { usuarioAtual, administradorAtual } from "../../../../lib/auth";
 
 export const runtime="nodejs";
 export async function GET(_request:Request,{params}:{params:Promise<{arquivo:string}>}){
@@ -19,8 +19,8 @@ export async function GET(_request:Request,{params}:{params:Promise<{arquivo:str
     if(!o)return new Response("Arquivo não encontrado.",{status:404});
     const publico=o.status_aprovacao==="APROVADO"&&o.status_caso==="ABERTO"&&!o.excluido_em;
     if(!publico){
-      const usuario=await usuarioAtual();
-      if(!usuario||(!usuario.adminResgate&&usuario.id!==Number(o.id_usuario_criador)))
+      const [usuario,administrador]=await Promise.all([usuarioAtual(),administradorAtual()]);
+      if(!administrador && usuario?.id!==Number(o.id_usuario_criador))
         return new Response("Arquivo não encontrado.",{status:404});
     }
     const conteudo=await readFile(join(process.cwd(),"storage","uploads",arquivo));

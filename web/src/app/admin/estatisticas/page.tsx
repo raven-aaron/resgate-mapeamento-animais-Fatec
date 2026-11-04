@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import type { RowDataPacket } from "mysql2/promise";
-import { usuarioAtual } from "../../../lib/auth";
+import { administradorAtual } from "../../../lib/auth";
 import { banco } from "../../../lib/db";
 import AdminShell from "../../../components/admin/AdminShell";
 export const dynamic="force-dynamic";
 export default async function Estatisticas() {
-  const usuario=await usuarioAtual();
+  const usuario=await administradorAtual();
   if(!usuario?.adminResgate)redirect("/admin/login");
   const [total]=await banco().query<RowDataPacket[]>(
     "SELECT e.nome AS especie,o.tipo_ocorrencia AS tipo,COUNT(*) AS total FROM ocorrencias o JOIN animais a ON a.id_animal=o.id_animal JOIN especies e ON e.id_especie=a.id_especie WHERE o.excluido_em IS NULL GROUP BY e.nome,o.tipo_ocorrencia ORDER BY e.nome,o.tipo_ocorrencia"

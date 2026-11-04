@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../lib/db";
-import { usuarioAtual } from "../../../lib/auth";
+import { administradorAtual } from "../../../lib/auth";
 import AdminShell from "../../../components/admin/AdminShell";
 import ControleUsuario from "../../../components/admin/ControleUsuario";
 
@@ -14,7 +14,7 @@ type Registro=RowDataPacket&{
 export default async function UsuariosAdmin({searchParams}:{
   searchParams:Promise<{busca?:string;situacao?:string}>;
 }){
-  const usuario=await usuarioAtual();
+  const usuario=await administradorAtual();
   if(!usuario?.adminResgate)redirect("/admin/login");
   const params=await searchParams;
   const busca=(params.busca||"").trim().slice(0,60);

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../../lib/db";
-import { usuarioAtual } from "../../../../lib/auth";
+import { administradorAtual } from "../../../../lib/auth";
 import { buscarAdministrativas } from "../../../../lib/ocorrencias";
 import { mesmaOrigem } from "../../../../lib/seguranca";
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
-  const usuario = await usuarioAtual();
+  const usuario = await administradorAtual();
   if (!usuario?.adminResgate) return NextResponse.json({ erro: "Acesso administrativo negado." }, { status: 403 });
   const status = request.nextUrl.searchParams.get("status") || "PENDENTE";
   if (!["PENDENTE","APROVADO","REJEITADO","OCULTO","TODAS"].includes(status)) return NextResponse.json({ erro: "Filtro inválido." }, { status: 400 });
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: Request) {
   if (!mesmaOrigem(request)) return NextResponse.json({ erro: "Origem inválida." }, { status: 403 });
-  const usuario = await usuarioAtual();
+  const usuario = await administradorAtual();
   if (!usuario?.adminResgate) return NextResponse.json({ erro: "Acesso administrativo negado." }, { status: 403 });
   let conn: Awaited<ReturnType<ReturnType<typeof banco>["getConnection"]>> | undefined;
   try {
