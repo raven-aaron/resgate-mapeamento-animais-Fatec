@@ -1,0 +1,32 @@
+.area { width:min(1400px,calc(100% - 32px)); margin:36px auto 0; padding:0; display:grid; grid-template-columns:280px minmax(0,1fr); gap:26px; align-items:start; }
+.menuAdmContainer { background:var(--card); border:1px solid #d5e5e0; box-shadow:0 4px 15px #3488881a; border-radius:18px; padding:26px; position:sticky;top:18px; }
+.cabecalho h2 { font-size:27px; color:var(--cor-verde-agua); border-bottom:2px solid var(--cor-verde-agua-claro); padding-bottom:16px; margin:12px 0; }
+.cabecalho p { font-weight:800; color:var(--cor-verde-agua); }
+.selo { font-size:12px; display:inline-block; color:#85431b; background:#fff1e9; border:1px solid #f3c0a0; border-radius:20px; padding:5px 11px; }
+.menuLinks { display:flex; flex-direction:column; gap:2px; }
+.menuLinks a { padding:12px 8px 12px 13px; border-left:3px solid transparent; color:var(--cor-escuro); font-weight:600; }
+.menuLinks a:hover, .menuLinks a:focus-visible { border-left-color:var(--cor-laranja); color:var(--cor-verde-agua); background:var(--cor-verde-agua-claro); }
+.menuAcoes { border-top:1px solid #d5e5e0; margin-top:16px; padding-top:16px; }
+.menuAcoes p { font-size:13px; overflow-wrap:anywhere; }
+.menuAcoes button { width:100%; font-size:13px; }
+.conteudo { min-width:0; border-radius:18px; background:var(--card); padding:30px; box-shadow:0 4px 15px #34888814; border:1px solid #d5e5e0; }
+.titulo h1 { color:var(--cor-verde-agua); font-weight:800; margin:12px 0 28px; font-size:clamp(26px,3vw,37px); }
+@media(max-width:860px){.area{grid-template-columns:1fr;}.menuAdmContainer{position:static;}.conteudo{padding:20px;}}
+
+@media(max-width:860px){
+  .area {gap:14px;margin-top:20px;}
+  .menuAdmContainer {padding:18px;}
+  .cabecalho h2 {font-size:21px;margin:7px 0;}
+  .menuLinks {flex-direction:row;overflow-x:auto;gap:8px;padding:6px 0;scrollbar-width:thin;}
+  .menuLinks a {border:1px solid #d5e5e0;border-radius:9px;white-space:nowrap;flex-shrink:0;padding:10px 12px;font-size:13px;}
+  .menuLinks a:hover,.menuLinks a:focus-visible {border:1px solid var(--cor-laranja);}
+  .menuAcoes {display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:10px;margin-top:10px;flex-wrap:wrap;}
+  .menuAcoes p {margin:0;}
+  .menuAcoes button {width:auto;}
+}
+@media(max-width:480px){
+  .area {width:calc(100% - 20px);}
+  .menuAdmContainer {padding:14px;}
+  .conteudo {padding:17px 13px;border-radius:13px;}
+  .titulo h1 {font-size:clamp(22px,7vw,30px);overflow-wrap:anywhere;}
+}

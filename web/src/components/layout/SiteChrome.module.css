@@ -1,0 +1,101 @@
+.container { width: 100%; max-width: 1400px; padding: 0 30px; margin: 0 auto; }
+.cabecalhoGeral { background: var(--cor-branco); color: var(--cor-escuro); }
+.barraAcessibilidade { background: var(--cor-ciano-claro); padding: 8px 0; }
+.acessibilidadeControles { display: flex; gap: 10px; }
+.acessibilidadeBotao { width: 36px; height: 36px; border: 2px solid var(--cor-vermelho); border-radius: 50%; background: var(--cor-branco); color: var(--cor-vermelho); font-weight: 700; display: grid; place-items: center; }
+.acessibilidadeBotao:hover { background: var(--cor-vermelho); color: white; }
+.cabecalho { background: var(--cor-branco); padding: 25px 0; }
+.gridCabecalho { display: grid; grid-template-columns: 200px 1fr 200px; align-items: center; gap: 20px; }
+.logoDepartamento { display: flex; align-items: center; min-width: 0; }
+.logo { max-width: 100%; height: auto; object-fit: contain; }
+.buscaWrapper { display: flex; justify-self: center; max-width: 500px; width: 100%; gap: 10px; align-items: start; }
+.btnBuscar { width: 44px; height: 44px; border: none; border-radius: 8px; background: var(--cor-verde-petroleo); color: white; display: grid; place-items: center; font-size: 25px; flex-shrink: 0; }
+.campoBusca { flex: 1; min-width: 0; position: relative; }
+.inputBusca { width: 100%; height: 44px; border: 1px solid #b9c9c7; border-radius: 8px; padding: 0 15px; background: var(--cor-branco); color: var(--cor-escuro); }
+.inputBusca::placeholder { color: #606b69; opacity: 1; }
+.buscaFeedback { position: absolute; z-index: 20; background: var(--cor-branco); color: var(--cor-escuro); top: 49px; left: 0; right: 0; margin: 0; padding: 12px; border: 1px solid #9da9a7; border-radius: 8px; box-shadow: 0 6px 18px #0002; font-size: 13px; line-height: 1.5; }
+.prefeituraWrapper { justify-self: end; }
+.logoPrefeitura { object-fit: contain; max-width: 100%; height: auto; }
+.navegacao { background: var(--cor-branco); border-bottom: 3px solid rgba(52,136,136,.15); }
+.flexNav { display: flex; align-items: center; min-height: 60px; }
+.btnMenu { display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 70px; height: 60px; border: none; border-radius: 18px; padding: 9px; background: var(--cor-verde-agua); color: var(--cor-verde-agua-claro); font-weight: 700; box-shadow: 0 8px 14px #34888859; z-index: 1; line-height: 1.2; }
+.btnMenu span:first-child { font-size: 22px; }
+.barraNav { display: flex; align-items: center; flex-wrap: wrap; gap: 22px; margin-left: -15px; padding: 12px 26px 12px 32px; min-height: 45px; border-radius: 18px; background: var(--cor-ciano-claro); font-size: 14px; }
+.barraNav a { color: var(--cor-escuro); font-weight: 650; white-space: nowrap; }
+.barraNav a:hover { color: var(--cor-verde-petroleo); text-decoration: underline; }
+.menuOverlay { position: fixed; inset: 0; z-index: 1000; }
+.overlayFechar { background: #0008; border: 0; position: absolute; inset: 0; width: 100%; height: 100%; }
+.menuLateral { position: absolute; left: 0; top: 0; width: min(320px, 88vw); height: 100vh; background: var(--cor-branco); color: var(--cor-escuro); box-shadow: 2px 0 10px #0002; overflow-y: auto; }
+.menuTopo { display: flex; align-items: center; justify-content: space-between; padding: 20px; background: var(--cor-verde-agua-claro); color: var(--cor-verde-agua); gap: 12px; }
+.fechar { background: transparent; border: 0; font-size: 28px; color: var(--cor-escuro); flex-shrink: 0; }
+.menuCorpo { padding: 24px 20px; }
+.menuCorpo h2 { font-size: 13px; letter-spacing: 1.5px; color: var(--cor-cinza); margin: 0 0 24px; line-height: 1.6; }
+.menuCorpo a { display: block; padding: 15px 0; border-bottom: 1px solid var(--line); color: var(--cor-escuro); font-size: 16px; font-weight: 600; line-height: 1.4; }
+.menuCorpo a:hover, .menuCorpo a:focus-visible { color: var(--cor-verde-agua); text-decoration: underline; }
+.rodape { width: 100%; margin-top: 50px; color: var(--cor-escuro); }
+.rodapeTopo { background: var(--cor-ciano-claro); padding: 24px 0; }
+.rodapeConteudo { display: flex; justify-content: space-between; align-items: center; gap: 40px; }
+.rodapeTexto { max-width: 680px; line-height: 1.55; }
+.rodapeTexto strong { font-size: 17px; }
+.rodapeTexto p { margin: 10px 0 0; font-size: 14px; }
+.rodapeLogos { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
+.rodapeBase { background: var(--cor-verde-agua); color: white; padding: 13px 0; font-size: 13px; }
+@media (max-width: 900px) { .gridCabecalho { grid-template-columns: 160px 1fr 130px; } .barraNav { gap: 12px; } }
+@media (max-width: 680px) {
+  .container { padding: 0 16px; }
+  .cabecalho { padding: 16px 0; }
+  .gridCabecalho { grid-template-columns: 1fr auto; gap: 12px; }
+  .logoDepartamento { max-width: 155px; }
+  .buscaWrapper { grid-column: 1 / -1; grid-row: 2; max-width: none; }
+  .prefeituraWrapper { grid-column: 2; grid-row: 1; max-width: 95px; }
+  .flexNav { align-items: start; }
+  .barraNav { gap: 11px; padding: 12px 17px 12px 24px; }
+  .barraNav a { font-size: 12px; }
+  .rodapeConteudo { align-items: start; flex-direction: column; gap: 20px; }
+  .rodapeLogos { gap: 16px; }
+}
+
+.prefeituraWrapper { display:flex;flex-direction:column;align-items:center;gap:8px; }
+.acessoPrefeitura { color:var(--cor-verde-agua);font-weight:700;font-size:12px;text-align:center;text-decoration:underline;white-space:nowrap; }
+.linkAdministracao { float:right;font-weight:700;text-decoration:underline; }
+@media(max-width:680px){.acessoPrefeitura{white-space:normal;font-size:10px;}.linkAdministracao{float:none;display:block;margin-top:10px;}}
+
+/* Navegação adaptativa, sem rolagem horizontal da página */
+@media(max-width:800px) {
+  .barraNav {flex-wrap:nowrap;overflow-x:auto;max-width:calc(100vw - 120px);scrollbar-width:thin;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:12px 16px 12px 26px;}
+  .barraNav a {white-space:nowrap;flex-shrink:0;}
+  .gridCabecalho {min-width:0;}
+  .buscaWrapper {min-width:0;}
+}
+@media(max-width:480px) {
+  .container {padding:0 12px;}
+  .cabecalho {padding:12px 0;}
+  .gridCabecalho {grid-template-columns:minmax(0,1fr) 100px;column-gap:10px;}
+  .logoDepartamento {max-width:145px;}
+  .prefeituraWrapper {max-width:100px;}
+  .logoPrefeitura {max-width:82px;height:auto;}
+  .flexNav {min-width:0;}
+  .btnMenu {min-width:61px;height:54px;padding:6px;border-radius:13px;}
+  .barraNav {min-width:0;max-width:calc(100vw - 91px);min-height:45px;gap:14px;margin-left:-8px;border-radius:11px;}
+  .barraAcessibilidade {padding:5px 0;}
+  .acessibilidadeBotao {width:32px;height:32px;}
+  .rodapeLogos {flex-wrap:wrap;}
+  .rodapeLogos img {max-width:95px;height:auto;}
+}
+
+.pularConteudo{position:fixed;left:12px;top:-100px;z-index:5000;background:#fff;color:#063f35;border:3px solid #063f35;padding:12px 18px;border-radius:8px;font-weight:750;}
+.pularConteudo:focus{top:12px;}
+.btnMenu:focus-visible,.fechar:focus-visible,.acessibilidadeBotao:focus-visible,.buscaWrapper button:focus-visible{outline:3px solid #175e50;outline-offset:3px;}
+
+/* Navegação pública + conta do cidadão: uma linha organizada no desktop. */
+.linhaNavegacao{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:72px;min-width:0;}
+.contaTopo{display:flex;align-items:center;justify-content:flex-end;flex:1;min-width:0;padding:8px 0;}
+.contaLateral{margin-top:16px;border-top:1px solid #d6e7e2;padding-top:8px;}
+@media(max-width:1100px){
+  .linhaNavegacao{flex-direction:column;align-items:stretch;gap:3px;padding:9px 0;}
+  .contaTopo{justify-content:flex-end;min-height:42px;padding:4px 0;}
+}
+@media(max-width:680px){
+  .linhaNavegacao{padding:4px 0 10px;}
+  .contaTopo{padding-top:9px;}
+}

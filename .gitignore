@@ -37,3 +37,6 @@ Thumbs.db
 
 # Local Docker overrides
 compose.override.yaml
+
+# Backups com informacoes pessoais (nunca versionar)
+/backups/

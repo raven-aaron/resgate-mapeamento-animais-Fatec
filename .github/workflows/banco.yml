@@ -1,0 +1,46 @@
+name: CI - Banco de dados
+
+on:
+  pull_request:
+    branches: [main, feat/banco-resgate-modulos]
+  push:
+    branches: [main, feat/banco-resgate-modulos, "fix/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: banco-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  banco:
+    name: MySQL - migracoes e integridade
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MYSQL_ROOT_PASSWORD: ci-root-descartavel
+      MYSQL_PASSWORD: ci-app-descartavel
+      MYSQL_DATABASE: resgate_animais
+      MYSQL_USER: resgate_app
+      BANCO_TESTE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+      - name: Iniciar MySQL vazio
+        run: docker compose up -d --wait --wait-timeout 180 mysql
+      - name: Aplicar migracoes
+        run: node database/scripts/migrar.mjs
+      - name: Repetir sem reaplicar
+        run: node database/scripts/migrar.mjs
+      - name: Verificar integridade e chat
+        run: node database/tests/integridade.mjs
+      - name: Verificar protecoes do migrador
+        run: node database/tests/migracoes.mjs
+      - name: Conferir historico
+        run: node database/scripts/migrar.mjs --status
+      - name: Encerrar ambiente descartavel de CI
+        if: always()
+        run: docker compose down --volumes

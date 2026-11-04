@@ -1,91 +1,76 @@
-# Ambiente local com Docker Compose
+# Ambiente Docker, migrações e operação local
 
-Este ambiente serve **somente para desenvolvimento**. Ele inicializa a aplicação Next.js e um banco MySQL 8.4.13 isolado, sem exigir instalação local do MySQL.
+## Pré-requisitos
 
-## Pré-requisito
+Docker Engine/Desktop com `docker compose` v2, Git e Node.js 24 no host. Funciona em Linux, Windows (WSL2/PowerShell) e macOS. Execute comandos a partir da **raiz do repositório**.
 
-Instale e inicie o Docker Desktop, com mecanismo Linux/WSL2 no Windows. Confira no terminal da pasta raiz:
+1. Crie `.env` copiando `.env.example` (`cp .env.example .env` em Linux/macOS, `Copy-Item .env.example .env` em PowerShell).
+2. Configure `MYSQL_ROOT_PASSWORD` e `MYSQL_PASSWORD` com senhas fortes diferentes. Não compartilhe nem versione o arquivo `.env`.
+3. Use somente as portas locais padrão: web em `127.0.0.1:3000`; MySQL em `127.0.0.1:3307`. Dentro do Compose, a aplicação usa `mysql:3306`.
 
-```powershell
-docker --version
-docker compose version
-```
+## Primeira execução ou atualização
 
-## Primeiro uso (Windows PowerShell)
-
-Na raiz do repositório, após sincronizar o código com a branch correta:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Abra o arquivo **.env** da raiz e preencha `MYSQL_ROOT_PASSWORD` e `MYSQL_PASSWORD` com **duas senhas fortes diferentes**. Nunca compartilhe esse arquivo ou faça commit dele; `.gitignore` já o ignora.
-
-Inicie tudo:
-
-```powershell
-docker compose up --build
-```
-
-Na primeira execução o Docker baixa a imagem MySQL, compila a imagem Node.js, instala dependências e cria o banco vazio. A aplicação aguarda o MySQL responder ao healthcheck.
-
-Acesso:
-- Aplicação Next.js: http://localhost:3000
-- MySQL no computador: host `127.0.0.1`, porta `3307`, usuário e senha definidos em `.env`, banco `resgate_animais`
-- No **código Next.js dentro do contêiner**, o hostname é **`mysql`** e a porta interna é **`3306`**. O Compose injeta `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`; a integração de persistência ainda será implementada.
-
-Se a porta 3000 ou 3307 estiver ocupada, pare o serviço anterior ou altere `WEB_PORT` / `MYSQL_HOST_PORT` no `.env`. O Next.js iniciado diretamente com `npm run dev` deve ser parado antes de usar Docker na mesma porta.
-
-## Desenvolvimento diário
-
-Com o terminal na raiz do repositório:
-
-```powershell
-docker compose up
-```
-
-Mudanças nos arquivos da pasta `web/` são montadas no contêiner; o Next.js deve atualizar a interface em desenvolvimento. Se o sistema de arquivos do Windows não sinalizar alterações corretamente, reinicie o serviço e verifique as configurações de compartilhamento/WSL2 do Docker Desktop.
-
-Em outro terminal, para ver o estado:
-
-```powershell
+```bash
+docker compose config --quiet
+docker compose up -d --wait mysql
+node database/scripts/migrar.mjs
+node database/scripts/migrar.mjs --status
+docker compose up -d --build web
 docker compose ps
+docker compose logs --tail=50 web
 ```
 
-Para parar e preservar os dados:
+Confirme `mysql` saudável e o Next.js pronto em [http://localhost:3000](http://localhost:3000).
 
-```powershell
-docker compose down
+O migrador aplica exclusivamente novas migrações e verifica o hash das já aplicadas. Repita `node database/scripts/migrar.mjs` após `git pull`; ele **não** recria o banco nem apaga dados existentes. Nunca edite uma migração aplicada: acrescente um arquivo sequencial na pasta `database/migrations`.
+
+Caso o volume de dependências fique desatualizado após alteração de `package-lock.json`:
+
+```bash
+docker compose run --rm --no-deps web npm ci
+docker compose restart web
 ```
 
-O volume `mysql_data` mantém os dados do MySQL entre reinicializações. **Não use `docker compose down -v` sem necessidade**: ele apaga os volumes persistentes deste ambiente, inclusive o banco.
+## Conta administrativa de desenvolvimento
 
-Se mudar `package.json` / `package-lock.json`, reinstale as dependências do contêiner após sincronizar os arquivos:
-
-```powershell
-docker compose exec web npm ci
+```bash
+docker compose exec web node scripts/criar-admin.mjs
 ```
 
-Para reconstruir a imagem quando necessário:
-
-```powershell
-docker compose up --build
-```
+Informe nome, e-mail e senha de pelo menos dez caracteres. Acesse `/admin/login` pelo rodapé. Não existe senha administrativa padrão. O login de cidadão e o login administrativo usam sessões separadas.
 
 ## Diagnóstico
 
-```powershell
+```bash
 docker compose ps
 docker compose logs --tail=100 mysql
 docker compose logs --tail=100 web
+node database/scripts/migrar.mjs --status
 ```
 
-Uma falha de conexão inicial pode ser apenas a criação do banco durante a primeira execução. Se a senha ou o nome do banco forem alterados após a inicialização, a imagem MySQL **não altera automaticamente** as credenciais existentes no volume; ajuste-as com SQL administrativo ou recrie o volume **somente se os dados puderem ser descartados**.
+Se o MySQL não iniciar, confira o healthcheck e as senhas. Alterar `.env` depois que o volume MySQL já foi criado **não** muda a senha gravada no banco. Não resolva falhas apagando volumes com dados.
 
-## Testes e segurança
+## Parar e preservar dados
 
-- Este Compose é para **desenvolvimento local**, não deploy de produção.
-- As portas são publicadas apenas em `127.0.0.1`, não na rede local.
-- Nenhuma senha real deve ser versionada; o `.env.example` é apenas um modelo vazio.
-- O pipeline do GitHub Actions valida a sintaxe do Compose e a construção da imagem web; não executa ainda testes de CRUD nem migrações SQL.
-- As configurações do MySQL e do Node serão evoluídas por Pull Requests separados.
+Use `docker compose down` para parar. Os volumes `mysql_data` e `media_data` persistem. **Nunca use `docker compose down -v` no ambiente da faculdade/casa**. O diretório `backups/` também não deve entrar no GitHub.
+
+## Backup e restauração segura
+
+```bash
+node database/scripts/backup-local.mjs
+node database/scripts/verificar-restauracao.mjs backups/resgate-<DATA>
+```
+
+O primeiro script salva dump e arquivos em `backups/`. O segundo sobe um contêiner temporário **sem portas públicas nem volumes compartilhados**, importa o SQL, confere tabelas e encerra a cópia. Detalhes em [backup e restauração](backup-restauracao.md).
+
+## CI e segurança
+
+- **CI — Next.js:** dependências, auditoria, lint, testes básicos, tipos, build e imagem Docker.
+- **CI — Banco de dados:** MySQL 8.4 isolado, migrações repetíveis, integridade e proteção do histórico.
+- **CI — Integração HTTP:** Next.js + MySQL isolados, usuários e ADM de teste, moderação, mapa, chat e notificações, seguidos de backup e restauração isolada.
+
+Os jobs descartam seus próprios volumes no runner. Isso **não ocorre** no computador de ninguém.
+
+## Fora do escopo local
+
+O `compose.yaml` inicia `next dev` com `NODE_ENV=development`. Não é imagem de produção nem substitui HTTPS, domínio, banco gerenciado, storage persistente, backup externo e revisão de LGPD. A localização aproximada depende de serviços externos e deve ser testada com CEPs reais antes da apresentação.

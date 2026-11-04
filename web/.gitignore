@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Fotos locais da demonstracao (persistem no host, nunca enviar ao GitHub)
+/public/uploads/
+
+# Armazenamento local de fotos de ocorrencias
+/storage/

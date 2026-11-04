@@ -2,9 +2,9 @@ name: CI — Next.js
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feat/banco-resgate-modulos]
   push:
-    branches: [main]
+    branches: [main, feat/banco-resgate-modulos, "fix/**"]
 
 permissions:
   contents: read
@@ -41,6 +41,12 @@ jobs:
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Test same-origin / Docker proxy
+        run: npm run test:origem
+
+      - name: Test map photo URLs
+        run: npm run test:fotos
 
       - name: Lint
         run: npm run lint

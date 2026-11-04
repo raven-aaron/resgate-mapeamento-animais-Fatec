@@ -1,0 +1,46 @@
+.area{display:flex;align-items:center;justify-content:flex-end;gap:clamp(8px,1.2vw,18px);min-width:0;position:relative;color:#174f4e;font-size:13px;}
+.identidade{display:flex;align-items:center;gap:9px;min-width:0;white-space:nowrap;}
+.avatar{width:35px;height:35px;border-radius:50%;background:#d7f0eb;color:#247f7b;display:grid;place-items:center;flex:0 0 auto;}
+.saudacao{display:block;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
+.saudacao strong{font-weight:800;}
+.contaMenu{position:relative;flex:0 0 auto;}
+.contaMenu summary{display:flex;align-items:center;gap:7px;list-style:none;white-space:nowrap;padding:9px 11px;border:1px solid #92c9c3;border-radius:10px;background:#f4fbfa;font-weight:750;cursor:pointer;min-height:40px;}
+.contaMenu summary::-webkit-details-marker{display:none;}
+.contaMenu[open] summary{background:#def3ef;}
+.contaMenu summary svg:last-child{width:15px;height:15px;transition:transform .15s;}
+.contaMenu[open] summary svg:last-child{transform:rotate(180deg);}
+.listaConta{position:absolute;z-index:150;right:0;top:calc(100% + 6px);min-width:215px;border:1px solid #d6e8e4;border-radius:12px;padding:7px;background:white;box-shadow:0 10px 28px #174f4e21;}
+.listaConta a{display:flex;align-items:center;gap:9px;padding:11px;border-radius:8px;color:#1d4040;font-weight:650;white-space:nowrap;}
+.listaConta a:hover,.listaConta a:focus-visible{background:#e9f6f2;}
+.avisos{display:flex;gap:9px;align-items:center;border-left:1px solid #bdd5d0;border-right:1px solid #bdd5d0;padding:0 12px;}
+.iconeLink{width:34px;height:38px;position:relative;display:grid;place-items:center;border-radius:9px;color:#1d4544;}
+.iconeLink svg{width:23px;height:23px;}
+.iconeLink:hover{background:#e9f6f2;}
+.contador{position:absolute;top:-5px;right:-3px;background:#187e77;color:white;border:2px solid white;border-radius:999px;min-width:21px;height:21px;padding:0 4px;display:grid;place-items:center;font-size:10px;font-weight:800;}
+.sair{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 11px;background:#fff8f7;border:1px solid #ca7770;border-radius:10px;color:#9b302b;font-weight:750;white-space:nowrap;}
+.sair:hover{background:#ffefec;}
+.visitante{display:flex;gap:13px;align-items:center;}
+.entrar,.cadastrar{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 15px;border-radius:10px;font-weight:750;white-space:nowrap;}
+.entrar{background:#277c79;color:white;}
+.cadastrar{border:1px solid #9ac9c3;color:#1c6560;background:white;}
+.entrar:hover{background:#195f5c;}
+.cadastrar:hover{background:#eef8f5;}
+.verificando{font-size:12px;color:#4d6c67;}
+.toast{position:fixed;z-index:2000;right:16px;top:80px;background:#f0fbf8;border:1px solid #8dbdb2;border-radius:12px;box-shadow:0 6px 24px #0002;padding:14px 16px;max-width:290px;font-weight:700;line-height:1.5;}
+.toast a{display:block;margin-top:7px;color:#145b53;text-decoration:underline;}
+.erro{position:absolute;right:0;top:calc(100% + 8px);margin:0;color:#a4302b;background:white;padding:8px;border:1px solid #eac2bf;border-radius:6px;z-index:30;font-size:12px;}
+.contaMenu summary:focus-visible,.iconeLink:focus-visible,.sair:focus-visible,.entrar:focus-visible,.cadastrar:focus-visible{outline:3px solid #12685f;outline-offset:3px;}
+.compacta{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:100%;gap:10px;padding:13px 0;}
+.compacta .identidade{white-space:normal;}
+.compacta .saudacao{max-width:none;}
+.compacta .contaMenu{width:100%;}
+.compacta .contaMenu summary{width:100%;justify-content:space-between;}
+.compacta .listaConta{position:static;box-shadow:none;min-width:0;margin-top:5px;}
+.compacta .avisos{border:0;padding:0;justify-content:space-around;gap:12px;}
+.compacta .iconeLink{width:auto;min-height:42px;padding:0 10px;display:flex;gap:8px;}
+.compacta .contador{top:-3px;right:0;}
+.compacta .sair{width:100%;}
+.compacta .visitante{flex-direction:column;align-items:stretch;}
+@media(max-width:1300px){.saudacao{max-width:136px;}}
+@media(max-width:720px){.area:not(.compacta){justify-content:flex-end;flex-wrap:wrap;gap:8px;}.saudacao{max-width:160px;}.avisos{padding:0 9px;}.avatar{width:31px;height:31px;}.contaMenu summary{padding:7px 9px;}}
+@media(max-width:420px){.saudacao{max-width:112px;}.contaMenu summary{font-size:12px;}.sair{padding:8px;}.toast{left:12px;right:12px;max-width:none;}}
