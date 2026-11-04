@@ -32,7 +32,7 @@ export default function ControleUsuario({id,email,situacao,adminResgate,proprio}
       });
       const dados=await resposta.json() as {erro?:string};
       if(!resposta.ok)throw new Error(dados.erro||"Não foi possível atualizar a conta.");
-      setSucesso("Alteração salva. O usuário precisará entrar novamente.");
+      setSucesso("Conta atualizada.");
       setConfirmacao("");setAcao(null);
       router.refresh();
     }catch(e){setErro(e instanceof Error?e.message:"Falha ao atualizar a conta.");}
@@ -49,8 +49,7 @@ export default function ControleUsuario({id,email,situacao,adminResgate,proprio}
         </select>
       </label>
       {acao&&<>
-        <p style={{fontSize:12}}>Esta ação será registrada em auditoria e encerrará as sessões do usuário.
-          {acao==="SUSPENDER"?" A suspensão afeta todos os módulos.":""}</p>
+        {acao==="SUSPENDER"&&<p style={{fontSize:12}}>A suspensão bloqueia o acesso a todos os módulos.</p>}
         <label className="form-field">Confirme digitando o e-mail completo
           <input type="email" required autoComplete="off" value={confirmacao}
             onChange={e=>setConfirmacao(e.target.value)} placeholder={email}/>

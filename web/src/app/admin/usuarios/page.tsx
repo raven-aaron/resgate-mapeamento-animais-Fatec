@@ -35,7 +35,6 @@ export default async function UsuariosAdmin({searchParams}:{
     "ORDER BY u.criado_em DESC LIMIT 100",valores
   );
   return <AdminShell nome={usuario.nome} titulo="CONTAS CADASTRADAS">
-    <p>Consulta administrativa de contas do portal e atividades do módulo de Resgate.</p>
     <form className="filtros-usuarios-admin" method="GET">
       <label className="form-field">Nome ou e-mail<input name="busca" type="search" defaultValue={busca} maxLength={60}/></label>
       <label className="form-field">Situação da conta<select name="situacao" defaultValue={status||""}>
@@ -62,6 +61,5 @@ export default async function UsuariosAdmin({searchParams}:{
       </table>
     </div>
     {!rows.length&&<p className="note">Nenhuma conta corresponde aos filtros.</p>}
-    <p className="note">As contas são compartilhadas entre os módulos: suspender um usuário interrompe o acesso a todos eles. Apenas administradores do Resgate podem executar as ações desta tela. Alterações de permissões são auditadas, revogam as sessões do usuário e impedem que um administrador altere a própria conta.</p>
   </AdminShell>;
 }

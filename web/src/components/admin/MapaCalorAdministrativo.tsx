@@ -59,6 +59,6 @@ export default function MapaCalorAdministrativo(){
     <div ref={elemento} className="mapa-publico" aria-label="Mapa administrativo de concentração de ocorrências" />
     {erro&&<p className="note note-warning" role="alert">{erro}</p>}
     {!pronto&&!erro&&<p role="status">Carregando mapa...</p>}
-    <p style={{fontSize:13,color:"var(--cor-cinza)",lineHeight:1.6}}>As zonas representam concentrações aproximadas por região e não endereços individuais.</p>
+    <p style={{fontSize:13,color:"var(--cor-cinza)"}}>Dados por região.</p>
   </section>;
 }

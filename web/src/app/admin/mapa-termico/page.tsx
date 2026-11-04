@@ -13,11 +13,10 @@ export default async function MapaTermico() {
   );
   const maximo=Math.max(1,...bairros.map(r=>Number(r.total)));
   return <AdminShell nome={usuario.nome} titulo="MAPA TÉRMICO — DENSIDADE">
-    <p>Concentração espacial de ocorrências aprovadas e abertas. O mapa usa dados agregados em zonas, enquanto o ranking abaixo mostra os bairros com mais registros.</p>
     <MapaCalorAdministrativo />
     {bairros.map(r=><div key={r.bairro} className="admin-barra">
       <span>{r.bairro}</span><div><i style={{width:(Number(r.total)/maximo*100)+"%"}}/></div><strong>{Number(r.total)}</strong>
     </div>)}
-    {bairros.length===0 && <p className="note">Aguardando ocorrências aprovadas para formar a análise territorial.</p>}
+    {bairros.length===0 && <p className="note">Sem dados para o mapa.</p>}
   </AdminShell>;
 }

@@ -14,7 +14,6 @@ export default async function Estatisticas() {
     "SELECT b.nome AS bairro,COUNT(*) AS total FROM ocorrencias o JOIN bairros b ON b.id_bairro=o.id_bairro WHERE o.excluido_em IS NULL GROUP BY b.id_bairro,b.nome ORDER BY total DESC LIMIT 8"
   );
   return <AdminShell nome={usuario.nome} titulo="ESTATÍSTICAS">
-    <p>Indicadores reais das ocorrências registradas no módulo Resgate, incluindo pendentes e aprovadas.</p>
     <h2>Distribuição por espécie e situação</h2>
     <div className="admin-kpis">{total.map((r,i)=><div key={i}><strong>{Number(r.total)}</strong><span>{r.especie} — {r.tipo==="PERDIDO"?"Perdidos":r.tipo==="ENCONTRADO"?"Encontrados":r.tipo}</span></div>)}</div>
     {total.length===0 && <p className="note">Ainda não existem ocorrências para gerar indicadores.</p>}

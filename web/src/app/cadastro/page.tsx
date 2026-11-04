@@ -34,7 +34,7 @@ function CadastroFormulario() {
     finally { setSalvando(false); }
   }
   return <main className="form-shell">
-    <header className="form-heading"><h1>CRIAR CONTA</h1><p></p></header>
+    <header className="form-heading"><h1>CRIAR CONTA</h1></header>
     <form className="form-panel" onSubmit={enviar}>
       <div className="form-grid">
         <label className="form-field">Nome completo<input required minLength={2} maxLength={100} value={nome} autoComplete="name" onChange={e=>setNome(e.target.value)} /></label>
