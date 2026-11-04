@@ -8,9 +8,9 @@ suas tabelas de negócio ainda dependem dos requisitos do outro grupo.
 
 ## O que ler
 
-- [Modelo, decisões e relacionamentos](../docs/modelo-banco.md).
-- [Campos de cada tabela](../docs/dicionario-banco.md).
-- [Contrato entre frontend, backend e os dois grupos](../docs/integracao-modulos.md).
+- [Modelo, decisões e relacionamentos](../docs/arquitetura/modelo-dados.md).
+- [Campos de cada tabela](../docs/arquitetura/dicionario-dados.md).
+- [Contrato entre frontend, backend e os dois grupos](../docs/arquitetura/integracao.md).
 - `migrations/001_estrutura.sql`: tabelas, índices, restrições e regras de chat.
 - `migrations/002_catalogos.sql`: espécies, cores e raças básicas.
 

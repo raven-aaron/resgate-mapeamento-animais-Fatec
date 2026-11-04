@@ -61,7 +61,7 @@ node database/scripts/backup-local.mjs
 node database/scripts/verificar-restauracao.mjs backups/resgate-<DATA>
 ```
 
-O primeiro script salva dump e arquivos em `backups/`. O segundo sobe um contêiner temporário **sem portas públicas nem volumes compartilhados**, importa o SQL, confere tabelas e encerra a cópia. Detalhes em [backup e restauração](backup-restauracao.md).
+O primeiro script salva dump e arquivos em `backups/`. O segundo sobe um contêiner temporário **sem portas públicas nem volumes compartilhados**, importa o SQL, confere tabelas e encerra a cópia. Detalhes em [backup e restauração](backup.md).
 
 ## CI e segurança
 

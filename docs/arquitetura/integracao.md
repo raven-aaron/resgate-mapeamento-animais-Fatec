@@ -1,6 +1,6 @@
 # Contrato de integração e divisão do trabalho
 
-> **Nota de manutenção (04/11/2026):** esta página registra o contrato arquitetural original e contém exemplos de rotas propostos antes da implementação. Para as rotas **efetivas**, consulte `web/src/app/api/`. O estado operacional e os comandos atualizados estão em [README](../README.md) e [ambiente Docker](ambiente-docker.md). Administradores do Resgate não podem alterar a situação global da conta; a API permite apenas conceder/revogar o papel ADMIN do módulo RESGATE.
+> **Nota de manutenção (04/11/2026):** esta página registra o contrato arquitetural original e contém exemplos de rotas propostos antes da implementação. Para as rotas **efetivas**, consulte `web/src/app/api/`. O estado operacional e os comandos atualizados estão em [README](../../README.md) e [ambiente Docker](../operacao/docker.md). Administradores do Resgate não podem alterar a situação global da conta; a API permite apenas conceder/revogar o papel ADMIN do módulo RESGATE.
 
 ## Portal e limites entre os grupos
 

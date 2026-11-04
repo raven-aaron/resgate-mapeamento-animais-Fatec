@@ -41,3 +41,6 @@ compose.override.yaml
 
 # Backups com informacoes pessoais (nunca versionar)
 /backups/
+
+# Gerado automaticamente pelo Next.js durante o desenvolvimento
+/web/AGENTS.md

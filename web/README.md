@@ -1,26 +1,39 @@
-# Aplicação web — Resgate de Animais
+# Aplicação Next.js
 
-Next.js 16 (App Router), TypeScript, React e driver MySQL 8.4. A aplicação é iniciada pelo Docker Compose na raiz do repositório.
+Interface e API HTTP do Resgate e Mapeamento de Animais.
 
-**Guia principal:** [README raiz](../README.md) • [Docker e migrações](../docs/ambiente-docker.md).
+## Onde desenvolver
 
-## Rotas
+| Pasta | Responsabilidade |
+| --- | --- |
+| `src/app/` | Páginas, layouts, navegação e rotas `/api` |
+| `src/components/` | Componentes reutilizáveis de interface, agrupados por domínio |
+| `src/lib/` | Consultas, autenticação, validações e tipos compartilhados |
+| `src/types/` | Declarações adicionais de tipos |
+| `public/assets/` | Imagens estáticas do projeto |
+| `scripts/` | Administração local, versões e enriquecimento DEMO |
+| `tests/` | Testes automatizados |
 
-- `/` — portal, sem listagem de ocorrências.
-- `/resgate` — registrar perda/encontro e acessar o mapa.
-- `/mapa` — listagem pública de ocorrências aprovadas.
-- `/cadastro`, `/login`, `/minha-conta`, `/minhas-ocorrencias` — cidadãos.
-- `/mensagens`, `/notificacoes` — chat e avisos do cidadão.
-- `/admin/login` — login separado de administrador (link no rodapé).
-- `/admin/*` — moderação, contas e indicadores.
+No App Router, `page.tsx` define a rota e `route.ts` define o endpoint. Componentes com interação no navegador usam `"use client"`. Consultas SQL e sessões são processadas no servidor.
 
-## Ambiente
+A equipe de interface deve começar por `src/components/` e pelos estilos de `src/app/`, sem alterar a API ou o banco sem combinar o contrato.
 
-Prefira executar pelo Compose da raiz: `docker compose up -d --build web`. O contêiner usa Node 24 e conecta-se ao host `mysql` na rede Docker. Para executar sem Compose, configure um MySQL 8.4 já migrado e as variáveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
+## Páginas principais
 
-## Verificações locais
+| Rota | Uso |
+| --- | --- |
+| `/` | Página inicial |
+| `/resgate` | Acesso às opções de registro |
+| `/mapa` | Consulta pública e mapa |
+| `/ocorrencias/nova` | Cadastro de perda ou encontro |
+| `/ocorrencias/[id]` | Cartaz da ocorrência |
+| `/login`, `/cadastro`, `/minha-conta` | Conta do cidadão |
+| `/minhas-ocorrencias`, `/mensagens`, `/notificacoes` | Área autenticada |
+| `/admin/login`, `/admin/*` | Acesso e operações administrativas |
 
-Dentro de `web/` com Node 24 e dependências instaladas:
+## Executar e validar
+
+Prefira o [Docker Compose da raiz](../docs/operacao/docker.md). Para executar os testes de código em `web/`, instale Node.js 24:
 
 ```bash
 npm ci
@@ -32,6 +45,6 @@ npx tsc --noEmit
 npm run build
 ```
 
-O teste `web/tests/integracao-http.mjs` **não deve ser executado contra o banco de desenvolvimento**: ele cria usuários e ocorrências de teste. A CI o executa apenas em contêineres descartáveis, juntamente com backup e teste de restauração.
+A integração HTTP (`tests/integracao-http.mjs`) **cria dados**; não execute contra um banco pessoal. A CI utiliza MySQL descartável.
 
-O upload atual usa o volume `media_data` (`/app/storage/uploads`) e não deve ser tratado como armazenamento de produção.
+Guia prático de front-end: [docs/frontend/guia-equipe.md](../docs/frontend/guia-equipe.md).
