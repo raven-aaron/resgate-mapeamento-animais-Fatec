@@ -13,6 +13,7 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
         <Link href="/admin/ocorrencias">Animais cadastrados</Link>
         <Link href="/admin/estatisticas">Estatísticas</Link>
         <Link href="/admin/mapa-termico">Mapa térmico</Link>
+        <Link href="/admin/usuarios">Contas cadastradas</Link>
         <Link href="/ocorrencias/nova?tipo=ENCONTRADO">Cadastrar animal</Link>
       </nav>
       <div className={styles.menuAcoes}><p>Conectado: <strong>{nome}</strong></p><LogoutButton /></div>

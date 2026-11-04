@@ -1,0 +1,63 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import type { RowDataPacket } from "mysql2/promise";
+import { banco } from "../../../lib/db";
+import { usuarioAtual } from "../../../lib/auth";
+import AdminShell from "../../../components/admin/AdminShell";
+
+export const dynamic="force-dynamic";
+type Registro=RowDataPacket&{
+  id:number;nome:string;email:string;situacao:string;
+  criada:string;admin_resgate:number;ocorrencias:number;
+};
+export default async function UsuariosAdmin({searchParams}:{
+  searchParams:Promise<{busca?:string;situacao?:string}>;
+}){
+  const usuario=await usuarioAtual();
+  if(!usuario?.adminResgate)redirect("/admin/login");
+  const params=await searchParams;
+  const busca=(params.busca||"").trim().slice(0,60);
+  const status=["ATIVO","SUSPENSO","DESATIVADO"].includes(params.situacao||"")?params.situacao:"";
+  const where:string[]=[];
+  const valores:string[]=[];
+  if(busca){
+    where.push("(u.nome LIKE ? OR u.email LIKE ?)");
+    valores.push("%"+busca+"%","%"+busca+"%");
+  }
+  if(status){where.push("u.situacao=?");valores.push(status);}
+  const [rows]=await banco().execute<Registro[]>(
+    "SELECT u.id_usuario AS id,u.nome,u.email,u.situacao,u.criado_em AS criada,"+
+    "EXISTS(SELECT 1 FROM permissoes_usuarios p WHERE p.id_usuario=u.id_usuario "+
+    "AND p.modulo='RESGATE' AND p.papel='ADMIN') AS admin_resgate,"+
+    "(SELECT COUNT(*) FROM ocorrencias o WHERE o.id_usuario_criador=u.id_usuario AND o.excluido_em IS NULL) AS ocorrencias "+
+    "FROM usuarios u "+(where.length?"WHERE "+where.join(" AND ")+" ":"")+
+    "ORDER BY u.criado_em DESC LIMIT 100",valores
+  );
+  return <AdminShell nome={usuario.nome} titulo="CONTAS CADASTRADAS">
+    <p>Consulta administrativa de contas do portal e atividades do módulo de Resgate.</p>
+    <form className="filtros-usuarios-admin" method="GET">
+      <label className="form-field">Nome ou e-mail<input name="busca" type="search" defaultValue={busca} maxLength={60}/></label>
+      <label className="form-field">Situação da conta<select name="situacao" defaultValue={status||""}>
+        <option value="">Todas</option><option value="ATIVO">Ativa</option>
+        <option value="SUSPENSO">Suspensa</option><option value="DESATIVADO">Desativada</option>
+      </select></label>
+      <button type="submit" className="action action-primary">BUSCAR</button>
+      <Link href="/admin/usuarios" className="action action-secondary">LIMPAR</Link>
+    </form>
+    <p><strong>{rows.length}</strong> conta(s) nesta consulta (limite de 100 por página).</p>
+    <div className="tabela-usuarios-wrap">
+      <table className="tabela-usuarios">
+        <thead><tr><th>Conta</th><th>Situação</th><th>Papel no resgate</th><th>Ocorrências</th><th>Cadastro</th></tr></thead>
+        <tbody>{rows.map(u=><tr key={u.id}>
+          <td><strong>{u.nome}</strong><small>{u.email}</small></td>
+          <td>{u.situacao==="ATIVO"?"Ativa":u.situacao==="SUSPENSO"?"Suspensa":"Desativada"}</td>
+          <td>{u.admin_resgate?"Administrador":"Cidadão"}</td>
+          <td>{u.ocorrencias}</td>
+          <td>{String(u.criada).replace("T"," ").slice(0,10).split("-").reverse().join("/")}</td>
+        </tr>)}</tbody>
+      </table>
+    </div>
+    {!rows.length&&<p className="note">Nenhuma conta corresponde aos filtros.</p>}
+    <p className="note">As contas são compartilhadas entre os módulos. Para evitar suspensões globais e alterações indevidas de privilégios, a promoção de administradores continua pelo procedimento controlado do sistema, e esta tela é somente de consulta.</p>
+  </AdminShell>;
+}

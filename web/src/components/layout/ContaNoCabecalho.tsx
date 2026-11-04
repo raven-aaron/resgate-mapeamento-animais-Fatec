@@ -38,6 +38,9 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
       // Mostrar aviso somente quando chegam novas mensagens enquanto a página está aberta.
       if(anterior.current!==null&&numero>anterior.current){
         setAviso(numero===1?"Você recebeu uma nova mensagem.":"Você tem novas mensagens.");
+        if(typeof window.Notification!=="undefined" && window.Notification.permission==="granted"){
+          try{new window.Notification("Nova mensagem · Resgate de Animais",{body:"Acesse suas conversas para ler a mensagem."});}catch{}
+        }
       }
       anterior.current=numero;
       setContagem({naoLidas:Number(dados.naoLidas||0),mensagensNaoLidas:numero});

@@ -7,6 +7,7 @@ export default function CaixaEntrada(){
   const [conversas,setConversas]=useState<Conversa[]>([]);
   const [erro,setErro]=useState("");
   const [carregando,setCarregando]=useState(true);
+  const [permissao,setPermissao]=useState<NotificationPermission|"indisponivel">("default");
   useEffect(()=>{
     const ctrl=new AbortController();
     async function atualizar(){
@@ -23,8 +24,22 @@ export default function CaixaEntrada(){
     const intervalo=setInterval(()=>{if(document.visibilityState==="visible")void atualizar();},7000);
     return ()=>{clearInterval(intervalo);ctrl.abort();};
   },[]);
+  async function ativarAvisos(){
+    if(typeof window.Notification==="undefined"){setPermissao("indisponivel");return;}
+    try{setPermissao(await window.Notification.requestPermission());}
+    catch{setPermissao("indisponivel");}
+  }
   return <main className={styles.pagina}>
     <div className="form-heading"><span className="eyebrow">Área do cidadão</span><h1>MINHAS CONVERSAS</h1><p>Mensagens privadas relacionadas aos cartazes de animais perdidos e encontrados.</p></div>
+    <div className="action-row" style={{marginBottom:20}}>
+      <button type="button" className="action action-secondary" onClick={()=>void ativarAvisos()}>
+        {permissao==="granted"?"AVISOS DO NAVEGADOR ATIVADOS":"ATIVAR AVISOS DO NAVEGADOR"}
+      </button>
+      <Link href="/notificacoes" className="action action-secondary">NOTIFICAÇÕES</Link>
+    </div>
+    <p className="note">As conversas atualizam automaticamente. Os avisos do navegador funcionam com a página aberta, mediante sua autorização.</p>
+    {permissao==="denied"&&<p className="note note-warning">O navegador bloqueou notificações. Altere a permissão nas configurações do site.</p>}
+    {permissao==="indisponivel"&&<p className="note note-warning">Seu navegador não oferece avisos do sistema neste ambiente.</p>}
     {carregando&&<p>Carregando conversas...</p>}
     {erro&&<p className="note note-warning" role="alert">{erro}</p>}
     <div className={styles.lista}>
