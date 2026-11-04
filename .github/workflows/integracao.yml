@@ -1,0 +1,58 @@
+name: CI — Integração HTTP
+on:
+  pull_request:
+    branches: [main, feat/banco-resgate-modulos]
+  push:
+    branches: [main, feat/banco-resgate-modulos, "fix/**", "chore/estabilizacao-*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integracao-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-real:
+    name: Sessões, permissões, ocorrências e chat
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      MYSQL_ROOT_PASSWORD: ci-root-efemera
+      MYSQL_PASSWORD: ci-app-efemera
+      MYSQL_DATABASE: resgate_animais
+      MYSQL_USER: resgate_app
+      WEB_BIND_HOST: 127.0.0.1
+      ADMIN_NOME: Administrador Integracao CI
+      ADMIN_EMAIL: ci-admin@example.invalid
+      ADMIN_SENHA: SenhaCI-SomenteRunner2026!
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+      - name: Validar Compose
+        run: docker compose config --quiet
+      - name: Iniciar MySQL isolado
+        run: docker compose up -d --wait --wait-timeout 180 mysql
+      - name: Aplicar e conferir migrações
+        run: |
+          node database/scripts/migrar.mjs
+          node database/scripts/migrar.mjs
+          node database/scripts/migrar.mjs --status
+      - name: Construir e iniciar Next.js
+        run: docker compose up -d --build web
+      - name: Preparar administrador de teste
+        run: docker compose exec -T -e ADMIN_NOME -e ADMIN_EMAIL -e ADMIN_SENHA web node scripts/criar-admin.mjs
+      - name: Testar APIs com três cidadãos e um administrador
+        env:
+          INTEGRACAO_TESTE: "1"
+        run: node web/tests/integracao-http.mjs
+      - name: Logs de diagnóstico
+        if: failure()
+        run: docker compose logs --tail=120 mysql web
+      - name: Descartar somente volumes do runner de CI
+        if: always()
+        run: docker compose down --volumes --remove-orphans
