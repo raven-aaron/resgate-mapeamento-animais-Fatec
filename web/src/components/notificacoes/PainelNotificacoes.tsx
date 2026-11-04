@@ -15,7 +15,7 @@ export default function PainelNotificacoes(){
   },[]);
   useEffect(()=>{
     const controller=new AbortController();
-    void carregar(controller.signal).catch(e=>{
+    void Promise.resolve().then(()=>carregar(controller.signal)).catch(e=>{
       if(!controller.signal.aborted)setErro(e instanceof Error?e.message:"Falha na consulta.");
     }).finally(()=>{if(!controller.signal.aborted)setCarregando(false);});
     const intervalo=setInterval(()=>{if(document.visibilityState==="visible")void carregar(controller.signal).catch(()=>{});},15000);
