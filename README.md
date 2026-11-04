@@ -13,7 +13,7 @@ Portal em Next.js 16 + TypeScript e MySQL 8.4 para o módulo de animais perdidos
 
 ## Ambiente DEMO e testes de API
 
-Para gerar usuários, ocorrências, conversas e mensagens **sintéticos no MySQL isolado** e importar 27 requests no Insomnia, consulte [Seed e Insomnia](docs/seed-insomnia.md). O ambiente DEMO usa portas 3001/3308 e não modifica os volumes de desenvolvimento.
+Para gerar usuários, ocorrências, conversas, fotos ilustrativas e mensagens **sintéticos no MySQL isolado** e importar a coleção Insomnia, consulte [Seed e Insomnia](docs/seed-insomnia.md). O ambiente DEMO usa portas 3001/3308 e não modifica os volumes de desenvolvimento.
 
 ## Requisitos locais
 

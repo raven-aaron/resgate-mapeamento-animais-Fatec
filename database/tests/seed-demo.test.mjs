@@ -51,3 +51,22 @@ test("coleção nativa Insomnia v4 possui requests e IDs consistentes", () => {
   assert.equal(env.data.cidadao_senha,"");
   assert.ok(reqs.every(x=>x.url.includes("{{ _.base_url }}")));
 });
+
+
+test("30 setores DEMO geram posições variadas mesmo com 80 ocorrências", async () => {
+  const { PONTOS_DEMO, regiaoDemo, coordenadaDemo } = await import("../../web/scripts/demo-localidades.mjs");
+  assert.equal(PONTOS_DEMO.length,30);
+  const pontos=Array.from({length:80},(_,i)=>coordenadaDemo(i));
+  assert.ok(pontos.every(([lat,lon])=>lat< -23.53 && lat> -23.63 && lon< -47.40 && lon> -47.50));
+  const arredondados=new Set(pontos.map(([lat,lon])=>lat.toFixed(3)+","+lon.toFixed(3)));
+  assert.ok(arredondados.size>=60,"Muitas ocorrências com mesma coordenada arredondada");
+  assert.equal(regiaoDemo(30),0);
+});
+test("a atualização do seed exige proteção e armazena fotos na API local", () => {
+  const fonte=readFileSync(new URL("../../web/scripts/enriquecer-demo.mjs",import.meta.url),"utf8");
+  assert.match(fonte,/RESGATE_DEMO:"1"/);
+  assert.match(fonte,/DB_NAME:"resgate_animais_demo"/);
+  assert.match(fonte,/foto[s]?_ocorrencias/);
+  assert.match(fonte,/randomUUID/);
+  assert.match(fonte,/storage|uploads/);
+});

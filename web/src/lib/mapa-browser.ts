@@ -3,6 +3,7 @@
    Nao depende do carregamento de scripts de CDN e carrega apenas no navegador. */
 export type MapaLeaflet = {
   setView: (posicao: [number,number], zoom: number) => MapaLeaflet;
+  fitBounds: (pontos: [number,number][], opcoes?: {padding?: [number,number];maxZoom?:number}) => MapaLeaflet;
   remove: () => void;
   removeLayer: (elemento: object) => void;
 };

@@ -54,6 +54,11 @@ jobs:
           fi
       - name: Iniciar aplicação DEMO na porta 3001
         run: docker compose --env-file .env.demo -p resgate-animais-demo up -d --build web
+      - name: Enriquecer fotos e posições sem afetar outras contas
+        run: |
+          docker compose --env-file .env.demo -p resgate-animais-demo exec -T -e RESGATE_DEMO=1 -e CI=true -e DEMO_MEDIA_OFFLINE=1 web node scripts/enriquecer-demo.mjs --dry-run
+          docker compose --env-file .env.demo -p resgate-animais-demo exec -T -e RESGATE_DEMO=1 -e CI=true -e DEMO_MEDIA_OFFLINE=1 web node scripts/enriquecer-demo.mjs --apply
+          docker compose --env-file .env.demo -p resgate-animais-demo exec -T -e RESGATE_DEMO=1 -e CI=true -e DEMO_MEDIA_OFFLINE=1 web node scripts/enriquecer-demo.mjs --apply
       - name: Confirmar dados reais via API pública
         run: |
           node --input-type=module -e '
@@ -68,7 +73,17 @@ jobs:
               throw new Error("Ocorrências sintéticas não apareceram no mapa: "+JSON.stringify(json).slice(0,500));
             if(!json.ocorrencias.every(o=>o.status_aprovacao==="APROVADO"&&o.status_caso==="ABERTO"))
               throw new Error("A API revelou registros pendentes ou encerrados");
-            console.log("OK: "+json.ocorrencias.length+" ocorrências públicas DEMO consultadas via HTTP.");
+            const distintos=new Set(json.ocorrencias.map(o=>o.latitude+","+o.longitude));
+            if(distintos.size<18)throw new Error("Pins concentrados: só "+distintos.size+" coordenadas distintas");
+            if(!json.ocorrencias.every(o=>/^\/api\/fotos\/[0-9a-f-]+\.jpg$/.test(o.foto||"")))
+              throw new Error("Há ocorrências sem fotos locais no mapa");
+            const urlFoto="http://127.0.0.1:3001"+json.ocorrencias[0].foto;
+            const imagem=await fetch(urlFoto,{signal:AbortSignal.timeout(10000)});
+            if(imagem.status!==200||!imagem.headers.get("content-type")?.includes("image/jpeg"))
+              throw new Error("Foto não foi servida pelo backend: HTTP "+imagem.status);
+            const conteudo=new Uint8Array(await imagem.arrayBuffer());
+            if(conteudo[0]!==255||conteudo[1]!==216)throw new Error("Foto JPG inválida");
+            console.log("OK: "+json.ocorrencias.length+" ocorrências, "+distintos.size+" pins e foto pública HTTP 200.");
           '
       - name: Diagnóstico em caso de falha
         if: failure()
