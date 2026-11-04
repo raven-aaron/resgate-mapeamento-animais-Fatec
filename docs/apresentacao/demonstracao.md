@@ -2,7 +2,7 @@
 
 ## Referência para demonstração em 11/11/2026
 
-Confira também [o roteiro de validação ponta a ponta](./roteiro-validacao-11-11.md), incluindo acesso administrativo isolado, edição, exclusão lógica e encerramento.
+Confira também [o roteiro de validação ponta a ponta](validacao.md), incluindo acesso administrativo isolado, edição, exclusão lógica e encerramento.
 
 ## Ambiente local
 

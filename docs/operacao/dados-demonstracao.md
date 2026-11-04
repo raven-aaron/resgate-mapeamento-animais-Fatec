@@ -110,7 +110,7 @@ Não use `down -v` em ambientes com informações que deseja preservar. Não exe
 
 ## Importar no Insomnia
 
-Arquivo: [`insomnia/resgate-demo.insomnia-v4.json`](../insomnia/resgate-demo.insomnia-v4.json).
+Arquivo: [`insomnia/resgate-demo.insomnia-v4.json`](../../insomnia/resgate-demo.insomnia-v4.json).
 
 1. No Insomnia, escolha **Import → File** e selecione o arquivo. O formato é **Insomnia JSON v4**, atualmente suportado para importação.
 2. Abra os ambientes da coleção e defina `cidadao_senha` e `admin_senha` **localmente**, usando a senha gerada no terminal. Não envie senhas para o GitHub nem exporte o ambiente com esses valores.
