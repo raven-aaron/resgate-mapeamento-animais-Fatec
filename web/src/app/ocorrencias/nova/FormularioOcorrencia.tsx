@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 type LocalizacaoConfirmada = { latitude_aproximada: number; longitude_aproximada: number };
 
 type Tipo = "PERDIDO" | "ENCONTRADO";
@@ -19,10 +19,9 @@ function hojeLocal() {
 
 export default function FormularioOcorrencia() {
   const parametros = useSearchParams();
-  const router = useRouter();
-  // O tipo vem sempre da URL; mudar apenas o querystring nao deve manter o estado anterior.
-  const tipoDaUrl: Tipo = parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO";
-  const [tipo,setTipo] = useState<Tipo>(tipoDaUrl);
+  // A URL é a fonte única da seleção. Assim, título, campos e endereço
+  // permanecem sincronizados mesmo ao navegar entre perdido/encontrado.
+  const tipo: Tipo = parametros.get("tipo") === "ENCONTRADO" ? "ENCONTRADO" : "PERDIDO";
 
   const [especie, setEspecie] = useState("");
   const [nome, setNome] = useState("");
@@ -181,10 +180,13 @@ export default function FormularioOcorrencia() {
               Tipo de ocorrência
               <select value={tipo} onChange={e => {
                 const selecionado=e.target.value==="ENCONTRADO"?"ENCONTRADO":"PERDIDO";
-                setTipo(selecionado);
-                if(selecionado==="ENCONTRADO")setMicrochip("");
-                router.replace("/ocorrencias/nova?tipo=" + selecionado, { scroll: false });
-                setRevisao(false);
+                if(selecionado!==tipo){
+                  if(selecionado==="ENCONTRADO")setMicrochip("");
+                  setRevisao(false);
+                  // O History API integra-se ao useSearchParams no Next.js:
+                  // URL e campos são atualizados juntos, sem navegação pendente.
+                  window.history.replaceState(null,"","/ocorrencias/nova?tipo="+selecionado);
+                }
               }}>
                 <option value="PERDIDO">Pet perdido</option>
                 <option value="ENCONTRADO">Pet encontrado</option>
