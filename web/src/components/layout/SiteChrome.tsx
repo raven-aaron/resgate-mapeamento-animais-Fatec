@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./SiteChrome.module.css";
+import ContaNoCabecalho from "./ContaNoCabecalho";
 
 const logoBemEstar = "https://raw.githubusercontent.com/raven-aaron/Projeto-Resgate-e-Mapeamento-FATEC/main/ProjetoNext/public/assets/logo_Bem-EstarAnimal_2.png";
 
@@ -118,6 +119,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
             </div>
           </div>
         </nav>
+        <div className={styles.container}><ContaNoCabecalho /></div>
       </header>
       {menuAberto && (
         <div className={styles.menuOverlay}>
@@ -134,7 +136,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
               <Link href="/mapa" onClick={() => setMenuAberto(false)}>Mapa de animais</Link>
               <Link href="/minhas-ocorrencias" onClick={() => setMenuAberto(false)}>Minhas ocorrências</Link>
               <Link href="/mensagens" onClick={() => setMenuAberto(false)}>Minhas conversas</Link>
-              <Link href="/login" onClick={() => setMenuAberto(false)}>Entrar na minha conta</Link>
+              <ContaNoCabecalho compacto />
             </div>
           </aside>
         </div>
