@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./home.module.css";
+import VitrinePublica from "../components/ocorrencias/VitrinePublica";
 
 export default function Home() {
   return (
     <main>
+      <VitrinePublica/>
       <section className={styles.secao}>
         <div className={styles.container}>
           <h1 className={styles.tituloDestaque}>PERDI O MEU PET</h1>
