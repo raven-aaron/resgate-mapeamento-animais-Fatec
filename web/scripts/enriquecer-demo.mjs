@@ -7,7 +7,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import mysql from "mysql2/promise";
-import { PONTOS_DEMO, regiaoDemo, coordenadaDemo } from "./demo-localidades.mjs";
+import { BAIRROS_DEMO, regiaoDemo, coordenadaDemo } from "./demo-localidades.mjs";
 
 const catalogo = {
   Cachorro:[710927,5331916,18056482,14757125,18436664,8725860,16620588,18039300],
@@ -99,13 +99,13 @@ async function executar(){
       "JOIN bairros b ON b.id_bairro=o.id_bairro "+
       "JOIN animais a ON a.id_animal=o.id_animal JOIN especies e ON e.id_especie=a.id_especie "+
       "WHERE u.email REGEXP '^demo[.]usuario[0-9]{2,3}@seed[.]resgate[.]invalid$' "+
-      "AND b.nome REGEXP '^Região Demo [0-9]{2}$' "+
+      "AND a.caracteristicas LIKE '%Registro sintético DEMO, sem tutor ou endereço real.%' "+
       "ORDER BY o.id_ocorrencia"
     );
     if(!ocorrencias.length)throw new Error("Não encontrei ocorrências geradas pelo seed. Banco preservado.");
     const semFotos=ocorrencias.filter(o=>Number(o.qtdFotos)===0);
     console.log("DEMO: "+ocorrencias.length+" ocorrências sintéticas, "+
-      semFotos.length+" sem foto. "+PONTOS_DEMO.length+" setores espaciais.");
+      semFotos.length+" sem foto. "+BAIRROS_DEMO.length+" bairros reais de referência.");
     if(argumentos[0]==="--dry-run"){
       console.log("Prévia apenas; nenhum registro ou arquivo foi alterado.");
       return;
@@ -116,14 +116,11 @@ async function executar(){
     await db.beginTransaction();
     emTransacao=true;
     const bairros=[];
-    for(let i=0;i<PONTOS_DEMO.length;i++){
-      const nome="Região Demo "+String(i+1).padStart(2,"0");
-      const [lat,lon]=PONTOS_DEMO[i];
+    for(const {nome,latitude,longitude} of BAIRROS_DEMO){
       const [resultado]=await db.execute(
         "INSERT INTO bairros (nome,latitude_aproximada,longitude_aproximada) VALUES (?,?,?) "+
-        "ON DUPLICATE KEY UPDATE id_bairro=LAST_INSERT_ID(id_bairro),"+
-        "latitude_aproximada=VALUES(latitude_aproximada),longitude_aproximada=VALUES(longitude_aproximada)",
-        [nome,lat,lon]
+        "ON DUPLICATE KEY UPDATE id_bairro=LAST_INSERT_ID(id_bairro)",
+        [nome,latitude,longitude]
       );
       bairros.push(resultado.insertId);
     }
@@ -133,11 +130,12 @@ async function executar(){
       const setor=regiaoDemo(i);
       const [latitude,longitude]=coordenadaDemo(i);
       await db.execute(
-        "UPDATE ocorrencias SET id_bairro=?,latitude_aproximada=?,longitude_aproximada=?,"+
-        "ponto_referencia=?,origem_localizacao='BAIRRO',precisao_localizacao='BAIRRO_APROXIMADO' "+
+        "UPDATE ocorrencias SET id_bairro=?,cep=?,latitude_aproximada=?,longitude_aproximada=?,"+
+        "ponto_referencia=NULL,logradouro=NULL,"+
+        "descricao=REPLACE(descricao,' Registro sintético DEMO, sem tutor ou endereço real.',''),"+
+        "origem_localizacao='BAIRRO',precisao_localizacao='BAIRRO_APROXIMADO' "+
         "WHERE id_ocorrencia=?",
-        [bairros[setor],latitude,longitude,
-          "Setor fictício "+String(setor+1).padStart(2,"0")+", localização ilustrativa",o.id]
+        [bairros[setor],BAIRROS_DEMO[setor].cep,latitude,longitude,o.id]
       );
       if(Number(o.qtdFotos)!==0)continue;
       const bancoFotos=biblioteca[o.especie];
@@ -158,7 +156,7 @@ async function executar(){
     await db.commit();
     emTransacao=false;
     console.log("DEMO ENRIQUECIDO OK | ocorrências redistribuídas="+ocorrencias.length+
-      " | fotos adicionadas="+adicionadas+" | setores="+PONTOS_DEMO.length);
+      " | fotos adicionadas="+adicionadas+" | bairros reais="+BAIRROS_DEMO.length);
     console.log("Dados de cidadãos e registros não sintéticos permanecem intactos.");
   }catch(error){
     if(emTransacao)await db.rollback().catch(()=>undefined);

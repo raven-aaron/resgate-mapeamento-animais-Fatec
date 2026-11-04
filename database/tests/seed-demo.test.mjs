@@ -53,14 +53,21 @@ test("coleção nativa Insomnia v4 possui requests e IDs consistentes", () => {
 });
 
 
-test("30 setores DEMO geram posições variadas mesmo com 80 ocorrências", async () => {
-  const { PONTOS_DEMO, regiaoDemo, coordenadaDemo } = await import("../../web/scripts/demo-localidades.mjs");
-  assert.equal(PONTOS_DEMO.length,30);
+test("15 bairros reais de Votorantim possuem CEP de logradouro, fontes e georreferência", async () => {
+  const {BAIRROS_DEMO,regiaoDemo,coordenadaDemo}=await import("../../web/scripts/demo-localidades.mjs");
+  assert.equal(BAIRROS_DEMO.length,15);
+  assert.equal(new Set(BAIRROS_DEMO.map(b=>b.nome)).size,15);
+  assert.equal(new Set(BAIRROS_DEMO.map(b=>b.cep)).size,15);
+  for(const bairro of BAIRROS_DEMO){
+    assert.match(bairro.cep,/^181\d{5}$/);
+    assert.ok(bairro.latitude< -23.52 && bairro.latitude> -23.60);
+    assert.ok(bairro.longitude< -47.41 && bairro.longitude> -47.51);
+    assert.match(bairro.fonteCep,/^https:\/\/cepbrasil.com\/sp\/votorantim\//);
+    assert.match(bairro.fonteMapa,/^https:\/\/mapcarta.com\//);
+  }
   const pontos=Array.from({length:80},(_,i)=>coordenadaDemo(i));
-  assert.ok(pontos.every(([lat,lon])=>lat< -23.53 && lat> -23.63 && lon< -47.40 && lon> -47.50));
-  const arredondados=new Set(pontos.map(([lat,lon])=>lat.toFixed(3)+","+lon.toFixed(3)));
-  assert.ok(arredondados.size>=60,"Muitas ocorrências com mesma coordenada arredondada");
-  assert.equal(regiaoDemo(30),0);
+  assert.equal(new Set(pontos.map(([lat,lon])=>lat.toFixed(6)+","+lon.toFixed(6))).size,80);
+  assert.equal(regiaoDemo(15),0);
 });
 test("a atualização do seed exige proteção e armazena fotos na API local", () => {
   const fonte=readFileSync(new URL("../../web/scripts/enriquecer-demo.mjs",import.meta.url),"utf8");

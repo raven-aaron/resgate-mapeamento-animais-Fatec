@@ -6,7 +6,7 @@
 import { randomBytes, scryptSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { consultar } from "./mysql.mjs";
-import { PONTOS_DEMO, regiaoDemo, coordenadaDemo } from "../../web/scripts/demo-localidades.mjs";
+import { BAIRROS_DEMO, regiaoDemo, coordenadaDemo } from "../../web/scripts/demo-localidades.mjs";
 
 const ajuda = [
   "Uso: RESGATE_DEMO=1 node database/scripts/seed-demo.mjs [--dry-run | --apply] [--count N] [--users N] [--chats N] [--seed N]",
@@ -133,9 +133,8 @@ function produzirSql(opcoes,senha) {
   }
   sql.push("INSERT INTO permissoes_usuarios (id_usuario,modulo,papel) VALUES (@demo_u0,'RESGATE','ADMIN');");
 
-  for (let i = 0; i < PONTOS_DEMO.length; i++) {
-    const nome = "Região Demo "+String(i+1).padStart(2,"0");
-    const [latitude,longitude] = PONTOS_DEMO[i];
+  for (let i = 0; i < BAIRROS_DEMO.length; i++) {
+    const {nome,latitude,longitude} = BAIRROS_DEMO[i];
     sql.push("INSERT INTO bairros (nome,latitude_aproximada,longitude_aproximada) VALUES ("+
       [nome,latitude,longitude].map(valorSql).join(",")+");");
     sql.push("SET @demo_b"+i+" = LAST_INSERT_ID();");
@@ -153,14 +152,16 @@ function produzirSql(opcoes,senha) {
     const aprovado = situacao==="APROVADO" || situacao==="RESOLVIDO";
     const encerrado = situacao==="RESOLVIDO";
     const bairro = regiaoDemo(i);
+    const regiao = BAIRROS_DEMO[bairro];
     const sexo = escolher(rnd,["MACHO","FEMEA","INDETERMINADO"]);
     const porte = escolher(rnd,["PEQUENO","MEDIO","GRANDE"]);
-    const descricao = escolher(rnd,descricoes)+" Registro sintético DEMO, sem tutor ou endereço real.";
+    const descricao = escolher(rnd,descricoes);
+    const marcaInterna = descricao+" Registro sintético DEMO, sem tutor ou endereço real.";
     const [latitude,longitude] = coordenadaDemo(i);
     sql.push("INSERT INTO animais (nome,id_especie,sexo,porte,possui_microchip,idade_aproximada,caracteristicas) "+
       "SELECT "+valorSql(nome)+",id_especie,"+valorSql(sexo)+","+
       valorSql(porte)+","+(tipo==="PERDIDO" ? (rnd()<0.25?"1":"0") : "NULL")+","+
-      valorSql(inteiro(rnd,1,10)+" anos")+","+valorSql(descricao)+
+      valorSql(inteiro(rnd,1,10)+" anos")+","+valorSql(marcaInterna)+
       " FROM especies WHERE nome="+valorSql(especie)+" LIMIT 1;");
     sql.push("SET @demo_a"+i+" = LAST_INSERT_ID();");
     sql.push("INSERT INTO animais_cores (id_animal,id_cor) "+
@@ -168,12 +169,12 @@ function produzirSql(opcoes,senha) {
     const status = situacao==="RESOLVIDO" ? "APROVADO" : situacao;
     const motivo = encerrado ? (tipo==="PERDIDO" ? "REENCONTRADO" : "DEVOLVIDO_AO_TUTOR") : null;
     sql.push("INSERT INTO ocorrencias (id_usuario_criador,id_animal,id_bairro,ponto_referencia,"+
-      "tipo_ocorrencia,status_aprovacao,status_caso,motivo_encerramento,encerrado_em,data_evento,descricao,"+
+      "tipo_ocorrencia,status_aprovacao,status_caso,motivo_encerramento,encerrado_em,data_evento,descricao,cep,"+
       "latitude_aproximada,longitude_aproximada,origem_localizacao,precisao_localizacao) VALUES ("+
-      ["@demo_u"+owner,"@demo_a"+i,"@demo_b"+bairro,valorSql("Setor fictício "+String(bairro+1).padStart(2,"0")+", localização ilustrativa"),
+      ["@demo_u"+owner,"@demo_a"+i,"@demo_b"+bairro,"NULL",
         valorSql(tipo),valorSql(status),valorSql(encerrado?"RESOLVIDO":"ABERTO"),valorSql(motivo),
         encerrado?"UTC_TIMESTAMP(3)":"NULL","DATE_SUB(CURDATE(), INTERVAL "+inteiro(rnd,1,75)+" DAY)",
-        valorSql(descricao),valorSql(latitude),valorSql(longitude),"'BAIRRO'","'BAIRRO_APROXIMADO'"].join(",")+");");
+        valorSql(descricao),valorSql(regiao.cep),valorSql(latitude),valorSql(longitude),"'BAIRRO'","'BAIRRO_APROXIMADO'"].join(",")+");");
     sql.push("SET @demo_o"+i+" = LAST_INSERT_ID();");
     sql.push("INSERT INTO historico_ocorrencias (id_ocorrencia,id_usuario_responsavel,acao) "+
       "VALUES (@demo_o"+i+",@demo_u"+owner+",'CRIACAO');");
