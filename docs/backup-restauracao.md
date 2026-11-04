@@ -1,30 +1,40 @@
-# Backups do ambiente local
+# Backup e restauração segura — ambiente local
 
-## Criar um backup completo
+Os dados de demonstração ficam no MySQL do volume `mysql_data` e as imagens no volume `media_data`. **Git/GitHub não sincronizam esses volumes.**
 
-Na raiz do repositório, com o Docker Desktop aberto e os contêineres em execução:
+## Gerar backup
 
-```powershell
+Com Docker Compose e MySQL/web iniciados, na raiz:
+
+```bash
 node database/scripts/backup-local.mjs
 ```
 
-O script gera uma pasta nova em `backups/resgate-DATA`, com um dump `resgate_animais.sql`, a pasta `storage` de fotografias do volume `media_data`, e um aviso de segurança. O arquivo `.gitignore` impede o envio automático desses backups ao GitHub.
+O script cria `backups/resgate-DATA/` com `resgate_animais.sql`, uma cópia do diretório `storage` e instruções. Não sobrescreve backups anteriores e não altera os dados existentes. A pasta `backups/` está no `.gitignore`.
 
-Os dados copiados podem conter **nome, e-mail, telefone, mensagens privadas e fotos**. Guarde em local protegido, use criptografia quando transportar, restrinja o acesso e elimine cópias desnecessárias. Não use repositórios Git para compartilhar o backup.
+Os arquivos podem conter **dados pessoais e mensagens privadas**. Armazene em mídia segura, com acesso limitado e, se necessário, criptografia. Não envie o dump para GitHub, Jira ou Teams.
 
-## Restaurar sem apagar o ambiente existente
+## Testar uma restauração sem mexer no banco atual
 
-**Não restaure por cima do banco da faculdade nem rode `docker compose down -v`.** Restaurar em ambiente descartável primeiro é obrigatório para verificar a integridade.
+```bash
+node database/scripts/verificar-restauracao.mjs backups/resgate-DATA
+```
 
-1. Crie um segundo ambiente Docker com **outro nome de projeto, outras portas e novos volumes**.
-2. Confira a versão do MySQL (8.4), o esquema criado e o conteúdo do arquivo SQL.
-3. Na base de teste vazia, importe o arquivo com o cliente MySQL 8.4 usando a conta administrativa local desse ambiente e revise os erros.
-4. Copie as imagens da pasta `storage` para o volume equivalente desse novo ambiente, preservando nomes dos arquivos.
-5. Valide as tabelas, o histórico de migrações, o acesso por duas contas e as fotos no navegador.
-6. Somente depois de confirmar a restauração em um ambiente isolado, planeje uma eventual troca do ambiente original, com aprovação e backup anterior.
+Substitua o diretório pelo nome real gerado. O verificador:
 
-Não incluí um comando automático de restauração destrutiva: ele poderia apagar dados existentes ou causar mistura de chaves entre os computadores. O objetivo é permitir backups verificáveis sem alterar o banco em uso.
+1. Recusa caminhos fora da pasta local `backups/`.
+2. Inicializa um **MySQL 8.4 descartável**, sem publicar portas e sem montar os volumes do projeto.
+3. Importa o dump, confere migrações e contagens básicas de contas/ocorrências/fotos.
+4. Destrói somente o contêiner de verificação, mesmo se ocorrer um erro.
 
-## Limitações
+O teste comprova que o dump pode ser lido e que o esquema principal foi recuperado. **Não comprova automaticamente cada foto** nem garante a restauração integral da interface: para entrega final, verifique também os arquivos em `storage/uploads` e abra alguns cartazes em ambiente separado.
 
-O script depende de Docker Compose, `mysqldump` no contêiner MySQL, `docker compose cp` e permissões para escrever na pasta `backups`. Ele ainda precisa ser testado em Windows e Ubuntu. Para hospedagem real, definir armazenamento externo cifrado, agendamento, retenção e testes periódicos de recuperação.
+## Recuperação efetiva
+
+Não restaure sobre o banco usado pela equipe sem autorização e novo backup. Para transferir a base para outro computador, prepare outro Compose isolado (nome do projeto, portas e volumes próprios), importe o dump nesse ambiente, copie as fotos para o volume correto, aplique a versão compatível do app e execute o roteiro manual com dois cidadãos e ADM.
+
+**Nunca execute `docker compose down -v` para 'corrigir' um banco com informações.** O comando destrói volumes. Não há rotina automática destrutiva de restore neste repositório.
+
+## Produção
+
+Backups locais não representam plano de recuperação em produção. Para publicar: backup externo criptografado, rotina automatizada, retenção, monitoramento de falhas e testes periódicos de restauração em ambiente isolado.
