@@ -53,7 +53,7 @@ export default function ContaNoCabecalho({compacto=false}:{compacto?:boolean}){
     window.addEventListener("resgate-auth",aoAlterar);
     window.addEventListener("resgate-notificacoes",consultarAvisos);
     document.addEventListener("visibilitychange",aoVisivel);
-    const intervalo=setInterval(()=>{if(document.visibilityState==="visible"){void consultarConta();void consultarAvisos();}},15000);
+    const intervalo=setInterval(()=>{if(document.visibilityState==="visible")void consultarConta();void consultarAvisos();},15000);
     return ()=>{
       clearInterval(intervalo);
       window.removeEventListener("resgate-auth",aoAlterar);
