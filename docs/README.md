@@ -7,6 +7,7 @@ Consulte o guia correspondente à tarefa.
 | Arquitetura | [Visão geral](arquitetura/visao-geral.md) | Fluxo da requisição, responsabilidades e autenticação |
 | Arquitetura | [Modelo de dados](arquitetura/modelo-dados.md) | Entidades, relacionamentos e regras de negócio |
 | Arquitetura | [Dicionário de dados](arquitetura/dicionario-dados.md) | Campos e estrutura do MySQL |
+| Arquitetura | [Swagger UI / OpenAPI](arquitetura/swagger.md) | Documentação interativa, teste de rotas, autenticação e especificação JSON |
 | Arquitetura | [API HTTP](arquitetura/api-http.md) | Rotas, métodos, entradas, respostas e autorização |
 | Arquitetura | [Integração entre módulos](arquitetura/integracao.md) | Contratos entre frentes de trabalho |
 | Front-end | [Guia da equipe](frontend/guia-equipe.md) | Onde editar, como validar e limites do escopo |
