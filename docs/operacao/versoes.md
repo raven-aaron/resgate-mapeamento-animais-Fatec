@@ -13,7 +13,7 @@ Este projeto utiliza um ambiente padronizado para que todos consigam instalar, e
 | TypeScript | 5.9.3 |
 | ESLint | 9.39.5 |
 | eslint-config-next | 16.4.2 |
-| MySQL | A definir com os responsáveis pelo banco antes de criar o Docker Compose |
+| MySQL | 8.4.13 (imagem do Docker Compose) |
 
 As demais dependências e seus pacotes transitivos seguem o `web/package-lock.json`. Algumas declarações de tipos continuam com faixas de versão; o lockfile registra as versões efetivamente usadas.
 
