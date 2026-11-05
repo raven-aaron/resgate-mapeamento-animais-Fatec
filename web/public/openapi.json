@@ -2988,14 +2988,33 @@
         "type": "object",
         "properties": {
           "usuario": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Usuario"
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 3
               },
-              {
-                "type": "null"
+              "nome": {
+                "type": "string",
+                "example": "Maria"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "maria@example.com"
+              },
+              "adminResgate": {
+                "type": "boolean"
               }
-            ]
+            },
+            "required": [
+              "id",
+              "nome",
+              "email",
+              "adminResgate"
+            ],
+            "nullable": true,
+            "description": "Retorna null quando não há sessão válida."
           }
         },
         "required": [
