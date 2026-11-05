@@ -1,0 +1,3476 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Resgate e Mapeamento de Animais — API HTTP",
+    "version": "1.0.0",
+    "description": "Documentação baseada nas rotas `web/src/app/api` da branch main (05/11/2026). Projeto FATEC Votorantim/SP.\n\n**Ambientes:** desenvolvimento em localhost:3000 e DEMO em localhost:3001; a especificação usa o mesmo host da página.\n\n**Autenticação:** sessões de cidadão e de administrador são independentes, via cookies HttpOnly `resgate_sessao` e `resgate_admin_sessao`. Faça login pela interface do site antes de usar endpoints protegidos. O Swagger não cria cookies manualmente; o navegador os envia automaticamente para a mesma origem.\n\n**Segurança:** mutações verificam a origem da requisição; chamadas da UI local usam mesmo host. Não inclua dados pessoais reais nos exemplos. Execução interativa só é habilitada no localhost/127.0.0.1. Os endpoints executados podem gravar ou alterar dados no banco; prefira o ambiente DEMO.\n\n**Chat:** mensagens e notificações são gravadas no MySQL; não há WebSocket nem garantias de entrega instantânea. O cliente precisa consultar as APIs periodicamente.\n\n**Resposta de erro:** JSON `{erro: string}`, exceto GET /api/fotos/{arquivo}, que retorna texto simples."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Mesmo host da aplicação (dev 3000 ou DEMO 3001)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autenticação",
+      "description": "Contas, login, sessões e recuperação."
+    },
+    {
+      "name": "Ocorrências",
+      "description": "Registro, consulta pública, edição, encerramento e exclusão."
+    },
+    {
+      "name": "Fotografias",
+      "description": "Upload, exclusão e controle de acesso às imagens."
+    },
+    {
+      "name": "Administração",
+      "description": "Moderação, permissões e indicadores."
+    },
+    {
+      "name": "Conversas",
+      "description": "Chat interno assíncrono e confirmação de leitura."
+    },
+    {
+      "name": "Notificações",
+      "description": "Avisos e mensagens não lidas."
+    },
+    {
+      "name": "Localização",
+      "description": "Validação regional do CEP de Votorantim/SP."
+    }
+  ],
+  "paths": {
+    "/api/auth/cadastro": {
+      "post": {
+        "operationId": "cadastrarCidadao",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Criar conta de cidadão",
+        "description": "Cria usuário e já inicia uma sessão de cidadão com cookie HttpOnly. Nome de 2–100 caracteres, telefone com DDD (10–11 dígitos), senha de 10–128 caracteres.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "example": "Maria Silva"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                    "example": "maria@example.com"
+                  },
+                  "telefone": {
+                    "type": "string",
+                    "pattern": "^[0-9]{10,11}$",
+                    "example": "15999998888"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 128,
+                    "format": "password"
+                  }
+                },
+                "required": [
+                  "nome",
+                  "email",
+                  "telefone",
+                  "senha"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Conta criada e cookie resgate_sessao emitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "nome": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "nome"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "entrar",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Entrar como cidadão ou administrador",
+        "description": "Use admin=true para sessão administrativa separada; exige privilégio ADMIN do módulo RESGATE. O cookie retornado é resgate_sessao ou resgate_admin_sessao. No login cidadão, manterConectado=true cria sessão persistente de 30 dias; caso contrário, sessão de 12 horas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "manterConectado": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "admin": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "email",
+                  "senha"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado; sessão emitida em cookie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "adminResgate": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "adminResgate"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de tentativas excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "sessaoCidadao",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Consultar sessão de cidadão",
+        "description": "Sem cookie válido, retorna HTTP 200 com usuario=null (não retorna 401).",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário atual ou null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessao"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "sairCidadao",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Encerrar sessão de cidadão",
+        "description": "Revoga a sessão de cidadão, sem afetar a sessão administrativa.",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão encerrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sucesso"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/admin/me": {
+      "get": {
+        "operationId": "sessaoAdministrador",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Consultar sessão administrativa",
+        "description": "Retorna usuario=null (HTTP 200) se não houver sessão administrativa autorizada.",
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrador atual ou null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessao"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/admin/logout": {
+      "post": {
+        "operationId": "sairAdministrador",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Encerrar sessão administrativa",
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão administrativa encerrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sucesso"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/recuperar": {
+      "post": {
+        "operationId": "solicitarRecuperacao",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Solicitar recuperação de senha por e-mail",
+        "description": "Requer RESEND_API_KEY, MAIL_FROM e APP_PUBLIC_URL configurados. Resposta genérica não revela se existe conta. Link expira em 30 minutos.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "nome",
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pedido processado (resultado não identifica existência da conta)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mensagem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de tentativas excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Serviço externo falhou",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Serviço temporariamente indisponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/redefinir": {
+      "post": {
+        "operationId": "redefinirSenha",
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Redefinir senha com token",
+        "description": "Token hexadecimal de 64 caracteres, válido e não utilizado. Atualiza a senha e revoga sessões anteriores.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 10,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "token",
+                  "senha"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha alterada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mensagem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ocorrencias": {
+      "get": {
+        "operationId": "listarOcorrencias",
+        "tags": [
+          "Ocorrências"
+        ],
+        "summary": "Listar ocorrências públicas",
+        "description": "Lista até 200 ocorrências aprovadas, abertas e não excluídas. Filtros não reconhecidos são ignorados pela implementação.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tipo",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PERDIDO",
+                "ENCONTRADO"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "especie",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Cachorro",
+                "Gato"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "porte",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PEQUENO",
+                "MEDIO",
+                "GRANDE"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sexo",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MACHO",
+                "FEMEA"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista pública",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ocorrencias": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Ocorrencia"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ocorrencias"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "criarOcorrencia",
+        "tags": [
+          "Ocorrências"
+        ],
+        "summary": "Cadastrar animal perdido ou encontrado",
+        "description": "Use multipart/form-data: 'dados' deve ser uma STRING contendo JSON serializado com o esquema OcorrenciaDados; 'confirmacao_privacidade' deve ser 'confirmado'. Até 5 fotos JPG/PNG/WebP, máximo 5 MB por foto. CEP é geocodificado pelo servidor; coordenadas do cliente não são aceitas. Cadastro inicia PENDENTE.",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dados": {
+                    "type": "string",
+                    "description": "JSON serializado (texto), não objeto separado. Veja o esquema OcorrenciaDados.",
+                    "example": "{\"tipo\":\"PERDIDO\",\"especie\":\"Cachorro\",\"nome\":\"Mel\",\"sexo\":\"FEMEA\",\"porte\":\"MEDIO\",\"dataEvento\":\"2026-11-01\",\"cep\":\"18110000\",\"referencia\":\"Próximo à praça\"}"
+                  },
+                  "confirmacao_privacidade": {
+                    "type": "string",
+                    "enum": [
+                      "confirmado"
+                    ]
+                  },
+                  "fotos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "JPG, PNG ou WebP; até cinco arquivos, 5 MB cada"
+                    }
+                  }
+                },
+                "required": [
+                  "dados",
+                  "confirmacao_privacidade"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ocorrência criada pendente de moderação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "PENDENTE"
+                      ]
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status",
+                    "mensagem"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Região não validada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Serviço temporariamente indisponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ocorrencias/{id}": {
+      "get": {
+        "operationId": "detalharOcorrencia",
+        "tags": [
+          "Ocorrências"
+        ],
+        "summary": "Obter ocorrência pública",
+        "description": "Apenas registros aprovados, abertos e não excluídos; não serve para consultar registros pendentes próprios.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes da ocorrência",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ocorrencia": {
+                      "$ref": "#/components/schemas/Ocorrencia"
+                    }
+                  },
+                  "required": [
+                    "ocorrencia"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "alterarOcorrencia",
+        "tags": [
+          "Ocorrências"
+        ],
+        "summary": "Editar ou encerrar a própria ocorrência",
+        "description": "Somente o autor da ocorrência pode alterar. EDITAR exige dataEvento e os demais campos pertinentes (nome obrigatório se PERDIDO). A edição retorna o registro para PENDENTE; novo CEP é recalculado no servidor. ENCERRAR exige motivo compatível com o tipo; OUTRO exige detalhe com pelo menos 5 caracteres. Encerramento fecha conversas.",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "acao": {
+                        "type": "string",
+                        "enum": [
+                          "EDITAR"
+                        ]
+                      },
+                      "nome": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "description": "Obrigatório quando tipo = PERDIDO; pode ficar vazio em ENCONTRADO."
+                      },
+                      "sexo": {
+                        "type": "string",
+                        "enum": [
+                          "",
+                          "MACHO",
+                          "FEMEA"
+                        ]
+                      },
+                      "porte": {
+                        "type": "string",
+                        "enum": [
+                          "",
+                          "PEQUENO",
+                          "MEDIO",
+                          "GRANDE"
+                        ]
+                      },
+                      "idade": {
+                        "type": "string",
+                        "maxLength": 30
+                      },
+                      "microchip": {
+                        "type": "string",
+                        "enum": [
+                          "",
+                          "SIM",
+                          "NAO"
+                        ],
+                        "description": "Somente para animal perdido; ignorado em encontrado."
+                      },
+                      "raca": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "description": "Raça cadastrada; o cadastro rejeita raça para Gato."
+                      },
+                      "cor": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "description": "Cor cadastrada no catálogo."
+                      },
+                      "descricao": {
+                        "type": "string",
+                        "maxLength": 4000,
+                        "description": "Não incluir telefone, e-mail ou número residencial."
+                      },
+                      "referencia": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "description": "Referência pública sem telefone, e-mail ou número residencial."
+                      },
+                      "dataEvento": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Data real que não pode estar no futuro."
+                      },
+                      "cep": {
+                        "type": "string",
+                        "pattern": "^[0-9]{8}$",
+                        "example": "18110000",
+                        "description": "CEP válido e geocodificável de Votorantim (somente região aproximada)."
+                      }
+                    },
+                    "required": [
+                      "acao",
+                      "dataEvento"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "acao": {
+                        "type": "string",
+                        "enum": [
+                          "ENCERRAR"
+                        ]
+                      },
+                      "motivo": {
+                        "type": "string",
+                        "enum": [
+                          "REENCONTRADO",
+                          "DEVOLVIDO_AO_TUTOR",
+                          "DUPLICIDADE",
+                          "OUTRO"
+                        ]
+                      },
+                      "detalhe": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "description": "Obrigatório se motivo = OUTRO, mínimo 5 caracteres."
+                      }
+                    },
+                    "required": [
+                      "acao",
+                      "motivo"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ocorrência editada ou encerrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "mensagem"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Região não validada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Serviço temporariamente indisponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "excluirOcorrencia",
+        "tags": [
+          "Ocorrências"
+        ],
+        "summary": "Excluir logicamente a própria ocorrência",
+        "description": "Define excluido_em e encerra conversas ativas. Não exclui fisicamente o registro do banco.",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registro removido das listagens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "mensagem"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ocorrencias/{id}/fotos": {
+      "post": {
+        "operationId": "adicionarFotos",
+        "tags": [
+          "Fotografias"
+        ],
+        "summary": "Adicionar fotos à própria ocorrência",
+        "description": "Apenas autor, ocorrência aberta e editável. Enviar de 1 a 5 arquivos; máximo 5 fotos no total. Formatos JPG, PNG, WebP com validação de assinatura. Reenvia registro para moderação.",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fotos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "required": [
+                  "fotos"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fotos adicionadas; ocorrência pendente novamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "fotos": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Foto"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "fotos"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removerFoto",
+        "tags": [
+          "Fotografias"
+        ],
+        "summary": "Remover uma foto da própria ocorrência",
+        "description": "Reenvia ocorrência para moderação. O arquivo local pode ser removido do volume após a exclusão do registro.",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "idFoto": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "idFoto"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto removida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "fotos": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Foto"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "fotos"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fotos/{arquivo}": {
+      "get": {
+        "operationId": "consultarFoto",
+        "tags": [
+          "Fotografias"
+        ],
+        "summary": "Consultar arquivo de foto com controle de acesso",
+        "description": "Foto pública somente de ocorrência aprovada e aberta; demais fotos só para autor ou administrador. Resposta binária; erro retorna texto puro 404. O nome deve ser UUID com extensão jpg/png/webp.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "arquivo",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f-]+\\.(jpg|png|webp)$",
+              "example": "123e4567-e89b-12d3-a456-426614174000.jpg"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imagem autorizada",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Arquivo inexistente, indisponível ou acesso negado",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/ocorrencias": {
+      "get": {
+        "operationId": "listarOcorrenciasAdmin",
+        "tags": [
+          "Administração"
+        ],
+        "summary": "Listar solicitações para moderação",
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "description": "Exige sessão administrativa com permissão ADMIN/RESGATE. Padrão PENDENTE; no máximo 200 resultados.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDENTE",
+                "APROVADO",
+                "REJEITADO",
+                "OCULTO",
+                "TODAS"
+              ],
+              "default": "PENDENTE"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ocorrências para moderação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ocorrencias": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Ocorrencia"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ocorrencias"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "moderarOcorrencia",
+        "tags": [
+          "Administração"
+        ],
+        "summary": "Aprovar, rejeitar ou ocultar ocorrência",
+        "description": "Apenas pendentes podem ser aprovadas/rejeitadas; APROVAR requer caso aberto. REJEITAR e OCULTAR exigem motivo >=5 caracteres. Gera histórico, auditoria e notificação.",
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "acao": {
+                    "type": "string",
+                    "enum": [
+                      "APROVAR",
+                      "REJEITAR",
+                      "OCULTAR"
+                    ]
+                  },
+                  "motivo": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 500,
+                    "description": "Obrigatório para REJEITAR e OCULTAR; dispensável para APROVAR."
+                  }
+                },
+                "required": [
+                  "id",
+                  "acao"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Situação atualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "APROVADO",
+                        "REJEITADO",
+                        "OCULTO"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/usuarios": {
+      "patch": {
+        "operationId": "gerenciarPermissaoAdmin",
+        "tags": [
+          "Administração"
+        ],
+        "summary": "Conceder ou revogar privilégio administrativo do Resgate",
+        "description": "Não há GET /api/admin/usuarios: a tela consulta o MySQL diretamente no servidor. Só altera permissões do módulo RESGATE, não suspende contas globais. Exige confirmar o e-mail exato; não permite alterar a própria conta nem remover o último administrador ativo. Revoga sessões do usuário afetado.",
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "acao": {
+                    "type": "string",
+                    "enum": [
+                      "CONCEDER_ADMIN",
+                      "REVOGAR_ADMIN"
+                    ]
+                  },
+                  "confirmacao": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "E-mail da conta que sofrerá a alteração."
+                  }
+                },
+                "required": [
+                  "id",
+                  "acao",
+                  "confirmacao"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privilégio alterado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/mapa-termico": {
+      "get": {
+        "operationId": "obterMapaTermico",
+        "tags": [
+          "Administração"
+        ],
+        "summary": "Obter densidade de ocorrências por região",
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "description": "Até 100 zonas aproximadas, agrupadas por latitude e longitude arredondadas para duas casas. Somente casos aprovados e abertos.",
+        "responses": {
+          "200": {
+            "description": "Zonas calculadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "zonas": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ZonaTermica"
+                      }
+                    }
+                  },
+                  "required": [
+                    "zonas"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversas": {
+      "get": {
+        "operationId": "listarConversas",
+        "tags": [
+          "Conversas"
+        ],
+        "summary": "Listar conversas da conta",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Até 100 conversas, com última mensagem e quantidade de mensagens recebidas não lidas.",
+        "responses": {
+          "200": {
+            "description": "Conversas da conta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "conversas": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConversaLista"
+                      }
+                    }
+                  },
+                  "required": [
+                    "conversas"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "iniciarConversa",
+        "tags": [
+          "Conversas"
+        ],
+        "summary": "Iniciar ou reutilizar conversa sobre ocorrência",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Somente em ocorrência aprovada e aberta, por outro cidadão. O endpoint é idempotente em relação ao par interessado/ocorrência e sempre retorna 200 com id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ocorrencia": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "ocorrencia"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ID da conversa nova ou existente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversas/{id}/mensagens": {
+      "get": {
+        "operationId": "listarMensagens",
+        "tags": [
+          "Conversas"
+        ],
+        "summary": "Obter mensagens de uma conversa",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Acesso apenas às duas partes. Retorna até 100 mensagens em ordem cronológica. Consultar não marca leitura; é necessário PATCH explícito.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversa e mensagens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "conversa": {
+                      "$ref": "#/components/schemas/ConversaDetalhe"
+                    },
+                    "mensagens": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MensagemChat"
+                      }
+                    },
+                    "meuId": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "conversa",
+                    "mensagens",
+                    "meuId"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "enviarMensagem",
+        "tags": [
+          "Conversas"
+        ],
+        "summary": "Enviar mensagem pelo chat interno",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Até 2.000 caracteres. Exige conversa ativa e ocorrência aprovada e aberta; máximo 3 mensagens por remetente em 2 segundos. Mensagem e notificação são persistidas na mesma transação MySQL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "conteudo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "example": "Olá! Você tem mais informações sobre o animal?"
+                  }
+                },
+                "required": [
+                  "conteudo"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mensagem enviada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Corpo da requisição acima do limite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de tentativas excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "marcarMensagensLidas",
+        "tags": [
+          "Conversas"
+        ],
+        "summary": "Confirmar leitura de mensagens recebidas",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Marca como lidas mensagens recebidas até ateId e notificações relacionadas, sem marcar mensagens mais recentes.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Identificador inteiro positivo",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ateId": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "ateId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Leitura confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notificacoes": {
+      "get": {
+        "operationId": "listarNotificacoes",
+        "tags": [
+          "Notificações"
+        ],
+        "summary": "Listar notificações e contadores",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Até 60 avisos, inclui contadores separados de notificações e mensagens não lidas.",
+        "responses": {
+          "200": {
+            "description": "Avisos e contadores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "notificacoes": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Notificacao"
+                      }
+                    },
+                    "naoLidas": {
+                      "type": "integer"
+                    },
+                    "mensagensNaoLidas": {
+                      "type": "integer"
+                    },
+                    "ultimaMensagemNaoLida": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "notificacoes",
+                    "naoLidas",
+                    "mensagensNaoLidas",
+                    "ultimaMensagemNaoLida"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "marcarNotificacoesLidas",
+        "tags": [
+          "Notificações"
+        ],
+        "summary": "Marcar notificação (ou todas) como lida",
+        "security": [
+          {
+            "cidadaoCookie": []
+          }
+        ],
+        "description": "Envie {id:123} para um aviso específico ou {todas:true} para todos os avisos da conta.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "todas": {
+                        "type": "boolean",
+                        "enum": [
+                          true
+                        ]
+                      }
+                    },
+                    "required": [
+                      "todas"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avisos marcados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão de cidadão ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origem ou acesso não permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/localizacao/cep": {
+      "get": {
+        "operationId": "consultarCep",
+        "tags": [
+          "Localização"
+        ],
+        "summary": "Validar CEP e localizar região aproximada",
+        "description": "As duas rotas compartilham a mesma implementação: ViaCEP + Nominatim e fallback BrasilAPI. Aceita apenas CEP de Votorantim/SP e região verificável. Retorna coordenada regional aproximada, nunca localização residencial exata.",
+        "parameters": [
+          {
+            "name": "cep",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{8}$",
+              "example": "18110000"
+            },
+            "description": "CEP com oito dígitos (outros caracteres são removidos pelo servidor)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Região do bairro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Localizacao"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Região não validada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Serviço temporariamente indisponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/localizacao/geocodificar": {
+      "get": {
+        "operationId": "geocodificarCep",
+        "tags": [
+          "Localização"
+        ],
+        "summary": "Geocodificar CEP (rota de compatibilidade)",
+        "description": "As duas rotas compartilham a mesma implementação: ViaCEP + Nominatim e fallback BrasilAPI. Aceita apenas CEP de Votorantim/SP e região verificável. Retorna coordenada regional aproximada, nunca localização residencial exata.",
+        "parameters": [
+          {
+            "name": "cep",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{8}$",
+              "example": "18110000"
+            },
+            "description": "CEP com oito dígitos (outros caracteres são removidos pelo servidor)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Região do bairro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Localizacao"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou formato incorreto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Região não validada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Serviço temporariamente indisponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cidadaoCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "resgate_sessao",
+        "description": "Cookie HttpOnly emitido pelo login como cidadão; enviado pelo navegador no mesmo host."
+      },
+      "adminCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "resgate_admin_sessao",
+        "description": "Cookie HttpOnly emitido pelo login com admin=true; exige permissão RESGATE ADMIN."
+      }
+    },
+    "schemas": {
+      "Erro": {
+        "type": "object",
+        "properties": {
+          "erro": {
+            "type": "string",
+            "example": "Dados inválidos."
+          },
+          "login": {
+            "type": "boolean",
+            "description": "Presente em alguns erros de autenticação."
+          }
+        },
+        "required": [
+          "erro"
+        ]
+      },
+      "Sucesso": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "Mensagem": {
+        "type": "object",
+        "properties": {
+          "mensagem": {
+            "type": "string",
+            "example": "Operação concluída."
+          }
+        },
+        "required": [
+          "mensagem"
+        ]
+      },
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 3
+          },
+          "nome": {
+            "type": "string",
+            "example": "Maria"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "maria@example.com"
+          },
+          "adminResgate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "email",
+          "adminResgate"
+        ]
+      },
+      "Sessao": {
+        "type": "object",
+        "properties": {
+          "usuario": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Usuario"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "usuario"
+        ]
+      },
+      "Ocorrencia": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 12
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true,
+            "example": "Mel"
+          },
+          "especie": {
+            "type": "string",
+            "example": "Cachorro"
+          },
+          "sexo": {
+            "type": "string",
+            "example": "FEMEA"
+          },
+          "porte": {
+            "type": "string",
+            "example": "MEDIO"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PERDIDO",
+              "ENCONTRADO"
+            ]
+          },
+          "bairro": {
+            "type": "string",
+            "example": "Vossoroca"
+          },
+          "data": {
+            "type": "string",
+            "description": "Data do evento conforme serialização do MySQL."
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "referencia": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Região aproximada; não é endereço residencial."
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true,
+            "format": "double",
+            "description": "Região aproximada; não é endereço residencial."
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "example": "/api/fotos/123e4567-e89b-12d3-a456-426614174000.jpg"
+          },
+          "raca": {
+            "type": "string",
+            "nullable": true
+          },
+          "cores": {
+            "type": "string",
+            "nullable": true
+          },
+          "idade": {
+            "type": "string",
+            "nullable": true
+          },
+          "microchip": {
+            "type": "integer",
+            "nullable": true,
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "autor": {
+            "type": "string"
+          },
+          "id_autor": {
+            "type": "integer"
+          },
+          "status_aprovacao": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "APROVADO",
+              "REJEITADO",
+              "OCULTO"
+            ]
+          },
+          "status_caso": {
+            "type": "string",
+            "enum": [
+              "ABERTO",
+              "RESOLVIDO",
+              "ENCERRADO"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "especie",
+          "sexo",
+          "porte",
+          "tipo",
+          "bairro",
+          "data",
+          "latitude",
+          "longitude",
+          "foto"
+        ]
+      },
+      "OcorrenciaDados": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PERDIDO",
+              "ENCONTRADO"
+            ],
+            "description": "Tipo de registro"
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "Cachorro",
+              "Gato"
+            ]
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Obrigatório quando tipo = PERDIDO; pode ficar vazio em ENCONTRADO."
+          },
+          "raca": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Raça cadastrada; o cadastro rejeita raça para Gato."
+          },
+          "sexo": {
+            "type": "string",
+            "enum": [
+              "",
+              "MACHO",
+              "FEMEA"
+            ]
+          },
+          "porte": {
+            "type": "string",
+            "enum": [
+              "",
+              "PEQUENO",
+              "MEDIO",
+              "GRANDE"
+            ]
+          },
+          "cor": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Cor cadastrada no catálogo."
+          },
+          "idade": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "microchip": {
+            "type": "string",
+            "enum": [
+              "",
+              "SIM",
+              "NAO"
+            ],
+            "description": "Somente para animal perdido; ignorado em encontrado."
+          },
+          "dataEvento": {
+            "type": "string",
+            "format": "date",
+            "description": "Data real que não pode estar no futuro."
+          },
+          "descricao": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "Não incluir telefone, e-mail ou número residencial."
+          },
+          "cep": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$",
+            "example": "18110000",
+            "description": "CEP válido e geocodificável de Votorantim (somente região aproximada)."
+          },
+          "referencia": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Referência pública sem telefone, e-mail ou número residencial."
+          }
+        },
+        "required": [
+          "tipo",
+          "especie",
+          "dataEvento",
+          "cep"
+        ]
+      },
+      "Foto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string",
+            "example": "/api/fotos/123e4567-e89b-12d3-a456-426614174000.jpg"
+          }
+        },
+        "required": [
+          "id",
+          "url"
+        ]
+      },
+      "ConversaLista": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "situacao": {
+            "type": "string"
+          },
+          "ocorrencia": {
+            "type": "integer"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PERDIDO",
+              "ENCONTRADO"
+            ]
+          },
+          "animal": {
+            "type": "string",
+            "nullable": true
+          },
+          "especie": {
+            "type": "string"
+          },
+          "interlocutor": {
+            "type": "string"
+          },
+          "ultimaMensagem": {
+            "type": "string",
+            "nullable": true
+          },
+          "ultimaData": {
+            "type": "string",
+            "nullable": true
+          },
+          "naoLidas": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "situacao",
+          "ocorrencia",
+          "tipo",
+          "especie",
+          "interlocutor",
+          "naoLidas"
+        ]
+      },
+      "ConversaDetalhe": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "ocorrencia": {
+            "type": "integer"
+          },
+          "animal": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PERDIDO",
+              "ENCONTRADO"
+            ]
+          },
+          "interlocutor": {
+            "type": "string"
+          },
+          "situacao": {
+            "type": "string"
+          },
+          "podeEnviar": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "ocorrencia",
+          "tipo",
+          "interlocutor",
+          "situacao",
+          "podeEnviar"
+        ]
+      },
+      "MensagemChat": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "conteudo": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "data": {
+            "type": "string"
+          },
+          "remetente": {
+            "type": "integer"
+          },
+          "autor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "conteudo",
+          "data",
+          "remetente",
+          "autor"
+        ]
+      },
+      "Notificacao": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "ocorrencia": {
+            "type": "integer",
+            "nullable": true
+          },
+          "conversa": {
+            "type": "integer",
+            "nullable": true
+          },
+          "data": {
+            "type": "string"
+          },
+          "lida": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "texto",
+          "data"
+        ]
+      },
+      "Localizacao": {
+        "type": "object",
+        "properties": {
+          "cep": {
+            "type": "string",
+            "example": "18110000"
+          },
+          "bairro": {
+            "type": "string"
+          },
+          "cidade": {
+            "type": "string",
+            "enum": [
+              "Votorantim"
+            ]
+          },
+          "uf": {
+            "type": "string",
+            "enum": [
+              "SP"
+            ]
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "origem_localizacao": {
+            "type": "string",
+            "enum": [
+              "BAIRRO"
+            ]
+          },
+          "precisao_localizacao": {
+            "type": "string",
+            "enum": [
+              "BAIRRO_APROXIMADO"
+            ]
+          },
+          "aviso": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cep",
+          "bairro",
+          "cidade",
+          "uf",
+          "latitude",
+          "longitude",
+          "origem_localizacao",
+          "precisao_localizacao",
+          "aviso"
+        ]
+      },
+      "ZonaTermica": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "perdidos": {
+            "type": "integer"
+          },
+          "encontrados": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "total",
+          "perdidos",
+          "encontrados"
+        ]
+      }
+    }
+  }
+}
