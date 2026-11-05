@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="same-origin" />
+  <title>Swagger UI — API Resgate</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.32.0/swagger-ui.css" />
+  <style>
+    body { margin: 0; background: #fafafa; }
+    header { padding: 16px 24px; font: 14px system-ui, sans-serif; background: #122333; color: white; }
+    header strong { display: block; font-size: 18px; margin-bottom: 4px; }
+    header a { color: #bce7e0; }
+    header p { margin: 6px 0 0; line-height: 1.5; }
+    #swagger-ui { max-width: 1500px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Resgate e Mapeamento de Animais — API</strong>
+    <span>Contratos HTTP documentados em OpenAPI 3.0.3</span>
+    <p>Use a sessão do próprio site para operações protegidas. Os botões de teste alteram dados de verdade no banco local/DEMO. Prefira o DEMO (porta 3001).</p>
+    <p><a href="/openapi.json" download="resgate-openapi.json">Baixar especificação OpenAPI (JSON)</a> · <a href="/">Voltar ao projeto</a></p>
+  </header>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5.32.0/swagger-ui-bundle.js" crossorigin="anonymous"></script>
+  <script>
+    window.addEventListener("load", function () {
+      // Ações interativas são habilitadas apenas em ambientes locais para evitar
+      // alteração acidental de dados em uma eventual publicação do portal.
+      var local = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+      window.ui = SwaggerUIBundle({
+        url: "/openapi.json",
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        docExpansion: "list",
+        displayRequestDuration: true,
+        filter: true,
+        withCredentials: true,
+        persistAuthorization: false,
+        validatorUrl: null,
+        supportedSubmitMethods: local ? ["get", "post", "patch", "delete"] : []
+      });
+    });
+  </script>
+</body>
+</html>
