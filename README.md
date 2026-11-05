@@ -61,6 +61,8 @@ docs/                  guias de arquitetura, operação e desenvolvimento
 ## Código e contratos
 
 - [Banco MySQL e migrações](database/README.md)
+- [Swagger UI / OpenAPI](docs/arquitetura/swagger.md) — documentação interativa em `http://localhost:3000/api-docs` (DEMO: `http://localhost:3001/api-docs`)
+- [Especificação OpenAPI 3.0.3](web/public/openapi.json) — JSON importável em ferramentas de API
 - [Rotas HTTP e formatos de requisição](docs/arquitetura/api-http.md)
 - [Organização da aplicação](docs/arquitetura/visao-geral.md)
 

@@ -48,6 +48,9 @@ jobs:
       - name: Test map photo URLs
         run: npm run test:fotos
 
+      - name: Validate OpenAPI contracts
+        run: npm run test:openapi
+
       - name: Lint
         run: npm run lint
 
