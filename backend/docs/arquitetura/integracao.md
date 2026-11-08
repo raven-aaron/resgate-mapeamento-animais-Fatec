@@ -1,6 +1,6 @@
 # Contrato de integração e divisão do trabalho
 
-> **Nota de manutenção (04/11/2026):** esta página registra o contrato arquitetural original e contém exemplos de rotas propostos antes da implementação. Para as rotas **efetivas**, consulte `frontend/src/app/api/`. O estado operacional e os comandos atualizados estão em [README](../../../README.md) e [ambiente Docker](../operacao/docker.md). Administradores do Resgate não podem alterar a situação global da conta; a API permite apenas conceder/revogar o papel ADMIN do módulo RESGATE.
+> **Nota de manutenção (04/11/2026):** esta página preserva o contrato arquitetural original e a divisão de trabalho planejada antes da implementação. As rotas listadas como propostas e as tarefas abaixo não descrevem o estado atual do módulo Resgate; consulte [API HTTP](api-http.md) para os endpoints implementados. O módulo funciona localmente e no DEMO; publicação segura e integração com outros módulos continuam fora do estado atual. Administradores do Resgate não podem alterar a situação global da conta; a API permite apenas conceder/revogar o papel ADMIN do módulo RESGATE.
 
 ## Portal e limites entre os grupos
 
@@ -70,7 +70,7 @@ um DTO explícito. Campo público de coordenadas significa sempre ponto do bairr
 
 ## Rotas sugeridas para iniciar frontend e backend
 
-Estas rotas são um contrato proposto; **não estão implementadas nesta PR**.
+Estas rotas registram a proposta original e **não são o contrato HTTP atual**. Algumas operações equivalentes foram implementadas em caminhos e métodos diferentes; consulte [API HTTP](api-http.md).
 
 | Rota | Acesso | Comportamento |
 | --- | --- | --- |
@@ -128,10 +128,11 @@ antes da publicação. Não criar tabela separada para cada gráfico.
 ## Antes de liberar dados reais e publicar
 
 1. Revisar e integrar o esquema; carregar bairros reais e coordenadas revisadas.
-2. Implementar pool MySQL no backend e testar conexões/transações. No Docker:
+2. Para produção, revisar o pool MySQL, conexões e transações. No Docker:
    `DB_HOST=mysql`, porta 3306. Do host: `127.0.0.1`, porta 3307.
-3. Implementar login, recuperação, permissões, uploads privados/moderação e CRUD.
-4. Testar o fluxo completo entre dois usuários e um moderador, incluindo tentativas
+3. Revisar o endurecimento para produção de login, recuperação, permissões, uploads
+   privados/moderação e operações CRUD; a implementação local já existe.
+4. Revalidar o fluxo completo entre dois usuários e um moderador, incluindo tentativas
    de ler chats de terceiros e alterar papéis.
 5. Confirmar ofertas gratuitas vigentes para aplicação, MySQL, fotos e email,
    limites de conexões/armazenamento/tráfego, TLS, suporte a triggers e backups.
@@ -140,5 +141,6 @@ antes da publicação. Não criar tabela separada para cada gráfico.
 6. Separar credenciais de migração/execução e ambiente local/publicado. Revisar
    retenção, remoção de fotos, restauração de backup e limites de uso.
 
-Esta entrega torna a proposta de banco e sua reprodução concretas. A aplicação
-ainda precisa das implementações acima para ser considerada funcional e publicada.
+O módulo Resgate está implementado para execução local e DEMO. Os itens acima
+continuam sendo requisitos de validação, integração e preparação antes de usar
+dados reais ou publicar a aplicação.

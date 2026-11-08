@@ -13,7 +13,7 @@ Referências no repositório `raven-aaron/Projeto-Resgate-e-Mapeamento-FATEC`:
 ## Formulário atual
 
 - Espécies: **Cachorro** e **Gato**; raça canina da lista original; campo desabilitado para gatos.
-- Campos: nome, espécie, idade, microchip, sexo, porte, cor/pelagem, raça, data, CEP e referência, fotos e observações.
+- Campos: nome, espécie, idade, microchip, sexo, porte, cor/pelagem, raça, data, CEP e referência, fotos e observações. Para animais encontrados, também é solicitada a situação do lar temporário (`PODE_ACOLHER` ou `NAO_PODE_ACOLHER`).
 - **Nunca oferecer opção com texto “Não sei”**; campos não conhecidos podem ser deixados sem preencher quando a regra permitir.
 - O cidadão informa somente um CEP de Votorantim, consulta o bairro e vê a **região de publicação aproximada**. Não existe seleção manual do pin: coordenadas enviadas pelo navegador são ignoradas e o backend resolve a localização novamente na gravação.
 - A localização é derivada de fonte geográfica validada, generalizada para uma grade regional e nunca aponta deliberadamente para um imóvel. Consulta malsucedida impede o cadastro com um aviso, em vez de escolher uma localização arbitrária.

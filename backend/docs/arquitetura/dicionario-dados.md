@@ -1,6 +1,6 @@
 # Dicionário de dados
 
-Gerado a partir da proposta SQL. As restrições e relações completas estão em `backend/database/migrations/001_estrutura.sql`. Todos os IDs são `INT UNSIGNED`; datas/horas devem ser gravadas em UTC.
+Derivado do esquema aplicado. As restrições e relações completas estão em `backend/database/migrations/`; as migrações posteriores à 001 acrescentam campos a `ocorrencias`. Todos os IDs são `INT UNSIGNED`; datas/horas devem ser gravadas em UTC.
 
 ## `usuarios`
 
@@ -121,11 +121,22 @@ Gerado a partir da proposta SQL. As restrições e relações completas estão e
 | `status_caso` | `ENUM('ABERTO', 'RESOLVIDO', 'ENCERRADO') NOT NULL DEFAULT 'ABERTO'` |
 | `motivo_encerramento` | `ENUM('REENCONTRADO', 'DEVOLVIDO_AO_TUTOR', 'ADOTADO', 'FALECIMENTO', 'DUPLICIDADE', 'OUTRO') NULL` |
 | `detalhe_encerramento` | `VARCHAR(500) NULL` |
+| `data_evento` | `DATE NOT NULL` |
 | `descricao` | `TEXT NULL` |
 | `encerrado_em` | `DATETIME(3) NULL` |
 | `excluido_em` | `DATETIME(3) NULL COMMENT 'Exclusão lógica: não aparece no público nem permite novas conversas'` |
 | `criado_em` | `DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)` |
 | `atualizado_em` | `DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)` |
+| `cep` | `CHAR(8) NULL` |
+| `logradouro` | `VARCHAR(160) NULL` |
+| `latitude_aproximada` | `DECIMAL(9,6) NULL` |
+| `longitude_aproximada` | `DECIMAL(9,6) NULL` |
+| `origem_localizacao` | `ENUM('RUA', 'AJUSTE_USUARIO', 'BAIRRO') NULL` |
+| `precisao_localizacao` | `ENUM('RUA_APROXIMADA', 'BAIRRO_APROXIMADO') NULL` |
+| `situacao_lar_temporario` | `ENUM('PODE_ACOLHER', 'NAO_PODE_ACOLHER') NULL` |
+
+`situacao_lar_temporario` é aplicável somente a ocorrências `ENCONTRADO`. O fluxo
+atual deixa esse campo nulo para ocorrências `PERDIDO`.
 
 ## `fotos_ocorrencias`
 

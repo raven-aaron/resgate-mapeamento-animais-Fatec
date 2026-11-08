@@ -23,13 +23,15 @@ A equipe de interface deve começar por `src/components/` e pelos estilos de `sr
 | Rota | Uso |
 | --- | --- |
 | `/` | Página inicial |
-| `/resgate` | Acesso às opções de registro |
+| `/entrar` | Escolha de acesso |
+| `/registro-usuario`, `/cadastro`, `/login` | Cadastro e autenticação do cidadão |
 | `/mapa` | Consulta pública e mapa |
 | `/ocorrencias/nova` | Cadastro de perda ou encontro |
 | `/ocorrencias/[id]` | Cartaz da ocorrência |
-| `/login`, `/cadastro`, `/minha-conta` | Conta do cidadão |
-| `/minhas-ocorrencias`, `/mensagens`, `/notificacoes` | Área autenticada |
+| `/minha-conta`, `/minhas-ocorrencias`, `/mensagens`, `/notificacoes` | Área autenticada |
 | `/admin/login`, `/admin/*` | Acesso e operações administrativas |
+
+Não há uma página `src/app/resgate/page.tsx` na estrutura atual. Apesar de `/resgate` ainda aparecer em alguns links/fallbacks do código, essa URL não corresponde a uma página implementada.
 
 ## Executar e validar
 

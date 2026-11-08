@@ -50,7 +50,7 @@ Para inspecionar exemplos reais de requisição, importe `backend/insomnia/resga
 ## Antes de abrir um PR
 
 ```bash
-cd web
+cd frontend
 npm ci
 npm run lint
 npx tsc --noEmit

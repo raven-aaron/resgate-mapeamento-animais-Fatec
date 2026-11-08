@@ -20,7 +20,7 @@ As demais dependências e seus pacotes transitivos seguem o `frontend/package-lo
 ## Preparando o ambiente local
 
 1. Instale Node.js 24 e npm 11. Consulte `frontend/.nvmrc` e `frontend/package.json`.
-2. Entre na pasta `web`.
+2. Entre na pasta `frontend`.
 3. Execute `npm ci` para reproduzir as dependências do lockfile.
 4. Execute `npm run check:versions` para validar a política de versões.
 5. Execute `npm run lint`, `npx next typegen`, `npx tsc --noEmit` e `npm run build` para validar o projeto.

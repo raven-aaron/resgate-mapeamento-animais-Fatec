@@ -8,7 +8,8 @@ Um MySQL por ambiente. Cada integrante usa seu Docker local; a publicação ter�
 uma base compartilhada própria, sem dados de testes. Manter `resgate_animais`,
 nome que já consta no Compose e no `.env.example`. Um nome técnico do banco não
 define limites de permissão. Fotos são arquivos em serviço de armazenamento;
-o SQL guarda identificação e metadados. Não armazenar imagens em BLOB neste projeto.
+o SQL guarda identificação e metadados. Atualmente, os arquivos ficam em `storage/uploads`
+no volume Docker `media_data`, com provedor SQL `LOCAL`. Não armazenar imagens em BLOB.
 
 A proposta de integração é um portal Next.js com contas compartilhadas e módulos
 separados. Header, footer, identidade visual e contato institucional ficam em
@@ -29,6 +30,8 @@ ser revista antes da integração. Não há implantação de ração nesta entre
 | `Chat_Mensagem` | `mensagens` | Validar participação e usar `lida_em` para saber quando houve leitura. |
 
 Complementos: `notificacoes`, `auditoria` e a tabela técnica `controle_migracoes`.
+As migrações posteriores também acrescentam campos de CEP/localização e situação
+de lar temporário a `ocorrencias`, sem criar novas tabelas.
 O desenho enviado representa localização como 1:1, mas o SQL original não impõe
 unicidade em `id_localizacao`. Na revisão, muitos registros compartilham um bairro,
 e cada ocorrência mantém sua própria referência aproximada.
@@ -38,7 +41,7 @@ e cada ocorrência mantém sua própria referência aproximada.
 | Grupo | Tabelas | Responsabilidade |
 | --- | --- | --- |
 | Contas compartilhadas | `usuarios`, `permissoes_usuarios`, `sessoes`, `recuperacoes_senha` | Cadastro, permissões administrativas por módulo, sessões revogáveis e recuperação. |
-| Catálogos | `bairros`, `especies`, `racas`, `cores` | Localidades permitidas e opções para formulários e filtros. |
+| Catálogos | `bairros`, `especies`, `racas`, `cores` | Bairros confirmados por CEP e opções controladas de espécie, raça e cor. |
 | Resgate | `animais`, `animais_cores`, `ocorrencias`, `fotos_ocorrencias`, `historico_ocorrencias` | Ficha do animal, publicação, imagens, moderação e evolução. |
 | Chat de resgate | `conversas`, `mensagens` | Conversa privada entre criador e interessado em uma ocorrência. |
 | Compartilhado | `notificacoes`, `auditoria` | Avisos internos e operações administrativas sensíveis. |
@@ -60,7 +63,7 @@ As tabelas específicas de ração não estão incluídas nesse total.
 | Animal ↔ cor | N:N por `animais_cores`; nenhuma cor significa desconhecida. |
 | Animal → ocorrência | 1:0..1 no SQL, com UNIQUE em `ocorrencias.id_animal`; criação normal insere os dois numa transação. |
 | Bairro → ocorrência | 1:N; referência pertence à ocorrência. |
-| Ocorrência → foto | 1:0..5 no SQL; API exige pelo menos uma foto antes de solicitar publicação. |
+| Ocorrência → foto | 1:0..5 no SQL e na API; o cadastro e a aprovação atuais não exigem uma foto. |
 | Ocorrência → histórico | 1:N; API grava a alteração e o histórico na mesma transação. |
 | Ocorrência → conversa | 1:N; no máximo uma conversa por interessado; sem conversar consigo mesmo. |
 | Conversa → mensagem | 1:N; apenas os dois participantes podem enviar ou ler pela API. |
@@ -101,9 +104,9 @@ Criação pública: sempre pendente. Aprovação/rejeição/ocultação: somente
 RESGATE. Alterar ficha, localização, descrição ou fotos de publicação aprovada
 retorna a ocorrência a PENDENTE, na mesma transação e com histórico. Rejeição e
 ocultação exigem motivo na API. Estado aprovado sozinho não autoriza exposição se
-`excluido_em` estiver preenchido. Lista principal filtra também caso aberto;
-casos resolvidos podem aparecer em histórico público separado, com os mesmos filtros
-de aprovação e exclusão. Não implementar rascunhos públicos.
+`excluido_em` estiver preenchido. A lista pública atual filtra também por caso aberto;
+não há endpoint ou tela pública de histórico para casos resolvidos nesta versão.
+Não implementar rascunhos públicos.
 
 Criador e ficha vinculada não podem ser trocados por UPDATE. A edição altera os
 campos da ficha e da ocorrência, não a autoria. Ocorrência encerrada não recebe
@@ -113,14 +116,21 @@ ocorrência permanecer aprovada; ocultação/exclusão bloqueia novos envios.
 ## Votorantim e localização aproximada
 
 1. Município fixo: Votorantim/SP, código IBGE **3557006**.
-2. Formulário recebe `id_bairro` de uma lista controlada de bairros ativos.
-3. Backend confirma que o ID existe e está ativo. Não aceita cidade, UF, latitude,
-   longitude ou criação livre de bairro no cadastro de ocorrência.
+2. O formulário recebe um CEP de oito dígitos; não envia `id_bairro` nem coordenadas.
+3. O backend valida município e UF pelo ViaCEP e geocodifica o bairro com Nominatim,
+   BrasilAPI como alternativa e, quando necessário, a via pública retornada pelo CEP.
+   O ponto precisa estar dentro dos limites aproximados do município e é arredondado
+   para uma grade regional de 0,01 grau. O bairro é inserido/atualizado no catálogo
+   pelo servidor; se a região não puder ser confirmada, a API rejeita o cadastro.
 4. Referência opcional: praça, escola, parque ou estabelecimento público próximo.
    Orientar o usuário a não informar número residencial nem contato pessoal.
-5. A administração revisa textos e fotos antes de publicar. Retirar EXIF/GPS das imagens.
-6. Mapa usa ponto representativo do bairro; não são coordenadas do desaparecimento.
-   Os campos aceitam NULL até que a localização do bairro seja revisada.
+5. A administração revisa textos e fotos antes de publicar. O código atual valida o
+   formato das imagens, mas não remove metadados EXIF/GPS; não tratar essa remoção
+   como funcionalidade existente.
+6. A API grava CEP, bairro, coordenadas aproximadas e precisão em `ocorrencias`;
+   o nome da via não é gravado pelo cadastro atual. O mapa usa o ponto regional
+   calculado no servidor, não coordenadas fornecidas pelo navegador. Registros
+   antigos podem manter coordenadas nulas ou valores anteriores.
 
 `DEFAULT 'Votorantim'` sozinho não restringe nada. Aqui, CHECK fixa município/UF/IBGE
 e a FK vincula cada ocorrência ao catálogo. Isso não prova que o nome do bairro ou
@@ -128,12 +138,13 @@ suas coordenadas são verdadeiros: a curadoria do catálogo continua necessária
 O CHECK de latitude/longitude valida faixa e preenchimento conjunto, não o limite
 geográfico municipal. Não basta arredondar uma coordenada residencial.
 
-**ViaCEP é auxiliar, opcional.** O backend consulta um CEP com oito dígitos e valida
-retorno `erro`, `ibge == '3557006'` e `uf == 'SP'`. O bairro retornado precisa ser
-mapeado para o catálogo, sem cadastrá-lo automaticamente. CEP inexistente ou de
-outra cidade gera erro explícito. Se o serviço estiver indisponível, a lista local
-de bairros continua disponível. Não é necessário armazenar o CEP, logradouro,
-complemento ou número residencial para o módulo de resgate.
+**ViaCEP e a geocodificação são necessárias no cadastro atual.** O backend consulta
+um CEP com oito dígitos e valida retorno `erro`, `ibge == '3557006'` e `uf == 'SP'`.
+Usa o bairro retornado para obter coordenadas aproximadas; Nominatim é tentado antes
+da BrasilAPI CEP v2, e o nome da via pública pode ser usado como último recurso.
+Se os serviços não confirmarem a região, o cadastro falha com erro explícito. O CEP
+validado e as coordenadas aproximadas são armazenados; logradouro, complemento e
+número residencial não são persistidos pelo fluxo atual.
 
 Validar CEP limita o endereço declarado, mas **não comprova residência nem impede
 alguém de selecionar um bairro falso**. A regra atual é território das ocorrências,
@@ -153,12 +164,14 @@ CASCADE é usado apenas para dependentes descartáveis: sessões, recuperações
 permissões, notificações do usuário e vínculo animal/cor. Não há cascata automática
 da conta até ocorrências, conversas e mensagens.
 
-Remover a linha de uma foto não apaga o arquivo do provedor. O backend precisa
-realizar a remoção externa e tratar falhas/repetições. Upload inicialmente privado;
-só expor URLs de fotos aprovadas. O serviço/fluxo escolhido deve permitir retirada
-de conteúdo e revisão antes da divulgação. Limite proposto: cinco fotos por
-ocorrência, 5 MB por arquivo, JPEG/PNG/WebP; validar tipo real, tamanho e metadados
-no backend. A cota por arquivo é regra de aplicação, não do SQL.
+O endpoint atual de remoção de foto tenta apagar o arquivo local depois de remover
+seu registro; se o arquivo já estiver indisponível, registra um aviso. A exclusão
+lógica da ocorrência não apaga imediatamente suas fotos. Uploads são privados;
+somente fotos de ocorrências aprovadas, abertas e não excluídas são públicas. A API
+permite até cinco imagens JPEG/PNG/WebP de 5 MB cada, mas não exige foto para criar
+ou aprovar uma ocorrência e não remove metadados EXIF/GPS. A cota e a validação do
+tipo real são regras da aplicação, não do SQL. Um provedor externo para produção
+precisará de fluxo próprio de remoção, falhas e repetição.
 
 ## Responsabilidades que o SQL não substitui
 
@@ -167,9 +180,10 @@ no backend. A cota por arquivo é regra de aplicação, não do SQL.
 - Validação de usuário ativo e sessão não expirada/revogada em toda operação privada.
 - Transações que gravam histórico junto com alterações e controle de concorrência
   com bloqueio da linha de ocorrência/conversa quando necessário.
-- Validação de data de evento não futura, catálogo ativo e foto obrigatória.
+- Validação de data de evento não futura, catálogos de espécie/raça/cor e CEP/região.
+- A aplicação atual não implementa paginação por cursor; as consultas têm limites fixos.
 - Proteção contra spam, consultas parametrizadas e limites de requisições.
-- Paginação por cursor, seleção explícita de campos públicos e teste de acessos indevidos.
+- Seleção explícita de campos públicos e teste de acessos indevidos.
 
 Os triggers cobrem integridade do chat e autoria, mas não conhecem a sessão HTTP.
 Um invasor usando a credencial SQL da aplicação poderia se passar por um usuário:

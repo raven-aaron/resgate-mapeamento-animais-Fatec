@@ -4,7 +4,7 @@ Fonte de referência: [Projeto-Resgate-e-Mapeamento-FATEC](https://github.com/ra
 
 ## Padrão de marca preservado
 
-- Fonte: **Outfit** (Next.js \`next/font/google\`).
+- Fonte: **Outfit**, carregada por `@import` do Google Fonts em `frontend/src/app/final-globals.css`.
 - Verde-água / petróleo: \`#348888\`.
 - Verde-água claro: \`#D5F1EF\`.
 - Ciano-claro das barras de navegação e rodapé: \`#9EF8EE\`.
@@ -26,7 +26,7 @@ Fonte de referência: [Projeto-Resgate-e-Mapeamento-FATEC](https://github.com/ra
 
 Os arquivos \`frontend/public/assets/cachorrogatoinicial.jpg\`, \`cachorrogato2.jpg\` e \`logo_prefeituraVotorantim.png\` foram copiados do repositório antigo.
 
-**Pendência de portabilidade offline:** \`logo_Bem-EstarAnimal_2.png\` tem aproximadamente 1,3 MB no repositório antigo e, nesta primeira adaptação, o cabeçalho e o rodapé usam o endereço do arquivo público original. Antes da apresentação, copiar esse logotipo para \`frontend/public/assets/logo_Bem-EstarAnimal_2.png\` e alterar \`SiteChrome.tsx\` para usar o caminho local, eliminando essa dependência externa.
+O logotipo \`logo_Bem-EstarAnimal_2.png\` está em \`frontend/public/assets/\`; o cabeçalho e o rodapé ativos o carregam pelo caminho local \`/assets/logo_Bem-EstarAnimal_2.png\`. A pendência de portabilidade offline foi resolvida.
 
 ## Adaptação à aplicação atual
 

@@ -12,6 +12,7 @@ O projeto usa MySQL 8.4.13 (InnoDB) em um serviço Docker definido em `compose.y
 | `002_catalogos.sql` | Espécies, cores e raças iniciais |
 | `003_localizacao_rua.sql` | CEP e localização aproximada nas ocorrências |
 | `004_catalogo_racas_caninas.sql` | Catálogo complementar de raças |
+| `005_situacao_lar_temporario.sql` | Situação de acolhimento temporário para ocorrências de animais encontrados |
 
 O script `backend/database/scripts/migrar.mjs` confere a versão do MySQL, compara o SHA-256 de cada migração e registra o histórico em `controle_migracoes`. Uma migração aplicada não deve ser editada; mudanças futuras entram em novo arquivo numerado.
 
