@@ -4,7 +4,7 @@ import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { banco } from "../../../lib/db";
-import { usuarioAtual } from "../../../lib/auth";
+import { administradorAtual, usuarioAtual } from "../../../lib/auth";
 import { buscarPublicas } from "../../../lib/ocorrencias";
 import { mesmaOrigem } from "../../../lib/seguranca";
 import { localizarBairroPorCep, ErroLocalizacao } from "../../../lib/localizacao-cep";
@@ -46,7 +46,8 @@ function extensaoImagem(bytes: Uint8Array): string | null {
 
 export async function POST(request: Request) {
   if (!mesmaOrigem(request)) return NextResponse.json({ erro: "Origem não permitida." }, { status: 403 });
-  const usuario = await usuarioAtual();
+  const usuarioCidadao = await usuarioAtual();
+  const usuario = usuarioCidadao ?? await administradorAtual();
   if (!usuario) return NextResponse.json({ erro: "Entre na sua conta antes de registrar um animal.", login: true }, { status: 401 });
   if (Number(request.headers.get("content-length") || 0) > 27 * 1024 * 1024) {
     return NextResponse.json({ erro: "Fotos excedem o limite de tamanho." }, { status: 413 });
@@ -65,6 +66,9 @@ export async function POST(request: Request) {
     }
     const dados = JSON.parse(campoDados) as Cadastro;
     const tipo = texto(dados.tipo, 20);
+    if (usuario.adminResgate && tipo !== "ENCONTRADO") {
+      return NextResponse.json({ erro: "Usuários administrativos podem cadastrar apenas animais encontrados." }, { status: 403 });
+    }
     const especie = texto(dados.especie, 50);
     const nome = texto(dados.nome, 80);
     const raca = texto(dados.raca, 80);

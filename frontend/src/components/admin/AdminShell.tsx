@@ -15,7 +15,7 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
     { href: "/admin/estatisticas", label: "Estatísticas" },
     { href: "/admin/mapa-termico", label: "Mapa térmico" },
     { href: "/admin/usuarios", label: "Contas cadastradas" },
-    { href: "/admin/cadastro-animal", label: "Cadastro de Animal" },
+    { href: "/admin/cadastro-animal", label: "Cadastrar animal encontrado" },
   ] as const;
 
   return <main className={styles.area}>

@@ -24,7 +24,7 @@ export default function HomePage() {
                 <CustomButton href="/login" variant="green">
                   PERDI MEU PET
                 </CustomButton>
-                <CustomButton href="/login" variant="green">
+                <CustomButton href="/registro-pet-encontrado" variant="green">
                   ENCONTREI UM PET
                 </CustomButton>
               </div>
