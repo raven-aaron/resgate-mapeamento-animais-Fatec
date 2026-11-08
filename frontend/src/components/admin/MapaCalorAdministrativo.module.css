@@ -1,0 +1,110 @@
+.mapa {
+  width: 100%;
+  height: 480px;
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid #d5e0e8;
+  border-radius: 12px;
+  background: #e2e8f0;
+}
+
+.mapa :global(.leaflet-container) {
+  z-index: 0;
+  font-family: inherit;
+}
+
+.markerIcon {
+  border: 0;
+  background: transparent;
+}
+
+.areaCalor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.manchaCalor {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  filter: blur(25px);
+  opacity: 0.8;
+  transition: all 0.5s ease-in-out;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.nivelAlto {
+  background: radial-gradient(circle, var(--cor-vermelho) 0%, transparent 70%);
+  width: 140px;
+  height: 140px;
+}
+
+.nivelMedio {
+  background: radial-gradient(circle, var(--cor-laranja) 0%, transparent 70%);
+  width: 110px;
+  height: 110px;
+}
+
+.nivelBaixo {
+  background: radial-gradient(circle, #2878c8 0%, transparent 70%);
+  width: 90px;
+  height: 90px;
+}
+
+.pontoMarcador {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+}
+
+.bgVermelho {
+  background-color: var(--cor-vermelho);
+}
+
+.bgLaranja {
+  background-color: var(--cor-laranja);
+}
+
+.bgAzul {
+  background-color: #2878c8;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 14px 0 0;
+  padding: 0;
+  color: #475569;
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.legenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.amostra {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .mapa {
+    height: 420px;
+    min-height: 360px;
+  }
+}

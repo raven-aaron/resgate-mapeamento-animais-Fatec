@@ -1,0 +1,24 @@
+export type Ocorrencia = {
+  id: number;
+  nome: string | null;
+  especie: string;
+  sexo: string;
+  porte: string;
+  tipo: "PERDIDO" | "ENCONTRADO";
+  bairro: string;
+  data: string;
+  descricao: string | null;
+  referencia: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  foto: string | null;
+  raca?: string | null;
+  cores?: string | null;
+  idade?: string | null;
+  microchip?: number | null;
+  autor?: string;
+  id_autor?: number;
+  status_aprovacao?: string;
+  status_caso?: string;
+  situacao_lar_temporario?: "PODE_ACOLHER" | "NAO_PODE_ACOLHER" | null;
+};

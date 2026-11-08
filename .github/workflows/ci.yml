@@ -20,7 +20,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: web
+        working-directory: frontend
 
     steps:
       - name: Checkout
@@ -29,9 +29,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: web/.nvmrc
+          node-version-file: frontend/.nvmrc
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Verify toolchain and locked versions
         run: npm run check:versions
@@ -68,5 +68,5 @@ jobs:
         working-directory: .
 
       - name: Build Docker development image
-        run: docker build -f web/Dockerfile.dev -t resgate-web-dev:ci web
+        run: docker build -f frontend/Dockerfile.dev -t resgate-web-dev:ci frontend
         working-directory: .

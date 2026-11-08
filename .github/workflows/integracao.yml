@@ -32,16 +32,16 @@ jobs:
       - name: Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version-file: web/.nvmrc
+          node-version-file: frontend/.nvmrc
       - name: Validar Compose
         run: docker compose config --quiet
       - name: Iniciar MySQL isolado
         run: docker compose up -d --wait --wait-timeout 180 mysql
       - name: Aplicar e conferir migrações
         run: |
-          node database/scripts/migrar.mjs
-          node database/scripts/migrar.mjs
-          node database/scripts/migrar.mjs --status
+          node backend/database/scripts/migrar.mjs
+          node backend/database/scripts/migrar.mjs
+          node backend/database/scripts/migrar.mjs --status
       - name: Construir e iniciar Next.js
         run: docker compose up -d --build web
       - name: Preparar administrador de teste
@@ -49,14 +49,14 @@ jobs:
       - name: Testar APIs com três cidadãos e um administrador
         env:
           INTEGRACAO_TESTE: "1"
-        run: node web/tests/integracao-http.mjs
+        run: node frontend/tests/integracao-http.mjs
       - name: Criar backup local de CI (MySQL e fotos)
-        run: node database/scripts/backup-local.mjs
+        run: node backend/database/scripts/backup-local.mjs
       - name: Verificar restauração em MySQL isolado
         run: |
           BACKUP=$(find backups -maxdepth 1 -type d -name 'resgate-*' | head -n 1)
           test -n "$BACKUP"
-          node database/scripts/verificar-restauracao.mjs "$BACKUP"
+          node backend/database/scripts/verificar-restauracao.mjs "$BACKUP"
       - name: Logs de diagnóstico
         if: failure()
         run: docker compose logs --tail=120 mysql web

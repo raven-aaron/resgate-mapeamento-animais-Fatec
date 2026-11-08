@@ -28,19 +28,19 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: web/.nvmrc
+          node-version-file: frontend/.nvmrc
       - name: Iniciar MySQL vazio
         run: docker compose up -d --wait --wait-timeout 180 mysql
       - name: Aplicar migracoes
-        run: node database/scripts/migrar.mjs
+        run: node backend/database/scripts/migrar.mjs
       - name: Repetir sem reaplicar
-        run: node database/scripts/migrar.mjs
+        run: node backend/database/scripts/migrar.mjs
       - name: Verificar integridade e chat
-        run: node database/tests/integridade.mjs
+        run: node backend/database/tests/integridade.mjs
       - name: Verificar protecoes do migrador
-        run: node database/tests/migracoes.mjs
+        run: node backend/database/tests/migracoes.mjs
       - name: Conferir historico
-        run: node database/scripts/migrar.mjs --status
+        run: node backend/database/scripts/migrar.mjs --status
       - name: Encerrar ambiente descartavel de CI
         if: always()
         run: docker compose down --volumes

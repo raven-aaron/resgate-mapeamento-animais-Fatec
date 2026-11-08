@@ -1,0 +1,38 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "check:versions": "node scripts/check-versions.mjs",
+    "test:origem": "node --test tests/seguranca.test.mjs",
+    "test:fotos": "node --test tests/fotos.test.mjs"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "formik": "^2.4.9",
+    "leaflet": "1.9.4",
+    "mysql2": "3.24.6",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "19.3.0",
+    "react-icons": "5.7.0",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  }
+}

@@ -23,9 +23,9 @@ jobs:
       - name: Node 24
         uses: actions/setup-node@v4
         with:
-          node-version-file: web/.nvmrc
+          node-version-file: frontend/.nvmrc
       - name: Testar contrato do seed e coleção Insomnia sem Docker
-        run: node --test database/tests/seed-demo.test.mjs
+        run: node --test backend/database/tests/seed-demo.test.mjs
       - name: Preparar ambiente DEMO independente
         run: |
           cp .env.demo.example .env.demo
@@ -38,15 +38,15 @@ jobs:
         env:
           RESGATE_DEMO: "1"
         run: |
-          node database/scripts/migrar.mjs
-          node database/scripts/migrar.mjs --status
+          node backend/database/scripts/migrar.mjs
+          node backend/database/scripts/migrar.mjs --status
       - name: Aplicar seed sintético e bloquear duplicação
         env:
           RESGATE_DEMO: "1"
           DEMO_SEED_PASSWORD: "SenhaSomenteRunnerCI2026!"
         run: |
-          node database/scripts/seed-demo.mjs --apply --count 40 --users 12 --chats 18 --seed 2026
-          if node database/scripts/seed-demo.mjs --apply --count 40 --users 12 --chats 18 --seed 2026; then
+          node backend/database/scripts/seed-demo.mjs --apply --count 40 --users 12 --chats 18 --seed 2026
+          if node backend/database/scripts/seed-demo.mjs --apply --count 40 --users 12 --chats 18 --seed 2026; then
             echo 'ERRO: seed aceitou banco não vazio'
             exit 1
           else

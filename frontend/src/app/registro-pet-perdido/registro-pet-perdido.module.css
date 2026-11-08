@@ -1,0 +1,15 @@
+.tituloFormulario {
+  color: var(--cor-verde-agua);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.containerBotoes {
+  display: flex;
+  gap: 15px;
+  margin-top: 24px;
+}
+
+.wrapperBtn {
+  display: inline-block;
+}
