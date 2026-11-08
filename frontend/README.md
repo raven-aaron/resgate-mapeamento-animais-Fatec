@@ -29,7 +29,8 @@ A equipe de interface deve começar por `src/components/` e pelos estilos de `sr
 | `/ocorrencias/nova` | Cadastro de perda ou encontro |
 | `/ocorrencias/[id]` | Cartaz da ocorrência |
 | `/minha-conta`, `/minhas-ocorrencias`, `/mensagens`, `/notificacoes` | Área autenticada |
-| `/admin/login`, `/admin/*` | Acesso e operações administrativas |
+| `/admin/login` | Entrada administrativa; exige uma conta com permissão ADMIN no módulo Resgate |
+| `/admin/*` | Painel e operações restritos a administradores; o link do painel só aparece no menu para uma sessão administrativa válida, e as páginas e APIs também verificam a permissão no servidor |
 
 Não há uma página `src/app/resgate/page.tsx` na estrutura atual. Apesar de `/resgate` ainda aparecer em alguns links/fallbacks do código, essa URL não corresponde a uma página implementada.
 

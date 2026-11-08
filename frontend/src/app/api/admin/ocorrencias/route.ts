@@ -9,11 +9,35 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const usuario = await administradorAtual();
   if (!usuario?.adminResgate) return NextResponse.json({ erro: "Acesso administrativo negado." }, { status: 403 });
-  const status = request.nextUrl.searchParams.get("status") || "PENDENTE";
+  const parametros = request.nextUrl.searchParams;
+  const status = parametros.get("status") || "PENDENTE";
   if (!["PENDENTE","APROVADO","REJEITADO","OCULTO","TODAS"].includes(status)) return NextResponse.json({ erro: "Filtro inválido." }, { status: 400 });
+  const valorPagina = parametros.get("pagina") || "1";
+  if (!/^[1-9]\d*$/.test(valorPagina) || !Number.isSafeInteger(Number(valorPagina))) {
+    return NextResponse.json({ erro: "Página inválida." }, { status: 400 });
+  }
+  const aprovacao = parametros.get("aprovacao") || "";
+  const especie = parametros.get("especie") || "";
+  const tipo = parametros.get("tipo") || "";
+  const ordem = parametros.get("ordem") || "RECENTE";
+  const busca = (parametros.get("busca") || "").trim().slice(0, 100);
+  if ((aprovacao && !["PENDENTE","APROVADO","REJEITADO","OCULTO"].includes(aprovacao)) ||
+    (especie && !["Cachorro","Gato"].includes(especie)) ||
+    (tipo && !["PERDIDO","ENCONTRADO"].includes(tipo)) ||
+    !["RECENTE","ANTIGO"].includes(ordem)) {
+    return NextResponse.json({ erro: "Filtro inválido." }, { status: 400 });
+  }
   try {
-    const ocorrencias = await buscarAdministrativas(status);
-    return NextResponse.json({ ocorrencias }, { headers: { "Cache-Control": "no-store" } });
+    const resultado = await buscarAdministrativas(status, {
+      pagina: Number(valorPagina),
+      porPagina: 10,
+      busca,
+      aprovacao,
+      especie,
+      tipo,
+      ordem,
+    });
+    return NextResponse.json(resultado, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Erro na consulta ADM",error);
     return NextResponse.json({ erro: "Falha ao carregar solicitações." }, { status: 500 });

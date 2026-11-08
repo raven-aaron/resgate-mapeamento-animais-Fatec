@@ -79,7 +79,7 @@ O trecho é **exemplo do formato dos campos**, não um registro obtido de uma ba
 
 | Método | Rota | Contrato |
 | --- | --- | --- |
-| GET | `/api/admin/ocorrencias?status=PENDENTE` | Lista até 200 solicitações; aceita `PENDENTE`, `APROVADO`, `REJEITADO`, `OCULTO`, `TODAS` |
+| GET | `/api/admin/ocorrencias?status=PENDENTE&pagina=1` | Retorna 10 ocorrências por página e total filtrado; aceita `PENDENTE`, `APROVADO`, `REJEITADO`, `OCULTO`, `TODAS`, além dos filtros `busca`, `aprovacao`, `especie`, `tipo` e `ordem` |
 | PATCH | `/api/admin/ocorrencias` | JSON: `{id,acao:"APROVAR"|"REJEITAR"|"OCULTAR",motivo?}`. Motivo de pelo menos cinco caracteres para rejeitar ou ocultar |
 | PATCH | `/api/admin/usuarios` | JSON: `{id,acao:"CONCEDER_ADMIN"|"REVOGAR_ADMIN",confirmacao:"email@..."}` |
 | GET | `/api/admin/mapa-termico` | Retorna `{zonas:[...]}`, agrupadas por coordenadas aproximadas |

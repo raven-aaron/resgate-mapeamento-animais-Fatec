@@ -41,6 +41,19 @@
   font-weight: 800;
 }
 
+.cabecalhoTipo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.situacaoLar {
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 .perdido {
   color: var(--cor-vermelho);
 }

@@ -388,6 +388,12 @@ body.modo-alto-contraste .edicao-contexto {background:#292929;color:#fff;border-
 .tabela-usuarios th{background:#e7f5ef;font-size:12px;font-weight:800;}
 .tabela-usuarios td strong{display:block;}
 .tabela-usuarios td small{display:block;color:var(--cor-cinza);margin-top:5px;max-width:210px;overflow-wrap:anywhere;}
+.paginacao-usuarios-admin{display:flex;justify-content:center;gap:6px;padding:26px 0 36px;}
+.paginacao-usuarios-admin a{display:inline-flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:50%;color:var(--cor-verde-agua);font-weight:700;text-decoration:none;transition:background-color .2s ease,color .2s ease;}
+.paginacao-usuarios-admin a:hover:not(.desabilitada){background:var(--cor-verde-agua-claro);}
+.paginacao-usuarios-admin a.atual{background:var(--cor-verde-petroleo);color:#fff;}
+.paginacao-usuarios-admin a.desabilitada{color:#94a3b8;pointer-events:none;}
+.paginacao-usuarios-admin a:focus-visible{outline:2px solid var(--cor-verde-petroleo);outline-offset:2px;}
 @media(max-width:680px){.filtros-usuarios-admin .form-field{max-width:none;min-width:100%;}}
 
 /* Acessibilidade e movimentação reduzida */

@@ -27,6 +27,7 @@ export async function compararSenha(senha:string,hash:string){
 function hashToken(token:string){return createHash("sha256").update(token).digest("hex");}
 
 export async function criarSessao(idUsuario:number,manterConectado=true,perfil:Perfil="cidadao"){
+  await encerrarSessao(perfil==="cidadao"?"administrador":"cidadao");
   const persistente=perfil==="cidadao"&&manterConectado;
   const duracaoSegundos=persistente?DIAS_LONGOS*24*3600:HORAS*3600;
   const jar=await cookies();
@@ -74,9 +75,15 @@ async function consultarSessao(perfil:Perfil):Promise<UsuarioSessao|null>{
   const [linhas]=await banco().execute<RowDataPacket[]>(sql,[hashToken(token)]);
   const u=linhas[0];
   if(!u)return null;
-  const usuario={id:Number(u.id),nome:String(u.nome),email:String(u.email),adminResgate:Boolean(u.adminResgate)};
+  const usuario={id:Number(u.id),nome:String(u.nome),email:String(u.email),adminResgate:Number(u.adminResgate)===1};
   if(perfil==="administrador"&&!usuario.adminResgate)return null;
   return usuario;
 }
 export async function usuarioAtual():Promise<UsuarioSessao|null>{return consultarSessao("cidadao");}
-export async function administradorAtual():Promise<UsuarioSessao|null>{return consultarSessao("administrador");}
+export async function administradorAtual():Promise<UsuarioSessao|null>{
+  const administrador=await consultarSessao("administrador");
+  if(!administrador?.adminResgate)return null;
+  const cidadao=await consultarSessao("cidadao");
+  if(cidadao&&(cidadao.id!==administrador.id||!cidadao.adminResgate))return null;
+  return administrador;
+}

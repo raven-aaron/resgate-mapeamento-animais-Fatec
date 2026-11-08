@@ -52,13 +52,65 @@ export async function buscarPublicaPorId(id: number): Promise<Ocorrencia | null>
   return (rows[0] as Ocorrencia) || null;
 }
 
-export async function buscarAdministrativas(status: string): Promise<Ocorrencia[]> {
-  const filtro = status === "TODAS" ? "" : " AND o.status_aprovacao=?";
-  const [rows] = await banco().execute<RowDataPacket[]>(
-    colunas + " WHERE o.excluido_em IS NULL" + filtro + " ORDER BY o.criado_em DESC LIMIT 200",
-    status === "TODAS" ? [] : [status]
+export async function buscarAdministrativas(
+  status: string,
+  opcoes: {
+    pagina: number;
+    porPagina: number;
+    busca: string;
+    aprovacao: string;
+    especie: string;
+    tipo: string;
+    ordem: string;
+  },
+): Promise<{ ocorrencias: Ocorrencia[]; total: number; pagina: number }> {
+  const where = ["o.excluido_em IS NULL"];
+  const valores: (string | number)[] = [];
+  if (status !== "TODAS") {
+    where.push("o.status_aprovacao=?");
+    valores.push(status);
+  }
+  if (opcoes.aprovacao) {
+    where.push("o.status_aprovacao=?");
+    valores.push(opcoes.aprovacao);
+  }
+  if (opcoes.especie) {
+    where.push("e.nome=?");
+    valores.push(opcoes.especie);
+  }
+  if (opcoes.tipo) {
+    where.push("o.tipo_ocorrencia=?");
+    valores.push(opcoes.tipo);
+  }
+  if (opcoes.busca) {
+    where.push("(b.nome LIKE ? OR e.nome LIKE ? OR (o.tipo_ocorrencia='PERDIDO' AND a.nome LIKE ?))");
+    const termo = "%" + opcoes.busca + "%";
+    valores.push(termo, termo, termo);
+  }
+
+  const from = [
+    "FROM ocorrencias o",
+    "JOIN animais a ON a.id_animal = o.id_animal",
+    "JOIN especies e ON e.id_especie = a.id_especie",
+    "JOIN bairros b ON b.id_bairro = o.id_bairro",
+    "JOIN usuarios u ON u.id_usuario = o.id_usuario_criador",
+    "LEFT JOIN racas r ON r.id_raca = a.id_raca",
+  ].join(" ");
+  const condicao = " WHERE " + where.join(" AND ");
+  const [contagem] = await banco().execute<RowDataPacket[]>(
+    "SELECT COUNT(*) AS total " + from + condicao,
+    valores,
   );
-  return rows as Ocorrencia[];
+  const total = Number(contagem[0]?.total || 0);
+  const ultimaPagina = Math.max(1, Math.ceil(total / opcoes.porPagina));
+  const pagina = Math.min(opcoes.pagina, ultimaPagina);
+  const offset = (pagina - 1) * opcoes.porPagina;
+  const direcao = opcoes.ordem === "ANTIGO" ? "ASC" : "DESC";
+  const [rows] = await banco().execute<RowDataPacket[]>(
+    colunas + condicao + ` ORDER BY o.id_ocorrencia ${direcao} LIMIT ? OFFSET ?`,
+    [...valores, opcoes.porPagina, offset],
+  );
+  return { ocorrencias: rows as Ocorrencia[], total, pagina };
 }
 
 export async function buscarAdministrativaPorId(id: number): Promise<Ocorrencia | null> {

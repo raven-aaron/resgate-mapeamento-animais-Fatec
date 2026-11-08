@@ -24,6 +24,12 @@ export default function CartaoOcorrenciaAdmin({
 }: Props) {
   const perdido = ocorrencia.tipo === "PERDIDO";
   const nome = identificacaoAnimal(ocorrencia.tipo, ocorrencia.nome, ocorrencia.especie);
+  const situacaoLarTemporario =
+    ocorrencia.situacao_lar_temporario === "PODE_ACOLHER"
+      ? "Sim"
+      : ocorrencia.situacao_lar_temporario === "NAO_PODE_ACOLHER"
+        ? "Não"
+        : "Não informado";
 
   return (
     <article className={styles.cartao}>
@@ -37,9 +43,16 @@ export default function CartaoOcorrenciaAdmin({
         />
       </div>
       <div className={styles.conteudo}>
-        <strong className={`${styles.tipo} ${perdido ? styles.perdido : styles.encontrado}`}>
-          {perdido ? "PROCURA-SE" : "ENCONTRADO"}
-        </strong>
+        <div className={styles.cabecalhoTipo}>
+          <strong className={`${styles.tipo} ${perdido ? styles.perdido : styles.encontrado}`}>
+            {perdido ? "PROCURA-SE" : "ENCONTRADO"}
+          </strong>
+          {ocorrencia.tipo === "ENCONTRADO" && (
+            <span className={styles.situacaoLar}>
+              Lar temporário: {situacaoLarTemporario}
+            </span>
+          )}
+        </div>
         <h2 className={styles.nome}>{nome}</h2>
         <p className={styles.detalhe}>Espécie: {ocorrencia.especie}</p>
         <p className={styles.detalhe}>Bairro: {ocorrencia.bairro || "Não informado"}</p>

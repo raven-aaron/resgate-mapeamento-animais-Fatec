@@ -4,8 +4,10 @@
 
 1. Clone o repositório e configure o Docker pelo [guia de instalação](../operacao/docker.md).
 2. Suba o projeto e abra `http://localhost:3000` ou utilize o [ambiente DEMO](../operacao/dados-demonstracao.md) na porta `3001`.
-3. Faça um cadastro como cidadão e explore `/mapa`, `/minhas-ocorrencias` e a área administrativa com uma conta de teste.
+3. Faça um cadastro como cidadão e explore `/mapa` e `/minhas-ocorrencias`. Para acessar a área administrativa, entre em `/admin/login` com uma conta de teste que tenha permissão ADMIN no módulo Resgate.
 4. Antes de mudar componentes, confirme o fluxo e o endpoint utilizado na página.
+
+O atalho **Painel administrativo** no menu só é exibido para uma sessão administrativa válida. A interface não é a barreira de segurança: páginas e APIs administrativas também validam a permissão no servidor, portanto esconder ou mostrar o link não concede acesso.
 
 ## Organização da interface
 

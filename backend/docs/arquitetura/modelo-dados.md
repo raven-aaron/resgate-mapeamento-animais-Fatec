@@ -181,7 +181,7 @@ precisará de fluxo próprio de remoção, falhas e repetição.
 - Transações que gravam histórico junto com alterações e controle de concorrência
   com bloqueio da linha de ocorrência/conversa quando necessário.
 - Validação de data de evento não futura, catálogos de espécie/raça/cor e CEP/região.
-- A aplicação atual não implementa paginação por cursor; as consultas têm limites fixos.
+- As listagens administrativas usam paginação por deslocamento; as demais podem ter limites fixos. Não há paginação por cursor.
 - Proteção contra spam, consultas parametrizadas e limites de requisições.
 - Seleção explícita de campos públicos e teste de acessos indevidos.
 

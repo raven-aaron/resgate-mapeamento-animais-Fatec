@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import type { Ocorrencia } from "../../lib/tipos";
 import AppIcon from "../AppIcon";
 import CustomButton from "../CustomButton";
@@ -31,12 +31,10 @@ const filtrosIniciais: Filtros = {
   situacaoCadastro: "",
 };
 
-function normalizar(valor: string) {
-  return valor.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-}
-
 export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | "TODAS" }) {
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
+  const [totalOcorrencias, setTotalOcorrencias] = useState(0);
+  const [pagina, setPagina] = useState(1);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
@@ -51,11 +49,29 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
   const aguardando = useRef(false);
 
   const carregar = useCallback(async (signal?: AbortSignal) => {
-    const resposta = await fetch("/api/admin/ocorrencias?status=" + status, { cache: "no-store", signal });
-    const dados = await resposta.json() as { ocorrencias?: Ocorrencia[]; erro?: string };
+    const parametros = new URLSearchParams({
+      status,
+      pagina: String(pagina),
+      busca: filtros.busca.trim(),
+      aprovacao: filtros.situacaoCadastro,
+      especie: filtros.especie,
+      tipo: filtros.situacao,
+      ordem: filtros.ordem,
+    });
+    const resposta = await fetch("/api/admin/ocorrencias?" + parametros, { cache: "no-store", signal });
+    const dados = await resposta.json() as {
+      ocorrencias?: Ocorrencia[];
+      total?: number;
+      pagina?: number;
+      erro?: string;
+    };
     if (!resposta.ok) throw new Error(dados.erro || "Falha ao carregar solicitações.");
-    if (!signal?.aborted) setOcorrencias(dados.ocorrencias || []);
-  }, [status]);
+    if (!signal?.aborted) {
+      setOcorrencias(dados.ocorrencias || []);
+      setTotalOcorrencias(dados.total || 0);
+      if (dados.pagina && dados.pagina !== pagina) setPagina(dados.pagina);
+    }
+  }, [status, pagina, filtros]);
 
   useEffect(() => {
     const controlador = new AbortController();
@@ -118,20 +134,14 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     };
   }, [confirmacao, filtroAberto]);
 
-  const ocorrenciasFiltradas = useMemo(() => {
-    const termo = normalizar(filtros.busca.trim());
-    return ocorrencias.filter((ocorrencia) => {
-      const atendeBusca = !termo || normalizar([
-        ocorrencia.tipo === "PERDIDO" ? ocorrencia.nome || "" : "",
-        ocorrencia.bairro || "",
-        ocorrencia.especie,
-      ].join(" ")).includes(termo);
-      return (!filtros.especie || ocorrencia.especie === filtros.especie)
-        && (!filtros.situacao || ocorrencia.tipo === filtros.situacao)
-        && (!filtros.situacaoCadastro || ocorrencia.status_aprovacao === filtros.situacaoCadastro)
-        && atendeBusca;
-    }).sort((a, b) => filtros.ordem === "RECENTE" ? b.id - a.id : a.id - b.id);
-  }, [ocorrencias, filtros]);
+  const totalPaginas = Math.max(1, Math.ceil(totalOcorrencias / 10));
+  const primeiraPaginaVisivel = Math.max(1, Math.min(pagina - 2, totalPaginas - 4));
+  const paginasVisiveis = Array.from(
+    { length: Math.min(5, totalPaginas) },
+    (_, indice) => primeiraPaginaVisivel + indice,
+  );
+  const primeiroResultado = totalOcorrencias ? (pagina - 1) * 10 + 1 : 0;
+  const ultimoResultado = Math.min(pagina * 10, totalOcorrencias);
 
   async function confirmar() {
     if (!confirmacao) return;
@@ -162,6 +172,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
 
   function aplicarFiltros(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
+    setPagina(1);
     setFiltros(filtrosTemporarios);
     setFiltroAberto(false);
   }
@@ -185,9 +196,12 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
     {carregando && <p role="status">Carregando {status === "PENDENTE" ? "solicitações" : "registros"}...</p>}
     {erro && <p role="alert" className="note note-warning">{erro}</p>}
     {sucesso && <p role="status" className="note">{sucesso}</p>}
-    <p><strong>{ocorrenciasFiltradas.length} ocorrência(s)</strong> na consulta atual.</p>
+    <p>
+      <strong>{totalOcorrencias} ocorrência(s)</strong> na consulta atual.
+      {totalOcorrencias > 0 && <> Exibindo {primeiroResultado}–{ultimoResultado}.</>}
+    </p>
     <div className={styles.gridCartoes}>
-      {ocorrenciasFiltradas.map((ocorrencia) => <CartaoOcorrenciaAdmin
+      {ocorrencias.map((ocorrencia) => <CartaoOcorrenciaAdmin
         key={ocorrencia.id}
         ocorrencia={ocorrencia}
         aoAprovar={ocorrencia.status_aprovacao === "PENDENTE"
@@ -200,12 +214,22 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
           ? () => setConfirmacao({ id: ocorrencia.id, acao: "OCULTAR" })
           : undefined}
       />)}
-      {!carregando && ocorrenciasFiltradas.length === 0 && <p className="note">
-        {ocorrencias.length === 0
+      {!carregando && ocorrencias.length === 0 && <p className="note">
+        {totalOcorrencias === 0
           ? `Não há ${status === "PENDENTE" ? "solicitações pendentes" : "registros"} nesta situação.`
           : "Nenhuma ocorrência corresponde aos filtros selecionados."}
       </p>}
     </div>
+    {totalPaginas > 1 && <nav className={styles.navegacaoPaginas} aria-label="Paginação de ocorrências">
+      <button type="button" aria-label="Página anterior" disabled={pagina <= 1}
+        onClick={() => setPagina((atual) => atual - 1)}>←</button>
+      {paginasVisiveis.map((numero) => <button key={numero} type="button"
+        aria-label={`Página ${numero}`} aria-current={numero === pagina ? "page" : undefined}
+        className={numero === pagina ? styles.paginaAtual : undefined}
+        onClick={() => setPagina(numero)}>{numero}</button>)}
+      <button type="button" aria-label="Próxima página" disabled={pagina >= totalPaginas}
+        onClick={() => setPagina((atual) => atual + 1)}>→</button>
+    </nav>}
 
     {filtroAberto && <div className="admin-modal-fundo" role="presentation" onMouseDown={(evento) => {
       if (evento.target === evento.currentTarget) setFiltroAberto(false);
@@ -255,6 +279,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
           <div className={styles.acoesFiltro}>
             <CustomButton type="submit" fullWidth>APLICAR FILTROS</CustomButton>
             <CustomButton type="button" variant="gray" fullWidth onClick={() => {
+              setPagina(1);
               setFiltros(filtrosIniciais);
               setFiltrosTemporarios(filtrosIniciais);
               setFiltroAberto(false);

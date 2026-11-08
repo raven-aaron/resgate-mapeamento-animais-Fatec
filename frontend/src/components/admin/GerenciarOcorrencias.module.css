@@ -19,6 +19,48 @@
   gap: 18px;
 }
 
+.navegacaoPaginas {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 26px 0 36px;
+}
+
+.navegacaoPaginas button {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cor-verde-agua);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navegacaoPaginas button:hover:not(:disabled) {
+  background: var(--cor-verde-agua-claro);
+}
+
+.navegacaoPaginas .paginaAtual {
+  background: var(--cor-verde-petroleo);
+  color: #fff;
+}
+
+.navegacaoPaginas button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.navegacaoPaginas button:focus-visible {
+  outline: 2px solid var(--cor-verde-petroleo);
+  outline-offset: 2px;
+}
+
 .modalFiltros {
   max-height: min(90vh, 760px);
   overflow-y: auto;

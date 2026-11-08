@@ -27,7 +27,7 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
           return <Link key={href} href={href} aria-current={ativo ? "page" : undefined}>{label}</Link>;
         })}
       </nav>
-      <div className={styles.menuAcoes}><p>Conectado: <strong>{nome}</strong></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
+      <div className={styles.menuAcoes}><p>Conectado com: <Link href="/minha-conta">{nome}</Link></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
     </aside>
     <section className={styles.conteudo}>
       <div className={styles.titulo}>

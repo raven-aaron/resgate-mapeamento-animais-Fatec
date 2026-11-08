@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const [rows] = await banco().execute<RowDataPacket[]>(sql, [email]);
     const usuario = rows[0];
     const valido = usuario && await compararSenha(senha, String(usuario.senha_hash));
-    if (!valido || (body.admin === true && !usuario.adminResgate)) {
+    if (!valido || (body.admin === true && Number(usuario.adminResgate) !== 1)) {
       const anterior = dadosRate && dadosRate.expira > agora ? dadosRate.qtd : 0;
       if (tentativas.size > 2000) tentativas.clear();
       tentativas.set(ip, { qtd: anterior + 1, expira: agora + 15 * 60_000 });

@@ -29,7 +29,7 @@ As fotografias enviadas são gravadas no volume Docker `media_data`. A tabela `f
 | Cidadão autenticado | Cria e gerencia os próprios registros e participa do chat |
 | Administrador do Resgate | Modera ocorrências e consulta as ferramentas administrativas |
 
-A sessão do cidadão e a sessão administrativa usam cookies distintos. O front-end apenas apresenta os estados de autenticação; a autorização é conferida nas rotas do servidor.
+A sessão do cidadão e a sessão administrativa usam cookies distintos. O atalho **Painel administrativo** só aparece no menu para uma sessão administrativa válida; páginas e APIs conferem a permissão novamente no servidor, independentemente da visibilidade do link.
 
 ## Áreas do código
 

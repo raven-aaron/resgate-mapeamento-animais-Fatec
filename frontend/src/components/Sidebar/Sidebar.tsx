@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import AppIcon from '../AppIcon';
 import CustomButton from '../CustomButton';
 import styles from './Sidebar.module.css';
@@ -11,6 +12,31 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const [acessoAdministrativo, setAcessoAdministrativo] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    const verificarAcesso = async () => {
+      try {
+        const resposta = await fetch('/api/auth/admin/me', {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
+        const dados = await resposta.json() as { usuario?: { adminResgate?: boolean } | null };
+        if (ativo) setAcessoAdministrativo(resposta.ok && dados.usuario?.adminResgate === true);
+      } catch (error) {
+        console.error('Falha ao verificar acesso administrativo do menu.', error);
+        if (ativo) setAcessoAdministrativo(false);
+      }
+    };
+    void verificarAcesso();
+    window.addEventListener('resgate-auth', verificarAcesso);
+    return () => {
+      ativo = false;
+      window.removeEventListener('resgate-auth', verificarAcesso);
+    };
+  }, []);
+
   return (
     <>
       <div 
@@ -42,9 +68,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <li className={styles.itemMenu}>
               <Link href="/mapa" className={styles.linkMenu} onClick={onClose}>Mapa</Link>
             </li>
-            <li className={styles.itemMenu}>
+            {acessoAdministrativo && <li className={styles.itemMenu}>
               <Link href="/admin" className={styles.linkMenu} onClick={onClose}>Painel administrativo</Link>
-            </li>
+            </li>}
             <li className={styles.itemMenu}>
               <Link href="/minha-conta" className={styles.linkMenu} onClick={onClose}>Meu perfil</Link>
             </li>
