@@ -9,7 +9,9 @@ export default function HomePage() {
     <main>
       <section className={styles.secao}>
         <div className={styles.container}>
-          <h1 className={styles.tituloDestaque}>RESGATE E MAPEAMENTO DE ANIMAIS</h1>
+          <h1 className={styles.tituloDestaque}>
+            RESGATE E MAPEAMENTO DE ANIMAIS
+          </h1>
           <div className={styles.gridHome}>
             <div className={styles.colTexto}>
               <p className={styles.textos}>
@@ -46,15 +48,11 @@ export default function HomePage() {
           <div className={`${styles.gridHome} ${styles.reverso}`}>
             <div className={styles.colTexto}>
               <p className={styles.textos}>
-                Cada ocorrência cadastrada passa por uma avaliação da equipe
-                responsável antes de ser disponibilizada na plataforma. A
-                comunidade também tem um papel fundamental nesse processo,
-                contribuindo com informações e ajudando na identificação dos
-                animais. Por meio do chat integrado, é possível facilitar a
-                comunicação entre as pessoas envolvidas e agilizar o reencontro
-                dos pets com seus tutores. Quando necessário, também é possível
-                entrar em contato com o setor de Bem-Estar Animal para solicitar
-                orientação e apoio.
+                Cada ocorrência passa por uma avaliação da equipe responsável
+                antes de ser publicada. A comunidade também contribui com
+                informações e ajuda na identificação dos animais. Pelo chat
+                integrado, as pessoas podem se comunicar e facilitar o
+                reencontro dos pets com seus tutores.
               </p>
               <div className={styles.botoes}>
                 <CustomButton href="/mapa">ACESSE O MAPA</CustomButton>
