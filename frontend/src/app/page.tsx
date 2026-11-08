@@ -9,7 +9,7 @@ export default function HomePage() {
     <main>
       <section className={styles.secao}>
         <div className={styles.container}>
-          <h1 className={styles.tituloDestaque}>PERDI O MEU PET</h1>
+          <h1 className={styles.tituloDestaque}>RESGATE E MAPEAMENTO DE ANIMAIS</h1>
           <div className={styles.gridHome}>
             <div className={styles.colTexto}>
               <p className={styles.textos}>
