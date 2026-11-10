@@ -118,9 +118,39 @@
   width: 100%;
 }
 
+/* mobile: ajustes da página */
 @media (max-width: 968px) {
   .contatoWrapper {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+}
+
+/* mobile: ajustes da página */
+@media (max-width: 760px) {
+  .tituloPagina {
+    font-size: 2rem;
+    padding: 30px 20px 8px;
+  }
+
+  .contatoWrapper {
+    padding: 0 16px;
+  }
+
+  .cardInformacoes,
+  .cardFormulario {
+    padding: 24px 18px;
+  }
+
+  .linhaContato {
+    align-items: flex-start;
+  }
+
+  .mapaContainer {
+    height: 220px;
+  }
+
+  .textareaContato {
+    height: 180px;
   }
 }

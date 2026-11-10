@@ -54,3 +54,51 @@
     filter: drop-shadow(10px 10px 8px #5c5c5c);
     object-fit: cover;
 }
+
+/* mobile: ajustes da página inicial */
+@media (max-width: 900px) {
+    .container {
+        padding: 42px 18px;
+    }
+
+    .tituloDestaque {
+        margin-bottom: 28px;
+        font-size: clamp(2.1rem, 6vw, 3.1rem);
+    }
+
+    .gridHome {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .textos {
+        font-size: clamp(1.1rem, 3.2vw, 1.8rem);
+        margin-bottom: 22px;
+    }
+
+    .botoes {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* mobile: ajustes da página inicial */
+@media (max-width: 480px) {
+    .container {
+        padding: 32px 14px;
+    }
+
+    .tituloDestaque {
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .botoes {
+        gap: 12px;
+    }
+
+    .imgBorda {
+        border-width: 3px;
+        border-radius: 14px;
+    }
+}

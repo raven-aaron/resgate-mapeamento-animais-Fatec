@@ -163,12 +163,14 @@
   text-align: center;
 }
 
+/* mobile: ajustes do mapa */
 @media (max-width: 800px) {
   .paineisInformacao {
     grid-template-columns: 1fr;
   }
 }
 
+/* mobile: ajustes do mapa */
 @media (max-width: 480px) {
   .containerFiltros {
     flex-direction: column;

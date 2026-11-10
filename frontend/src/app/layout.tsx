@@ -3,7 +3,6 @@ import FinalSiteShell from "../components/FinalSiteShell";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
-import "./final-globals.css";
 
 export const metadata: Metadata = {
   title: "Resgate e Mapeamento de Animais | Votorantim",

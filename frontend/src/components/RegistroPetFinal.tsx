@@ -461,12 +461,6 @@ export default function RegistroPetFinal({
           <p>Entre na sua conta para enviar o cadastro. <Link href={`/login?retorno=${encodeURIComponent(formularioDestino)}`}>Acessar login</Link></p>
         )}
         <div className={`${styles.containerBotoes} ${wizard.acoesEtapa}`}>
-          <div className={styles.wrapperBtn}>
-            <CustomButton type="button" variant="red" onClick={cancelarCadastro}>CANCELAR</CustomButton>
-          </div>
-          {etapa > 1 && <div className={styles.wrapperBtn}>
-            <CustomButton type="button" variant="gray" onClick={() => setEtapa((atual) => Math.max(atual - 1, 1))}>VOLTAR</CustomButton>
-          </div>}
           {etapa < 3 ? (
             <div className={styles.wrapperBtn}>
               <CustomButton type="button" variant="green" onClick={() => void validarEtapaAtual()}>PRÓXIMO</CustomButton>
@@ -478,6 +472,12 @@ export default function RegistroPetFinal({
               </CustomButton>
             </div>
           )}
+          {etapa > 1 && <div className={styles.wrapperBtn}>
+            <CustomButton type="button" variant="gray" onClick={() => setEtapa((atual) => Math.max(atual - 1, 1))}>VOLTAR</CustomButton>
+          </div>}
+          <div className={styles.wrapperBtn}>
+            <CustomButton type="button" variant="red" onClick={cancelarCadastro}>CANCELAR</CustomButton>
+          </div>
         </div>
       </Form>
       <ModalSucesso

@@ -1,5 +1,5 @@
 .area { width:min(1400px,calc(100% - 32px)); margin:36px auto 0; padding:0; display:grid; grid-template-columns:280px minmax(0,1fr); gap:26px; align-items:start; }
-.menuAdmContainer { background:var(--card); border:1px solid #d5e5e0; box-shadow:0 4px 15px #3488881a; border-radius:18px; padding:26px; position:sticky;top:18px; }
+.menuAdmContainer { background:var(--cor-superficie); border:1px solid #d5e5e0; box-shadow:0 4px 15px #3488881a; border-radius:18px; padding:26px; position:sticky;top:18px; }
 .cabecalho h2 { font-size:27px; font-weight:800; color:var(--cor-verde-agua); border-bottom:2px solid var(--cor-verde-agua-claro); padding-bottom:16px; margin:12px 0; }
 .cabecalho p { font-weight:800; color:var(--cor-verde-agua); }
 .selo { font-size:12px; display:inline-block; color:#85431b; background:#fff1e9; border:1px solid #f3c0a0; border-radius:20px; padding:5px 11px; }
@@ -11,10 +11,13 @@
 .menuAcoes p { font-size:13px; overflow-wrap:anywhere; }
 .menuAcoes p a { color:var(--cor-verde-agua); font-weight:800; text-decoration:underline; text-underline-offset:2px; }
 .menuAcoes button { width:100%; font-size:13px; }
-.conteudo { min-width:0; border-radius:18px; background:var(--card); padding:30px; box-shadow:0 4px 15px #34888814; border:1px solid #d5e5e0; }
+.conteudo { min-width:0; border-radius:18px; background:var(--cor-superficie); padding:30px; box-shadow:0 4px 15px #34888814; border:1px solid #d5e5e0; }
 .titulo h1 { color:var(--cor-verde-agua); font-weight:800; margin:12px 0 28px; font-size:clamp(26px,3vw,37px); }
+.mobileMenuToggleWrap, .mobileMenuPanel, .mobileMenuBackdrop { display:none; }
+/* mobile: ajustes do menu administrativo */
 @media(max-width:860px){.area{grid-template-columns:1fr;}.menuAdmContainer{position:static;}.conteudo{padding:20px;}}
 
+/* mobile: ajustes do menu administrativo */
 @media(max-width:860px){
   .area {gap:14px;margin-top:20px;}
   .menuAdmContainer {padding:18px;}
@@ -27,9 +30,26 @@
   .menuAcoes p {margin:0;}
   .menuAcoes button {width:auto;}
 }
-@media(max-width:480px){
+/* mobile: ajustes do menu administrativo */
+@media (max-width: 768px) {
   .area {width:calc(100% - 20px);}
-  .menuAdmContainer {padding:14px;}
+  .menuAdmContainer {display:none;}
+  .mobileMenuToggleWrap {display:block;}
+  .mobileMenuToggle { width:100%; border:0; border-radius:14px; background:var(--cor-verde-agua); color:#fff; padding:14px 16px; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; box-shadow:0 8px 20px rgba(52,136,136,.2); }
+  .mobileMenuBackdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); border:0; z-index:1030; display:block; }
+  .mobileMenuPanel { position:fixed; left:0; top:0; bottom:0; width:min(86vw, 360px); background:var(--cor-superficie); z-index:1040; display:flex; flex-direction:column; transform:translateX(-105%); transition:transform .22s ease; box-shadow:12px 0 28px rgba(0,0,0,.18); }
+  .mobileMenuPanelOpen { transform:translateX(0); }
+  .mobileMenuHeader { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:18px 18px 12px; background:var(--cor-verde-agua-claro); border-bottom:1px solid #d5e5e0; }
+  .mobileMenuTitleWrap { display:flex; flex-direction:column; gap:8px; }
+  .mobileMenuTitleWrap h2 { margin:0; font-size:1.3rem; color:var(--cor-verde-agua); }
+  .mobileMenuClose { width:42px; height:42px; background:transparent; border:none; color:var(--cor-escuro); font-size:2rem; line-height:1; }
+  .mobileMenuLinks { display:flex; flex-direction:column; gap:8px; padding:16px 18px; overflow-y:auto; }
+  .mobileMenuLinks a { display:block; padding:14px 12px; border:1px solid #d5e5e0; border-radius:12px; color:var(--cor-escuro); background:var(--cor-superficie); font-weight:700; }
+  .mobileMenuLinks a[aria-current="page"] { border-color:var(--cor-verde-agua); color:var(--cor-verde-agua); background:rgba(52,136,136,.08); }
+  .mobileMenuActions { border-top:1px solid #d5e5e0; padding:16px 18px; margin-top:auto; }
+  .mobileMenuActions p { margin:0 0 12px; overflow-wrap:anywhere; }
+  .mobileMenuActions p a { color:var(--cor-verde-agua); font-weight:800; }
+  .mobileMenuActions button { width:100%; }
   .conteudo {padding:17px 13px;border-radius:13px;}
   .titulo h1 {font-size:clamp(22px,7vw,30px);overflow-wrap:anywhere;}
 }

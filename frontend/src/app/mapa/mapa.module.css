@@ -145,3 +145,36 @@
   width: 300px;
   z-index: 1000; 
 }
+
+/* mobile: ajustes do mapa */
+@media (max-width: 640px) {
+  .card-mapa-interno {
+    width: 140px;
+    padding: 8px;
+  }
+
+  .titulo-card-mapa {
+    font-size: 0.8rem;
+  }
+
+  .texto-card-mapa {
+    font-size: 0.72rem;
+  }
+
+  .icone-funil-mapa {
+    top: 12px;
+    right: 12px;
+  }
+
+  .conteudo-modal {
+    width: min(300px, calc(100% - 28px));
+    padding: 16px;
+  }
+}
+
+/* mobile: ajustes do mapa */
+@media (max-width: 420px) {
+  .card-mapa-interno {
+    width: 124px;
+  }
+}

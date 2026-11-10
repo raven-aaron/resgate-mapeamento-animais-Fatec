@@ -103,6 +103,7 @@
   align-items: center;
 }
 
+/* mobile: ajustes do formulário */
 @media (max-width: 620px) {
   .progresso {
     gap: 6px;
@@ -128,6 +129,7 @@
   }
 }
 
+/* mobile: ajustes do formulário */
 @media (max-width: 420px) {
   .progresso {
     grid-template-columns: 1fr;

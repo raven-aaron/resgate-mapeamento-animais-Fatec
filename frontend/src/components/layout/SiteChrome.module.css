@@ -30,7 +30,7 @@
 .fechar { background: transparent; border: 0; font-size: 28px; color: var(--cor-escuro); flex-shrink: 0; }
 .menuCorpo { padding: 24px 20px; }
 .menuCorpo h2 { font-size: 13px; letter-spacing: 1.5px; color: var(--cor-cinza); margin: 0 0 24px; line-height: 1.6; }
-.menuCorpo a { display: block; padding: 15px 0; border-bottom: 1px solid var(--line); color: var(--cor-escuro); font-size: 16px; font-weight: 600; line-height: 1.4; }
+.menuCorpo a { display: block; padding: 15px 0; border-bottom: 1px solid var(--cor-borda); color: var(--cor-escuro); font-size: 16px; font-weight: 600; line-height: 1.4; }
 .menuCorpo a:hover, .menuCorpo a:focus-visible { color: var(--cor-verde-agua); text-decoration: underline; }
 .rodape { width: 100%; margin-top: 50px; color: var(--cor-escuro); }
 .rodapeTopo { background: var(--cor-ciano-claro); padding: 24px 0; }
@@ -40,7 +40,9 @@
 .rodapeTexto p { margin: 10px 0 0; font-size: 14px; }
 .rodapeLogos { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
 .rodapeBase { background: var(--cor-verde-agua); color: white; padding: 13px 0; font-size: 13px; }
+/* mobile: ajustes do cabeçalho */
 @media (max-width: 900px) { .gridCabecalho { grid-template-columns: 160px 1fr 130px; } .barraNav { gap: 12px; } }
+/* mobile: ajustes do cabeçalho */
 @media (max-width: 680px) {
   .container { padding: 0 16px; }
   .cabecalho { padding: 16px 0; }
@@ -58,15 +60,18 @@
 .prefeituraWrapper { display:flex;flex-direction:column;align-items:center;gap:8px; }
 .acessoPrefeitura { color:var(--cor-verde-agua);font-weight:700;font-size:12px;text-align:center;text-decoration:underline;white-space:nowrap; }
 .linkAdministracao { float:right;font-weight:700;text-decoration:underline; }
+/* mobile: ajustes do cabeçalho */
 @media(max-width:680px){.acessoPrefeitura{white-space:normal;font-size:10px;}.linkAdministracao{float:none;display:block;margin-top:10px;}}
 
 /* Navegação adaptativa, sem rolagem horizontal da página */
+/* mobile: ajustes do cabeçalho */
 @media(max-width:800px) {
   .barraNav {flex-wrap:nowrap;overflow-x:auto;max-width:calc(100vw - 120px);scrollbar-width:thin;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:12px 16px 12px 26px;}
   .barraNav a {white-space:nowrap;flex-shrink:0;}
   .gridCabecalho {min-width:0;}
   .buscaWrapper {min-width:0;}
 }
+/* mobile: ajustes do cabeçalho */
 @media(max-width:480px) {
   .container {padding:0 12px;}
   .cabecalho {padding:12px 0;}
@@ -91,10 +96,12 @@
 .linhaNavegacao{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:72px;min-width:0;}
 .contaTopo{display:flex;align-items:center;justify-content:flex-end;flex:1;min-width:0;padding:8px 0;}
 .contaLateral{margin-top:16px;border-top:1px solid #d6e7e2;padding-top:8px;}
+/* mobile: ajustes do cabeçalho */
 @media(max-width:1100px){
   .linhaNavegacao{flex-direction:column;align-items:stretch;gap:3px;padding:9px 0;}
   .contaTopo{justify-content:flex-end;min-height:42px;padding:4px 0;}
 }
+/* mobile: ajustes do cabeçalho */
 @media(max-width:680px){
   .linhaNavegacao{padding:4px 0 10px;}
   .contaTopo{padding-top:9px;}

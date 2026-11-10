@@ -80,3 +80,27 @@
 .btn-recuperar:hover {
     background-color: var(--cor-vermelho);
 }
+
+/* mobile: ajustes do formulário */
+@media (max-width: 520px) {
+    .container {
+        padding: 16px;
+    }
+
+    .card {
+        padding: 24px 18px;
+    }
+
+    .titulo {
+        font-size: 1.2rem;
+    }
+
+    .subtitulo {
+        margin-bottom: 22px;
+    }
+
+    .btn-recuperar {
+        padding: 14px 12px;
+        font-size: 0.84rem;
+    }
+}

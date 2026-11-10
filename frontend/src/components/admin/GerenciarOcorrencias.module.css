@@ -86,12 +86,14 @@
   margin-top: 20px;
 }
 
+/* mobile: ajustes dos cards */
 @media (max-width: 720px) {
   .gridCartoes {
     grid-template-columns: 1fr;
   }
 }
 
+/* mobile: ajustes dos cards */
 @media (max-width: 600px) {
   .camposFiltro,
   .acoesFiltro {

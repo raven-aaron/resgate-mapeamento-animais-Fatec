@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import LogoutButton from "../../components/auth/LogoutButton";
 import CustomButton from "../../components/CustomButton";
+import FormPage, { FormPanel } from "../../components/FormPage";
 import { administradorAtual, usuarioAtual } from "../../lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -11,14 +12,12 @@ export default async function MinhaContaPage() {
   if (!usuario) redirect("/login?retorno=%2Fminha-conta");
 
   return (
-    <main className="form-shell">
-      <header className="form-heading">
-        <span className="eyebrow">{administrador ? "Área administrativa" : "Área do usuário"}</span>
-        <h1>MINHA CONTA</h1>
-        <p>{administrador ? "Dados da conta administrativa." : "Gerencie seus dados e ocorrências."}</p>
-      </header>
-
-      <section className="form-panel" aria-label="Dados da conta conectada">
+    <FormPage
+      eyebrow={administrador ? "Área administrativa" : "Área do usuário"}
+      title="MINHA CONTA"
+      description={administrador ? "Dados da conta administrativa." : "Gerencie seus dados e ocorrências."}
+    >
+      <FormPanel aria-label="Dados da conta conectada">
         <h2>{usuario.nome}</h2>
         <p>
           <strong>E-mail:</strong> {usuario.email}
@@ -44,7 +43,7 @@ export default async function MinhaContaPage() {
             <LogoutButton destino="/" texto="Sair da minha conta" />
           </div>
         </>}
-      </section>
-    </main>
+      </FormPanel>
+    </FormPage>
   );
 }

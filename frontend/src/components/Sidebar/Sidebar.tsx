@@ -37,6 +37,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     };
   }, []);
 
+  const itensMenu = [
+    { href: '/', label: 'Página Inicial' },
+    { href: '/adote', label: 'Adote' },
+    { href: '/banco-de-racao', label: 'Banco de Ração' },
+    { href: '/', label: 'Resgate e Mapeamento' },
+    { href: '/castracao', label: 'Castração' },
+    { href: '/mapa', label: 'Mapa' },
+    { href: '/registro-pet-perdido', label: 'Perdi meu Pet' },
+    { href: '/registro-pet-encontrado', label: 'Encontrei um Pet' },
+    { href: '/entrar', label: 'Entrar' },
+    { href: '/minha-conta', label: 'Meu perfil' },
+  ];
+
   return (
     <>
       <div 
@@ -56,24 +69,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className={styles.conteudo}>
           <h2 className={styles.tituloMenu}>NAVEGAÇÃO</h2>
           <ul className={styles.listaMenu}>
-            <li className={styles.itemMenu}>
-              <Link href="/" className={styles.linkMenu} onClick={onClose}>Página Inicial</Link>
-            </li>
-            <li className={styles.itemMenu}>
-              <Link href="/registro-pet-perdido" className={styles.linkMenu} onClick={onClose}>Perdi meu Pet</Link>
-            </li>
-            <li className={styles.itemMenu}>
-              <Link href="/registro-pet-encontrado" className={styles.linkMenu} onClick={onClose}>Encontrei um Pet</Link>
-            </li>
-            <li className={styles.itemMenu}>
-              <Link href="/mapa" className={styles.linkMenu} onClick={onClose}>Mapa</Link>
-            </li>
+            {itensMenu.map((item) => (
+              <li key={`${item.href}-${item.label}`} className={styles.itemMenu}>
+                <Link href={item.href} className={styles.linkMenu} onClick={onClose}>{item.label}</Link>
+              </li>
+            ))}
             {acessoAdministrativo && <li className={styles.itemMenu}>
               <Link href="/admin" className={styles.linkMenu} onClick={onClose}>Painel administrativo</Link>
             </li>}
-            <li className={styles.itemMenu}>
-              <Link href="/minha-conta" className={styles.linkMenu} onClick={onClose}>Meu perfil</Link>
-            </li>
           </ul>
         </div>
       </aside>

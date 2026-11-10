@@ -20,11 +20,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   }, [tamanhoFonte]);
 
   useEffect(() => {
-    if (altoContraste) {
-      document.body.classList.add('alto-contraste');
-    } else {
-      document.body.classList.remove('alto-contraste');
-    }
+    document.body.classList.toggle('modo-alto-contraste', altoContraste);
+    return () => document.body.classList.remove('modo-alto-contraste');
   }, [altoContraste]);
 
   const aumentarFonte = () => {

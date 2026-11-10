@@ -181,12 +181,14 @@
   text-align: center;
 }
 
+/* mobile: ajustes das estatísticas */
 @media (max-width: 800px) {
   .containerGraficos {
     grid-template-columns: 1fr;
   }
 }
 
+/* mobile: ajustes das estatísticas */
 @media (max-width: 480px) {
   .containerFiltros {
     flex-direction: column;

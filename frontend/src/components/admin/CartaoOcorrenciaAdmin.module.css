@@ -91,6 +91,7 @@
   font-size: 0.68rem;
 }
 
+/* mobile: ajustes dos cards */
 @media (max-width: 600px) {
   .cartao {
     grid-template-columns: minmax(95px, 32%) minmax(0, 1fr);
@@ -105,6 +106,7 @@
   }
 }
 
+/* mobile: ajustes dos cards */
 @media (max-width: 400px) {
   .cartao {
     grid-template-columns: 1fr;

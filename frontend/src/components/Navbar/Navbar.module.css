@@ -253,44 +253,127 @@
     font-size: 20px;
 }
 
-@media (max-width: 760px) {
+/* mobile: ajustes do cabeçalho */
+@media (max-width: 768px) {
     .containerFluid {
+        width: 100%;
+        max-width: 100%;
         padding: 0 12px;
+    }
+
+    .flexAcessibilidade {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btnAcessibilidade {
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        min-height: 40px;
+    }
+
+    .cabecalho {
+        padding: 16px 0;
+    }
+
+    .gridCabecalho {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .logoWrapper {
+        min-width: 0;
+    }
+
+    .logo {
+        max-width: 140px;
+        width: auto;
+        height: auto;
+    }
+
+    .buscaWrapper {
+        grid-column: 1 / -1;
+        max-width: none;
+        width: 100%;
     }
 
     .redesSociais {
         display: none;
     }
 
+    .navEsquerda {
+        flex: 1 1 100%;
+        gap: 10px;
+        min-width: 0;
+    }
+
     .btnMenu,
     .btnMenu:global(.custom-button.custom-button--green) {
         min-width: 56px;
         width: 56px;
+        height: 52px;
+        min-height: 52px;
+        border-radius: 14px;
+        flex-shrink: 0;
     }
 
     .barraNav {
-        flex: 1;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 0 10px;
+        display: none;
     }
 
     .linkNav {
-        font-size: 12px;
+        display: none;
     }
 }
 
+/* mobile: ajustes do cabeçalho */
 @media (max-width: 480px) {
-    .barraNav {
-        flex-wrap: wrap;
+    .cabecalho {
+        padding: 12px 0;
+    }
+
+    .gridCabecalho {
+        grid-template-columns: minmax(0, 1fr) 90px;
+    }
+
+    .logo {
+        max-width: 118px;
+    }
+
+    .prefeituraWrapper {
+        justify-self: end;
+        max-width: 90px;
+    }
+
+    .logoPrefeitura {
+        max-width: 82px;
         height: auto;
-        min-height: 45px;
-        justify-content: center;
-        gap: 6px 12px;
-        padding: 8px 10px;
+    }
+
+    .buscaWrapper {
+        gap: 8px;
+        width: 100%;
+    }
+
+    .btnBuscar {
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        min-height: 42px;
+    }
+
+    .inputBusca {
+        height: 42px;
+        min-width: 0;
+    }
+
+    .barraNav {
+        display: none;
     }
 
     .linkNav {
-        font-size: 11px;
+        display: none;
     }
 }

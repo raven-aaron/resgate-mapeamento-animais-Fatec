@@ -102,6 +102,7 @@
   border-radius: 50%;
 }
 
+/* mobile: ajustes do mapa */
 @media (max-width: 768px) {
   .mapa {
     height: 420px;

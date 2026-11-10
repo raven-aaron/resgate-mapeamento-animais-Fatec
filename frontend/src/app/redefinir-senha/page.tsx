@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense,useState,type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import CustomButton from "../../components/CustomButton";
+import FormPage from "../../components/FormPage";
 
 function Formulario(){
   const token=useSearchParams().get("token")||"";
@@ -23,19 +24,20 @@ function Formulario(){
     }catch(e){setErro(e instanceof Error?e.message:"Falha ao redefinir.");}
     finally{setEnviando(false);}
   }
-  return <main className="form-shell">
-    <header className="form-heading"><h1>REDEFINIR SENHA</h1></header>
-    <form className="form-panel" onSubmit={enviar}>
-      {!/^[a-f0-9]{64}$/.test(token)&&<p className="note note-warning">Link de recuperação inválido.</p>}
-      {sucesso?<p className="note" role="status">{sucesso} <Link href="/login">Entrar</Link></p>:<>
-        <div className="form-grid">
-          <label className="form-field">Nova senha<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={senha} onChange={e=>setSenha(e.target.value)} /></label>
-          <label className="form-field">Confirmar senha<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={confirmacao} onChange={e=>setConfirmacao(e.target.value)} /></label>
-        </div>
-        {erro&&<p className="note note-warning" role="alert">{erro}</p>}
-        <div className="action-row"><CustomButton type="submit" disabled={enviando||!/^[a-f0-9]{64}$/.test(token)}>{enviando?"Salvando...":"SALVAR NOVA SENHA"}</CustomButton></div>
-      </>}
-    </form>
-  </main>;
+  return (
+    <FormPage title="REDEFINIR SENHA">
+      <form className="form-panel" onSubmit={enviar}>
+        {!/^[a-f0-9]{64}$/.test(token)&&<p className="note note-warning">Link de recuperação inválido.</p>}
+        {sucesso?<p className="note" role="status">{sucesso} <Link href="/login">Entrar</Link></p>:<>
+          <div className="form-grid">
+            <label className="form-field">Nova senha<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={senha} onChange={e=>setSenha(e.target.value)} /></label>
+            <label className="form-field">Confirmar senha<input type="password" required minLength={10} maxLength={128} autoComplete="new-password" value={confirmacao} onChange={e=>setConfirmacao(e.target.value)} /></label>
+          </div>
+          {erro&&<p className="note note-warning" role="alert">{erro}</p>}
+          <div className="action-row"><CustomButton type="submit" disabled={enviando||!/^[a-f0-9]{64}$/.test(token)}>{enviando?"Salvando...":"SALVAR NOVA SENHA"}</CustomButton></div>
+        </>}
+      </form>
+    </FormPage>
+  );
 }
 export default function RedefinirSenha(){return <Suspense fallback={<main className="form-shell">Carregando...</main>}><Formulario/></Suspense>;}
