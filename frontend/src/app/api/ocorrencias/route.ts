@@ -127,8 +127,9 @@ export async function POST(request: Request) {
       }
       throw error;
     }
+    // Não escreve em disco se o cadastro não inclui fotos (importante para Vercel).
     const pasta = join(process.cwd(), "storage", "uploads");
-    await mkdir(pasta, { recursive: true });
+    if (arquivos.length > 0) await mkdir(pasta, { recursive: true });
     for (const arquivo of arquivos) {
       const path = join(pasta, arquivo.nome);
       await writeFile(path, arquivo.buffer, { flag: "wx" });

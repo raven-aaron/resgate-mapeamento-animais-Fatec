@@ -117,7 +117,7 @@ export default function PainelEstatisticas() {
       {erro && <p className="note note-warning" role="alert">{erro}</p>}
       {carregando && <p role="status">Carregando estatísticas...</p>}
       {!carregando && !erro && <p className={styles.notaDados}>
-        Indicadores calculados a partir de ocorrências aprovadas; a consulta administrativa retorna até 200 registros.
+        Indicadores calculados com as ocorrências aprovadas obtidas de todas as páginas administrativas.
       </p>}
 
       <div className={styles.gridKpis}>
