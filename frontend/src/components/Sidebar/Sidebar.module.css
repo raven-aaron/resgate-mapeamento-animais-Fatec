@@ -151,7 +151,6 @@
         width: 100vw;
     }
 }
-/* Navegação exclusiva do resgate e cores de interação. */
 .sidebar { visibility: hidden; }
 .sidebarOpen { visibility: visible; }
 .linkMenu:hover,
