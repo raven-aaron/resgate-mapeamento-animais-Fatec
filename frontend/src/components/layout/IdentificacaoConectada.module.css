@@ -1,0 +1,27 @@
+.faixa {
+  width: 100%;
+  padding: 8px 30px;
+  background: #f0fbf9;
+  border-bottom: 1px solid rgba(52, 136, 136, 0.18);
+  color: var(--cor-escuro);
+  font-size: 14px;
+}
+
+.conteudo {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+}
+
+.conteudo a {
+  color: var(--cor-verde-agua);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* mobile: ajustes do perfil */
+@media (max-width: 600px) {
+  .faixa {
+    padding: 8px 18px;
+  }
+}

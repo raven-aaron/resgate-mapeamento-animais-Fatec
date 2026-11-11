@@ -28,44 +28,44 @@ Preencha `MYSQL_ROOT_PASSWORD` e `MYSQL_PASSWORD` com valores fortes e diferente
 
 ```powershell
 docker compose up -d --wait mysql
-node database/scripts/migrar.mjs
+node backend/database/scripts/migrar.mjs
 docker compose up -d --build web
 ```
 
 Acesse `http://localhost:3000`. Para criar um administrador, utilize `docker compose exec web node scripts/criar-admin.mjs`.
 
-Para testar com **80 ocorrências fictícias, fotos e contas próprias**, siga o [guia do ambiente DEMO](docs/operacao/dados-demonstracao.md). Ele usa `localhost:3001` e um banco separado do ambiente principal.
+Para testar com **80 ocorrências fictícias, fotos e contas próprias**, siga o [guia do ambiente DEMO](backend/docs/operacao/dados-demonstracao.md). Ele usa `localhost:3001` e um banco separado do ambiente principal.
 
 Não versionar arquivos `.env`, senhas, bancos nem uploads. `docker compose down` preserva os volumes; `down -v` apaga os dados locais.
 
 ## Estrutura
 
 ```text
-web/
+frontend/
   src/app/             páginas, layouts e endpoints HTTP (App Router)
   src/components/      componentes de interface por domínio
   src/lib/             acesso a dados, autenticação e regras compartilhadas
   scripts/             ferramentas locais e ambiente DEMO
   tests/               testes de segurança e integração
 
-database/
-  migrations/          esquema SQL versionado
-  scripts/             migração, seed e backup
-  tests/               testes de migrações e integridade
-
-insomnia/              coleção de requisições HTTP
-docs/                  guias de arquitetura, operação e desenvolvimento
+backend/
+  database/
+    migrations/        esquema SQL versionado
+    scripts/           migração, seed e backup
+    tests/             testes de migrações e integridade
+  insomnia/            coleção de requisições HTTP
+  docs/                guias de arquitetura, operação e desenvolvimento
 .github/workflows/     pipelines de CI
 ```
 
 ## Código e contratos
 
-- [Banco MySQL e migrações](database/README.md)
-- [Rotas HTTP e formatos de requisição](docs/arquitetura/api-http.md)
-- [Organização da aplicação](docs/arquitetura/visao-geral.md)
+- [Banco MySQL e migrações](backend/database/README.md)
+- [Rotas HTTP e formatos de requisição](backend/docs/arquitetura/api-http.md)
+- [Organização da aplicação](backend/docs/arquitetura/visao-geral.md)
 
 ## Colaboração
 
-Para começar no front-end, leia o [guia da equipe](docs/frontend/guia-equipe.md) e a [visão geral da arquitetura](docs/arquitetura/visao-geral.md). Regras de branches, revisão e testes: [CONTRIBUTING.md](CONTRIBUTING.md).
+Para começar no front-end, leia o [guia da equipe](backend/docs/frontend/guia-equipe.md) e a [visão geral da arquitetura](backend/docs/arquitetura/visao-geral.md). Regras de branches, revisão e testes: [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Documentação completa: [docs/README.md](docs/README.md).
+Documentação completa: [backend/docs/README.md](backend/docs/README.md).

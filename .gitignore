@@ -43,4 +43,4 @@ compose.override.yaml
 /backups/
 
 # Gerado automaticamente pelo Next.js durante o desenvolvimento
-/web/AGENTS.md
+/frontend/AGENTS.md

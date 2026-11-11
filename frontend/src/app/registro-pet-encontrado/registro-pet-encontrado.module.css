@@ -1,0 +1,32 @@
+.tituloFormulario {
+  color: var(--cor-verde-agua);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.containerBotoes {
+  display: flex;
+  gap: 15px;
+  margin-top: 24px;
+}
+
+.wrapperBtn {
+  display: inline-block;
+}
+
+.wrapperBtn:nth-child(1) { order: 1; }
+.wrapperBtn:nth-child(2) { order: 2; }
+.wrapperBtn:nth-child(3) { order: 3; }
+
+/* mobile: ajustes do formulário */
+@media (max-width: 600px) {
+  .containerBotoes {
+    flex-direction: column;
+  }
+
+  .wrapperBtn {
+    display: block;
+    width: 100%;
+    order: unset;
+  }
+}

@@ -29,7 +29,7 @@ Essa divisão indica a responsabilidade principal, não um bloqueio de colabora�
 
 ## Testes
 
-No diretório `web/`, execute:
+No diretório `frontend/`, execute:
 
 ```bash
 npm ci
@@ -43,4 +43,4 @@ npm run build
 
 A CI executa também testes de MySQL, APIs HTTP e seed em contêineres independentes. Não execute testes de integração que criam dados em bancos pessoais.
 
-Guias: [estrutura do projeto](docs/arquitetura/visao-geral.md) e [equipe de front-end](docs/frontend/guia-equipe.md).
+Guias: [estrutura do projeto](backend/docs/arquitetura/visao-geral.md) e [equipe de front-end](backend/docs/frontend/guia-equipe.md).
