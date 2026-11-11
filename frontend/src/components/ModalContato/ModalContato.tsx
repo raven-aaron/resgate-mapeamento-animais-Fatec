@@ -47,7 +47,7 @@ export default function ModalContato({ exibir, aoFechar, ocorrenciaId }: Proprie
   return (
     <div className={styles.overlay} onClick={aoFechar}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <CustomButton type="button" size="icon" variant="red" className={styles.btnClose} aria-label="Fechar" onClick={aoFechar}>
+        <CustomButton type="button" size="icon" variant="gray" className={styles.btnClose} aria-label="Fechar" onClick={aoFechar}>
           &times;
         </CustomButton>
         <div className={styles.body}>

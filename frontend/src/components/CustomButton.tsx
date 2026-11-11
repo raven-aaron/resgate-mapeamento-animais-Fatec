@@ -42,7 +42,7 @@ export default function CustomButton(props: CustomButtonProps) {
   if (typeof props.href === "string") {
     const {
       href,
-      variant = "orange",
+      variant = "green",
       size = "medium",
       fullWidth = false,
       className,
@@ -57,7 +57,7 @@ export default function CustomButton(props: CustomButtonProps) {
   }
 
   const {
-    variant = "orange",
+    variant = "green",
     size = "medium",
     fullWidth = false,
     className,

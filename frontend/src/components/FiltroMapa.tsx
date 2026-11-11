@@ -47,7 +47,7 @@ export function FiltroMapa({
               <input type="radio" name="status" value="" checked={!status} onChange={() => onAlterarStatus("")} style={{ accentColor: 'var(--cor-verde-agua)' }} /> Todos
             </label>
             <label style={{ fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input type="radio" name="status" value="PERDIDO" checked={status === "PERDIDO"} onChange={() => onAlterarStatus("PERDIDO")} style={{ accentColor: 'var(--cor-alerta)' }} /> Perdidos
+              <input type="radio" name="status" value="PERDIDO" checked={status === "PERDIDO"} onChange={() => onAlterarStatus("PERDIDO")} style={{ accentColor: 'var(--cor-vermelho)' }} /> Perdidos
             </label>
             <label style={{ fontSize: '0.85em', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
               <input type="radio" name="status" value="ENCONTRADO" checked={status === "ENCONTRADO"} onChange={() => onAlterarStatus("ENCONTRADO")} style={{ accentColor: 'var(--cor-verde-agua)' }} /> Encontrados

@@ -46,6 +46,10 @@ export default function MapaPage() {
 
   return (
     <main>
+      <div className={styles.barraVisualizacao}>
+        <span>Visualização: mapa</span>
+        <CustomButton href="/animais" variant="green" size="small">Ver em cartazes</CustomButton>
+      </div>
       <section className={styles["secao-mapa"]} aria-label="Mapa de ocorrências públicas">
         <CustomButton
           type="button"

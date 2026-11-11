@@ -496,7 +496,7 @@ export default function RegistroPetFinal({
             <CustomButton type="button" variant="gray" onClick={() => setEtapa((atual) => Math.max(atual - 1, 1))}>VOLTAR</CustomButton>
           </div>}
           <div className={styles.wrapperBtn}>
-            <CustomButton type="button" variant="red" onClick={cancelarCadastro}>CANCELAR</CustomButton>
+            <CustomButton type="button" variant="gray" onClick={cancelarCadastro}>CANCELAR</CustomButton>
           </div>
         </div>
       </Form>

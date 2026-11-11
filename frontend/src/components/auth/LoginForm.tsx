@@ -56,7 +56,7 @@ export default function LoginForm({ admin = false }: { admin?: boolean }) {
         {erro && <p role="alert" className="note note-warning" style={{marginTop:18}}>{erro}</p>}
         <div className="action-row">
           <CustomButton type="submit" disabled={carregando}>{carregando ? "Autenticando..." : "ENTRAR"}</CustomButton>
-          <CustomButton href={admin?"/":"/resgate"} variant="red">Voltar</CustomButton>
+          <CustomButton href="/" variant="gray">Voltar</CustomButton>
         </div>
         {!admin && <p style={{marginTop:22}}>Ainda não possui conta? <Link href={"/cadastro?retorno="+encodeURIComponent(retorno)} style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Cadastre-se</Link> · <Link href="/recuperar-senha" style={{color:"var(--cor-verde-agua)",fontWeight:700}}>Esqueci minha senha</Link></p>}
       </form>
