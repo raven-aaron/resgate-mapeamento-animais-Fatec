@@ -56,7 +56,6 @@ export default function HomePage() {
               </p>
               <div className={styles.botoes}>
                 <CustomButton href="/mapa" variant="green">VER NO MAPA</CustomButton>
-                <CustomButton href="/animais" variant="green">VER EM CARTAZES</CustomButton>
               </div>
             </div>
             <div className={styles.colImg}>
