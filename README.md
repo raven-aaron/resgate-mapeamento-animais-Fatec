@@ -15,6 +15,8 @@ Projeto Integrador da FATEC: portal para registrar, consultar e moderar ocorrên
 
 O projeto usa **ambientes locais de desenvolvimento**. Não está preparado para publicação em produção sem revisão de segurança, hospedagem e persistência.
 
+**Novo integrante no Windows?** Siga o [passo a passo de instalação da equipe](docs/operacao/instalacao-windows-equipe.md).
+
 ## Rodar localmente
 
 Pré-requisitos: Git, Docker Desktop/Engine com Compose v2 e Node.js 24.
