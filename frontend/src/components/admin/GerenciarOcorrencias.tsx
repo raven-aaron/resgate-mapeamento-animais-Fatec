@@ -304,7 +304,7 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
         </label>}
         <div className="action-row">
           <CustomButton type="button" variant={confirmacao.acao === "APROVAR" ? "green" : "red"} disabled={enviando || (confirmacao.acao === "REJEITAR" && motivo.trim().length < 5) || (confirmacao.acao === "OCULTAR" && !motivoOcultacao)} onClick={() => void confirmar()}>{enviando ? "Salvando..." : "CONFIRMAR"}</CustomButton>
-          <CustomButton type="button" variant="red" disabled={enviando} onClick={() => { setConfirmacao(null); setMotivo(""); setMotivoOcultacao(""); }}>CANCELAR</CustomButton>
+          <CustomButton type="button" variant="gray" disabled={enviando} onClick={() => { setConfirmacao(null); setMotivo(""); setMotivoOcultacao(""); }}>CANCELAR</CustomButton>
         </div>
       </section>
     </div>}

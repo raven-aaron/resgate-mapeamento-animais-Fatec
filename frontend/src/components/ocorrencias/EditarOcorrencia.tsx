@@ -190,7 +190,7 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
       </section>
       {erro&&<p className="note note-warning" role="alert">{erro}</p>}
       <div className="action-row">
-        <CustomButton href="/minhas-ocorrencias" variant="red">CANCELAR</CustomButton>
+        <CustomButton href="/minhas-ocorrencias" variant="gray">CANCELAR</CustomButton>
         <CustomButton type="submit" variant="green" disabled={enviando}>{enviando?"Salvando...":"SALVAR E ENVIAR PARA ANÁLISE"}</CustomButton>
       </div>
     </form>

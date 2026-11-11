@@ -67,7 +67,7 @@ export default function AcoesMinhaOcorrencia({
         </>}
         {erro&&<p className="note note-warning" role="alert">{erro}</p>}
         <div className="action-row">
-          <CustomButton type="button" variant="red" disabled={enviando} onClick={()=>{setAcao(null);setErro("");}} autoFocus>CANCELAR</CustomButton>
+          <CustomButton type="button" variant="gray" disabled={enviando} onClick={()=>{setAcao(null);setErro("");}} autoFocus>CANCELAR</CustomButton>
           <CustomButton type="button" variant={acao==="EXCLUIR"?"red":"green"} onClick={()=>void confirmar()} disabled={enviando||(acao==="ENCERRAR"&&motivo==="OUTRO"&&detalhe.trim().length<5)}>
             {enviando?"Salvando...":acao==="EXCLUIR"?"CONFIRMAR EXCLUSÃO":"CONFIRMAR ENCERRAMENTO"}
           </CustomButton>

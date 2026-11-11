@@ -320,7 +320,7 @@ export default function FormularioOcorrencia() {
           </div>
 
           <div className="action-row">
-            <CustomButton href="/resgate" variant="red">CANCELAR</CustomButton>
+            <CustomButton href="/" variant="gray">CANCELAR</CustomButton>
             <CustomButton variant="green" type="submit">REVISAR CADASTRO</CustomButton>
           </div>
         </section>
@@ -381,7 +381,7 @@ export default function FormularioOcorrencia() {
               <span>Li e compreendi as orientações de segurança e privacidade.</span>
             </label>
             <div className="orientacoes-acoes">
-              <CustomButton variant="red" type="button" disabled={enviando} onClick={()=>setConfirmacaoAberta(false)}>VOLTAR E REVISAR</CustomButton>
+              <CustomButton variant="gray" type="button" disabled={enviando} onClick={()=>setConfirmacaoAberta(false)}>VOLTAR E REVISAR</CustomButton>
               <CustomButton variant="green" type="button" disabled={!orientacoesLidas || enviando} onClick={()=>{void enviarRegistro();}}>
                 {enviando ? "Enviando..." : "CONCORDO E ENVIAR"}
               </CustomButton>
