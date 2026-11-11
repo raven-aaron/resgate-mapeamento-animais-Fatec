@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { banco } from "../../../../../lib/db";
 import { usuarioAtual } from "../../../../../lib/auth";
 import { mesmaOrigem } from "../../../../../lib/seguranca";
+import { administradorAtual } from "../../../../../lib/auth";
+import { salvarFoto, excluirFoto, ErroArmazenamento, type ProvedorFoto } from "../../../../../lib/storage-fotos";
 
 export const runtime="nodejs";
 type Contexto={params:Promise<{id:string}>};
@@ -49,14 +49,14 @@ async function historico(conn:PoolConnection,id:number,userId:number,tipo:string
 }
 export async function POST(request:Request,contexto:Contexto){
   if(!mesmaOrigem(request))return err("Origem não permitida.",403);
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return err("Entre na sua conta.",401);
   const {id:valor}=await contexto.params;
   if(!formatoId.test(valor))return err("Identificador inválido.",400);
   if(Number(request.headers.get("content-length")||0)>26*1024*1024)return err("Fotos excedem o limite.",413);
   let conn:PoolConnection|null=null;
   let concluiu=false;
-  const criados:string[]=[];
+  const criados:{nome:string;provedor:ProvedorFoto}[]=[];
   try{
     const form=await request.formData();
     const fotos=form.getAll("fotos").filter((v):v is File=>v instanceof File);
@@ -71,8 +71,6 @@ export async function POST(request:Request,contexto:Contexto){
         return err("Envie apenas fotos JPG, PNG ou WebP válidas.",400);
       arquivos.push({nome:randomUUID()+"."+ext,bytes});
     }
-    const pasta=join(process.cwd(),"storage","uploads");
-    await mkdir(pasta,{recursive:true});
     conn=await banco().getConnection();
     await conn.beginTransaction();
     const id=Number(valor);
@@ -87,13 +85,12 @@ export async function POST(request:Request,contexto:Contexto){
       const ordem=[1,2,3,4,5].find(x=>!usadas.has(x));
       if(!ordem)throw new Error("Limite de fotografias");
       usadas.add(ordem);
-      const arquivoPath=join(pasta,arquivo.nome);
-      await writeFile(arquivoPath,arquivo.bytes,{flag:"wx"});
-      criados.push(arquivoPath);
+      const provedor=await salvarFoto(arquivo.nome,arquivo.bytes);
+      criados.push({nome:arquivo.nome,provedor});
       await conn.execute<ResultSetHeader>(
         "INSERT INTO fotos_ocorrencias (id_ocorrencia,provedor,identificador_arquivo,url_foto,ordem) "+
-        "VALUES (?,'LOCAL',?,?,?)",
-        [id,arquivo.nome,"/api/fotos/"+arquivo.nome,ordem]
+        "VALUES (?,?,?,?,?)",
+        [id,provedor,arquivo.nome,"/api/fotos/"+arquivo.nome,ordem]
       );
     }
     await historico(conn,id,usuario.id,"Adição de fotografias",arquivos.length);
@@ -102,13 +99,15 @@ export async function POST(request:Request,contexto:Contexto){
     return NextResponse.json({ok:true,fotos:await listar(conn,id)});
   }catch(error){
     console.error("Falha ao adicionar fotografias",error);
-    return err("Não foi possível adicionar as fotos.",500);
+    return error instanceof ErroArmazenamento ? err(error.message,503) : err("Não foi possível adicionar as fotos.",500);
   }finally{
     if(conn){
       if(!concluiu)await conn.rollback().catch(()=>undefined);
       conn.release();
     }
-    if(!concluiu)await Promise.all(criados.map(p=>unlink(p).catch(()=>undefined)));
+    if(!concluiu)await Promise.all(criados.map(foto =>
+      excluirFoto(foto.nome,foto.provedor).catch(error => console.warn("Falha ao desfazer upload",error))
+    ));
   }
 }
 export async function DELETE(request:Request,contexto:Contexto){
@@ -138,8 +137,8 @@ export async function DELETE(request:Request,contexto:Contexto){
     await conn.commit();
     concluiu=true;
     const foto=rows[0];
-    if(foto.provedor==="LOCAL"&&formatoFoto.test(String(foto.identificador_arquivo))){
-      await unlink(join(process.cwd(),"storage","uploads",String(foto.identificador_arquivo)))
+    if(["LOCAL","AZURE_BLOB"].includes(String(foto.provedor))&&formatoFoto.test(String(foto.identificador_arquivo))){
+      await excluirFoto(String(foto.identificador_arquivo),foto.provedor as ProvedorFoto)
         .catch(e=>console.warn("Arquivo já indisponível após exclusão",e));
     }
     return NextResponse.json({ok:true,fotos:await listar(conn,id)});

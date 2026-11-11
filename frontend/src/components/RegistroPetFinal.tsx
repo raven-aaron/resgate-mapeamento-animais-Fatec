@@ -134,7 +134,12 @@ export default function RegistroPetFinal({
       setErroEnvio("");
       setPrecisaLogin(false);
       setRegistroCriado(null);
+      let idCriado: number | null = null;
       try {
+        const fotosSelecionadas = Array.from(valores.fotos || []);
+        if (fotosSelecionadas.length > 5 || fotosSelecionadas.some(foto => foto.size > 4 * 1024 * 1024 || foto.size === 0)) {
+          throw new Error("Envie no máximo cinco fotos, com até 4 MB cada, para publicação na Vercel.");
+        }
         const formulario = new FormData();
         formulario.append("confirmacao_privacidade", "confirmado");
         formulario.append("dados", JSON.stringify({
@@ -153,13 +158,28 @@ export default function RegistroPetFinal({
           descricao: valores.observacoes,
           ...(tipo === "ENCONTRADO" ? { situacaoLarTemporario: valores.situacaoLarTemporario } : {}),
         }));
-        Array.from(valores.fotos || []).forEach((foto) => formulario.append("fotos", foto));
+        // O cadastro é enviado primeiro, sem fotos: cada requisição fica abaixo
+        // do limite de 4,5 MB das funções da Vercel.
         const resultado = await solicitarApi<{ id: number; mensagem: string }>(
           "/api/ocorrencias",
           { method: "POST", body: formulario },
         );
+        idCriado = resultado.id;
+        for (const foto of fotosSelecionadas) {
+          const dadosFoto = new FormData();
+          dadosFoto.append("fotos", foto);
+          await solicitarApi<{ ok: boolean }>(
+            `/api/ocorrencias/${resultado.id}/fotos`,
+            { method: "POST", body: dadosFoto },
+          );
+        }
         setRegistroCriado(resultado.id);
       } catch (error) {
+        if (idCriado !== null) {
+          setRegistroCriado(idCriado);
+          setErroEnvio("A ocorrência foi criada, mas uma foto não pôde ser enviada. Abra Minhas ocorrências para completar as fotos.");
+          return;
+        }
         if (error instanceof ErroApi && error.status === 401) setPrecisaLogin(true);
         setErroEnvio(error instanceof Error ? error.message : "Não foi possível registrar a ocorrência.");
       }

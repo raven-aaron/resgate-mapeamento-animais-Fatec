@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ResultSetHeader, RowDataPacket, PoolConnection } from "mysql2/promise";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { banco } from "../../../lib/db";
 import { administradorAtual, usuarioAtual } from "../../../lib/auth";
@@ -9,6 +7,7 @@ import { buscarPublicas } from "../../../lib/ocorrencias";
 import { mesmaOrigem } from "../../../lib/seguranca";
 import { localizarBairroPorCep, ErroLocalizacao } from "../../../lib/localizacao-cep";
 import { validarSituacaoLarTemporario } from "../../../lib/situacao-lar-temporario.mjs";
+import { salvarFoto, excluirFoto, ErroArmazenamento, type ProvedorFoto } from "../../../lib/storage-fotos";
 
 export const runtime = "nodejs";
 
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
   }
   let conexao: PoolConnection | null = null;
   let concluiu = false;
-  const caminhos: string[] = [];
+  const criadas: { nome: string; provedor: ProvedorFoto }[] = [];
   try {
     const formulario = await request.formData();
     if (formulario.get("confirmacao_privacidade") !== "confirmado") {
@@ -127,13 +126,9 @@ export async function POST(request: Request) {
       }
       throw error;
     }
-    // Não escreve em disco se o cadastro não inclui fotos (importante para Vercel).
-    const pasta = join(process.cwd(), "storage", "uploads");
-    if (arquivos.length > 0) await mkdir(pasta, { recursive: true });
     for (const arquivo of arquivos) {
-      const path = join(pasta, arquivo.nome);
-      await writeFile(path, arquivo.buffer, { flag: "wx" });
-      caminhos.push(path);
+      const provedor = await salvarFoto(arquivo.nome, arquivo.buffer);
+      criadas.push({ nome: arquivo.nome, provedor });
     }
 
     conexao = await banco().getConnection();
@@ -169,8 +164,8 @@ export async function POST(request: Request) {
       await conexao.execute("INSERT INTO animais_cores (id_animal,id_cor) VALUES (?,?)", [animal.insertId,Number(cores[0].id)]);
     }
     for (let i=0;i<arquivos.length;i++) {
-      await conexao.execute("INSERT INTO fotos_ocorrencias (id_ocorrencia,provedor,identificador_arquivo,url_foto,ordem) VALUES (?,'LOCAL',?,?,?)",
-        [ocorrencia.insertId,arquivos[i].nome,"/api/fotos/"+arquivos[i].nome,i+1]);
+      await conexao.execute("INSERT INTO fotos_ocorrencias (id_ocorrencia,provedor,identificador_arquivo,url_foto,ordem) VALUES (?,?,?,?,?)",
+        [ocorrencia.insertId,criadas[i].provedor,arquivos[i].nome,"/api/fotos/"+arquivos[i].nome,i+1]);
     }
     await conexao.execute(
       "INSERT INTO historico_ocorrencias (id_ocorrencia,id_usuario_responsavel,acao) VALUES (?,?,'CRIACAO')",
@@ -181,12 +176,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ id: ocorrencia.insertId, status: "PENDENTE", mensagem: "Ocorrência registrada e enviada para análise." }, { status: 201 });
   } catch (error) {
     console.error("Falha ao registrar ocorrência", error);
+    if (error instanceof ErroArmazenamento) {
+      return NextResponse.json({ erro: error.message }, { status: 503 });
+    }
     return NextResponse.json({ erro: "Não foi possível salvar a ocorrência. Confira os dados e tente novamente." }, { status: 500 });
   } finally {
     if (conexao) {
       if (!concluiu) await conexao.rollback().catch(() => undefined);
       conexao.release();
     }
-    if (!concluiu) await Promise.all(caminhos.map(path => unlink(path).catch(() => undefined)));
+    if (!concluiu) await Promise.all(criadas.map(foto =>
+      excluirFoto(foto.nome, foto.provedor).catch(error => console.warn("Falha ao desfazer upload", error))
+    ));
   }
 }
