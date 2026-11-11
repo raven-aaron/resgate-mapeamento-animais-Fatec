@@ -112,7 +112,7 @@ export async function POST(request:Request,contexto:Contexto){
 }
 export async function DELETE(request:Request,contexto:Contexto){
   if(!mesmaOrigem(request))return err("Origem não permitida.",403);
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return err("Entre na sua conta.",401);
   const {id:valor}=await contexto.params;
   if(!formatoId.test(valor))return err("Identificador inválido.",400);
