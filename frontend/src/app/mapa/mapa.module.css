@@ -178,3 +178,17 @@
     width: 124px;
   }
 }
+/* Alternância disponível fora do mapa, sem sobrepor controles Leaflet. */
+.barraVisualizacao {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 14px 24px;
+  color: var(--cor-cinza);
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (max-width: 480px) {
+  .barraVisualizacao { padding: 12px 14px; gap: 10px; }
+}

@@ -12,6 +12,7 @@
   --cor-cinza: #707070;
   --cor-branco: #ffffff;
   --cor-vermelho: #F24405;
+  --cor-alerta: #d94343;
   --cor-ciano-medio: #22BABB;
   --cor-ciano-claro: #9EF8EE;
   --cor-verde-petroleo: #348888;
@@ -162,6 +163,7 @@ body.modo-alto-contraste {
   --cor-cinza: #ececec;
   --cor-branco: #161616;
   --cor-vermelho: #ffa78b;
+  --cor-alerta: #ffa78b;
   --cor-ciano-claro: #242424;
   --cor-verde-petroleo: #377b7b;
   --cor-fundo: #111111;

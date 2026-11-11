@@ -94,7 +94,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 <Link href="/banco-de-racao" className={styles.linkNav}>Banco de Ração</Link>
                 <Link href="/" className={styles.linkNav}>Resgate e Mapeamento</Link>
                 <Link href="/castracao" className={styles.linkNav}>Castração</Link>
-                <Link href="/entrar" className={styles.linkNav}>Entrar</Link>
               </div>
             </div>
 

@@ -98,7 +98,7 @@ export default function MapaPublico({ ocorrencias }: { ocorrencias: Ocorrencia[]
       conteudo.append(identidade);
       conteudo.append(linha("Região: ",o.bairro));
       const botao=document.createElement("a");
-      botao.href="/ocorrencias/"+o.id;botao.className="custom-button custom-button--orange custom-button--small";
+      botao.href="/ocorrencias/"+o.id;botao.className="custom-button custom-button--green custom-button--small";
       botao.textContent="Ver cartaz completo";conteudo.append(botao);
       marker.bindPopup(conteudo,{maxWidth:270,minWidth:180});
       marcadores.current.push(marker);

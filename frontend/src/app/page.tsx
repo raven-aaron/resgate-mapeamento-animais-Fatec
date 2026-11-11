@@ -17,11 +17,11 @@ export default function HomePage() {
               <p className={styles.textos}>
                 Cadastre um pet perdido ou um animal encontrado que possa estar
                 longe de seu tutor. As ocorrências ficam disponíveis em um mapa
-                interativo da região, facilitando a busca e ajudando a reunir
+                interativo e em cartazes para consulta, facilitando a busca e ajudando a reunir
                 animais e seus tutores.
               </p>
               <div className={styles.botoes}>
-                <CustomButton href="/login" variant="green">
+                <CustomButton href="/registro-pet-perdido" variant="green">
                   PERDI MEU PET
                 </CustomButton>
                 <CustomButton href="/registro-pet-encontrado" variant="green">
@@ -44,7 +44,7 @@ export default function HomePage() {
 
       <section className={styles.secao}>
         <div className={styles.container}>
-          <h1 className={styles.tituloDestaque}>O MAPA E RESGATES</h1>
+          <h1 className={styles.tituloDestaque}>CONSULTE OS RESGATES</h1>
           <div className={`${styles.gridHome} ${styles.reverso}`}>
             <div className={styles.colTexto}>
               <p className={styles.textos}>
@@ -55,7 +55,8 @@ export default function HomePage() {
                 reencontro dos pets com seus tutores.
               </p>
               <div className={styles.botoes}>
-                <CustomButton href="/mapa">ACESSE O MAPA</CustomButton>
+                <CustomButton href="/mapa" variant="green">VER NO MAPA</CustomButton>
+                <CustomButton href="/animais" variant="green">VER EM CARTAZES</CustomButton>
               </div>
             </div>
             <div className={styles.colImg}>

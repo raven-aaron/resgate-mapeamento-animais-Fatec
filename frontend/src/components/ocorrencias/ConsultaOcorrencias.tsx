@@ -8,7 +8,7 @@ import CustomButton from "../CustomButton";
 import { identificacaoAnimal } from "../../lib/identificacao-animal";
 
 export default function ConsultaOcorrencias() {
-  const [modo, setModo] = useState<"mapa" | "cards">("mapa");
+  const [modo, setModo] = useState<"mapa" | "cards">("cards");
   const [especie, setEspecie] = useState("");
   const [porte, setPorte] = useState("");
   const [sexo, setSexo] = useState("");
@@ -94,7 +94,7 @@ export default function ConsultaOcorrencias() {
           <span role="status">{carregando ? "Buscando ocorrências..." : filtradas.length + " ocorrência(s) encontrada(s)"}</span>
           <div className="seletor-modo" aria-label="Modo de visualização">
             <CustomButton type="button" size="small" variant={modo==="mapa"?"green":"gray"} aria-pressed={modo==="mapa"} onClick={()=>setModo("mapa")}>Mapa</CustomButton>
-            <CustomButton type="button" size="small" variant={modo==="cards"?"green":"gray"} aria-pressed={modo==="cards"} onClick={()=>setModo("cards")}>Cards</CustomButton>
+            <CustomButton type="button" size="small" variant={modo==="cards"?"green":"gray"} aria-pressed={modo==="cards"} onClick={()=>setModo("cards")}>Cartazes</CustomButton>
           </div>
         </div>
       </section>
@@ -111,12 +111,12 @@ export default function ConsultaOcorrencias() {
             <p>{o.especie} • {o.bairro} • Votorantim/SP</p>
             <p>Porte: {o.porte==="INDETERMINADO"?"Não informado":o.porte.toLowerCase()} · Sexo: {o.sexo==="INDETERMINADO"?"Não informado":o.sexo.toLowerCase()}</p>
             <p>Data: {String(o.data).slice(0,10).split("-").reverse().join("/")}</p>
-            <CustomButton href={"/ocorrencias/"+o.id}>VER CARTAZ</CustomButton>
+            <CustomButton href={"/ocorrencias/"+o.id} variant="green">VER CARTAZ</CustomButton>
           </div>
         </article>)}
         {!carregando && !erro && filtradas.length===0 && <div className="form-panel"><p>Nenhum animal encontrado.</p></div>}
       </section>}
-      <div className="action-row"><CustomButton href="/resgate" variant="red">Voltar ao módulo de resgate</CustomButton></div>
+      <div className="action-row"><CustomButton href="/" variant="gray">Voltar à página inicial</CustomButton></div>
     </main>
   );
 }

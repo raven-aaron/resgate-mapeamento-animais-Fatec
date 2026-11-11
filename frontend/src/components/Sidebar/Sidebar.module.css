@@ -151,3 +151,31 @@
         width: 100vw;
     }
 }
+/* Navegação exclusiva do resgate e cores de interação. */
+.sidebar { visibility: hidden; }
+.sidebarOpen { visibility: visible; }
+.linkMenu:hover,
+.linkMenu:focus-visible,
+.linkMenu[aria-current="page"] {
+    background: var(--cor-verde-agua-claro);
+    color: var(--cor-principal-escura);
+    border-radius: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+.areaAcesso {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--cor-borda);
+}
+.areaAcesso .tituloMenu { margin-bottom: 10px; }
+.btnClose:global(.custom-button.custom-button--gray) {
+    background: transparent;
+    color: var(--cor-escuro);
+    border: 1px solid var(--cor-borda-forte);
+    box-shadow: none;
+}
+.btnClose:global(.custom-button.custom-button--gray):hover:not(:disabled) {
+    background: var(--cor-superficie-suave);
+    color: var(--cor-escuro);
+}
