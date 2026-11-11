@@ -34,8 +34,11 @@ function exigirStatus(resultado,esperado,descricao){
   return resultado;
 }
 function cookieDe(resposta,nome){
-  const valor=resposta.headers.get("set-cookie")||"";
-  assert.ok(valor.includes(nome+"="),"Cookie "+nome+" ausente");
+  // Uma resposta pode ter cookies de limpeza e de criação de sessão.
+  // get("set-cookie") concatena os cabeçalhos; pegar só o primeiro invalida o teste.
+  const cookies=resposta.headers.getSetCookie();
+  const valor=cookies.find(linha=>linha.startsWith(nome+"="));
+  assert.ok(valor,"Cookie "+nome+" ausente: "+JSON.stringify(cookies.map(linha=>linha.split("=")[0])));
   return valor.split(";")[0];
 }
 async function cadastrar(nome,email,telefone){
