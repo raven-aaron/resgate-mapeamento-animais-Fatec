@@ -97,6 +97,31 @@ async function executar(){
   assert.ok(publicas.dados.ocorrencias.some(v=>Number(v.id)===id),"Animal aprovado não apareceu no mapa");
   exigirStatus(await chamar("/api/ocorrencias/"+id),200,"Cartaz aprovado");
 
+  // O administrador também pode ser autor de animal encontrado e receber mensagens.
+  const encontradoAdmin=publicas.dados.ocorrencias.find(v=>v.nome==="Animal encontrado ADM CI");
+  assert.ok(encontradoAdmin?.id,"Ocorrência administrativa não disponível no mapa");
+  const conversaAdmin=exigirStatus(await chamar("/api/conversas",{
+    method:"POST",cookie:interessado,body:{ocorrencia:Number(encontradoAdmin.id)}
+  }),200,"Interessado inicia conversa com administrador");
+  const idChatAdmin=Number(conversaAdmin.dados.id);
+  exigirStatus(await chamar("/api/conversas",{cookie:administrador}),200,"Admin consulta suas conversas");
+  exigirStatus(await chamar("/api/conversas/"+idChatAdmin+"/mensagens",{
+    method:"POST",cookie:interessado,body:{conteudo:"Encontrei um animal parecido"}
+  }),201,"Interessado escreve ao administrador");
+  const avisosAdmin=exigirStatus(await chamar("/api/notificacoes",{cookie:administrador}),200,"Admin recebe notificações");
+  assert.ok(Number(avisosAdmin.dados.mensagensNaoLidas)>0,"Mensagem ao admin não foi notificada");
+  exigirStatus(await chamar("/api/conversas/"+idChatAdmin+"/mensagens",{
+    cookie:administrador
+  }),200,"Admin lê conversa de ocorrência própria");
+  exigirStatus(await chamar("/api/conversas/"+idChatAdmin+"/mensagens",{
+    method:"POST",cookie:administrador,body:{conteudo:"Obrigado, vamos conferir!"}
+  }),201,"Admin responde pelo chat");
+  const chatRetorno=exigirStatus(await chamar("/api/conversas/"+idChatAdmin+"/mensagens",{
+    cookie:interessado
+  }),200,"Interessado lê resposta do administrador");
+  assert.ok(chatRetorno.dados.mensagens.some(m=>m.conteudo==="Obrigado, vamos conferir!"),
+    "Resposta do administrador não persistiu no MySQL");
+
   const conversa=exigirStatus(await chamar("/api/conversas",{
     method:"POST",cookie:interessado,body:{ocorrencia:id}
   }),200,"Interessado inicia chat");
