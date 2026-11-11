@@ -178,7 +178,6 @@
     width: 124px;
   }
 }
-/* Alternância disponível fora do mapa, sem sobrepor controles Leaflet. */
 .barraVisualizacao {
   display: flex;
   align-items: center;
