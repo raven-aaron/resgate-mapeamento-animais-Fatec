@@ -18,6 +18,10 @@ export function banco(): Pool {
       dateStrings: true,
       decimalNumbers: true,
       multipleStatements: false,
+      // Azure Database for MySQL exige TLS. Habilitar DB_SSL=required na Vercel.
+      ssl: ["required", "true", "1"].includes((process.env.DB_SSL || "").toLowerCase())
+        ? { rejectUnauthorized: true }
+        : undefined,
     });
   }
   return globalPool.__resgateMysql;

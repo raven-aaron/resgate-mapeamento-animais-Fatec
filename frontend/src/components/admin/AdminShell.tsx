@@ -17,6 +17,8 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
     { href: "/admin/mapa-termico", label: "Mapa térmico" },
     { href: "/admin/usuarios", label: "Contas cadastradas" },
     { href: "/admin/cadastro-animal", label: "Cadastrar animal encontrado" },
+    { href: "/mensagens", label: "Mensagens recebidas" },
+    { href: "/notificacoes", label: "Notificações" },
   ] as const;
 
   const renderMenu = () => opcoesMenu.map(({ href, label }) => {

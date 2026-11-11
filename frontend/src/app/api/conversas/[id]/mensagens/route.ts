@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../../../lib/db";
-import { usuarioAtual } from "../../../../../lib/auth";
+import { usuarioAtual, administradorAtual } from "../../../../../lib/auth";
 import { mesmaOrigem } from "../../../../../lib/seguranca";
 
 export const runtime="nodejs";
@@ -22,7 +22,7 @@ async function acessoConversa(id:number,usuario:number){
   return rows[0];
 }
 export async function GET(_request:Request,contexto:Contexto){
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return NextResponse.json({erro:"Sessão necessária."},{status:401});
   const {id:valor}=await contexto.params;
   if(!/^[1-9]\d{0,9}$/.test(valor))return NextResponse.json({erro:"Conversa inválida."},{status:400});
@@ -46,7 +46,7 @@ export async function GET(_request:Request,contexto:Contexto){
 // GET apenas consulta; o cliente confirma explicitamente a leitura quando o chat está visível.
 export async function PATCH(request:Request,contexto:Contexto){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem inválida."},{status:403});
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return NextResponse.json({erro:"Sessão necessária."},{status:401});
   const {id:valor}=await contexto.params;
   if(!/^[1-9]\d{0,9}$/.test(valor))return NextResponse.json({erro:"Conversa inválida."},{status:400});
@@ -80,7 +80,7 @@ export async function PATCH(request:Request,contexto:Contexto){
 }
 export async function POST(request:Request,contexto:Contexto){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem inválida."},{status:403});
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return NextResponse.json({erro:"Sessão necessária."},{status:401});
   const {id:valor}=await contexto.params;
   if(!/^[1-9]\d{0,9}$/.test(valor))return NextResponse.json({erro:"Conversa inválida."},{status:400});

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../lib/db";
-import { usuarioAtual } from "../../../lib/auth";
+import { usuarioAtual, administradorAtual } from "../../../lib/auth";
 import { mesmaOrigem } from "../../../lib/seguranca";
 
 export const runtime="nodejs";
 
 export async function GET(){
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return NextResponse.json({erro:"Entre na sua conta."},{status:401});
   try{
     const [avisos]=await banco().execute<RowDataPacket[]>(
@@ -38,7 +38,7 @@ export async function GET(){
 }
 export async function PATCH(request:Request){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem não permitida."},{status:403});
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return NextResponse.json({erro:"Entre na sua conta."},{status:401});
   try{
     const data=await request.json() as {id?:number;todas?:boolean};

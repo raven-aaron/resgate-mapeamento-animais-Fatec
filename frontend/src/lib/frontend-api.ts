@@ -39,7 +39,21 @@ export async function listarOcorrenciasPublicas(filtros = "") {
 }
 
 export async function listarOcorrenciasAdministrativas(status = "TODAS") {
-  return solicitarApi<{ ocorrencias: Ocorrencia[] }>(
-    `/api/admin/ocorrencias?status=${encodeURIComponent(status)}`,
-  );
+  const ocorrencias: Ocorrencia[] = [];
+  let pagina = 1;
+  // A API de moderação é paginada. Estatísticas e mapa precisam de todas as páginas.
+  // Não usar apenas os 10 primeiros registros como se fossem a base inteira.
+  for (;;) {
+    const resultado = await solicitarApi<{ ocorrencias: Ocorrencia[]; total: number; pagina: number }>(
+      `/api/admin/ocorrencias?status=${encodeURIComponent(status)}&pagina=${pagina}`,
+    );
+    if (!Array.isArray(resultado.ocorrencias) || !Number.isSafeInteger(resultado.total) || resultado.total < 0) {
+      throw new Error("O servidor retornou uma listagem administrativa inválida.");
+    }
+    ocorrencias.push(...resultado.ocorrencias);
+    if (ocorrencias.length >= resultado.total || resultado.ocorrencias.length === 0) break;
+    if (pagina >= 1000) throw new Error("Limite de páginas administrativas excedido.");
+    pagina += 1;
+  }
+  return { ocorrencias };
 }

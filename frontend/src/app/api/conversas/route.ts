@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import type { RowDataPacket } from "mysql2/promise";
 import { banco } from "../../../lib/db";
-import { usuarioAtual } from "../../../lib/auth";
+import { usuarioAtual, administradorAtual } from "../../../lib/auth";
 import { mesmaOrigem } from "../../../lib/seguranca";
 
 export const runtime="nodejs";
 
 export async function GET() {
   try {
-    const usuario=await usuarioAtual();
+    const usuario=(await usuarioAtual()) ?? (await administradorAtual());
     if(!usuario)return NextResponse.json({erro:"Entre na sua conta.",login:true},{status:401});
     const [rows]=await banco().execute<RowDataPacket[]>(
       "SELECT c.id_conversa AS id,c.situacao,o.id_ocorrencia AS ocorrencia,o.tipo_ocorrencia AS tipo,"+
@@ -30,7 +30,7 @@ export async function GET() {
 
 export async function POST(request:Request){
   if(!mesmaOrigem(request))return NextResponse.json({erro:"Origem inválida."},{status:403});
-  const usuario=await usuarioAtual();
+  const usuario=(await usuarioAtual()) ?? (await administradorAtual());
   if(!usuario)return NextResponse.json({erro:"Entre para iniciar uma conversa.",login:true},{status:401});
   try {
     if(Number(request.headers.get("content-length")||0)>1000)return NextResponse.json({erro:"Dados inválidos."},{status:413});

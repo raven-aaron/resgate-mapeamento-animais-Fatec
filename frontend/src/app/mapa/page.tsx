@@ -39,7 +39,9 @@ export default function MapaPage() {
     }
 
     void carregar();
-    return () => controlador.abort();
+    // Mantém o mapa atualizado quando uma ocorrência é aprovada por um administrador.
+    const intervalo = setInterval(() => { void carregar(); }, 20_000);
+    return () => { clearInterval(intervalo); controlador.abort(); };
   }, [especie, tipo]);
 
   return (

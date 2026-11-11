@@ -1,6 +1,6 @@
 'use client'
 import { Form, Row, Col } from 'react-bootstrap';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface PropriedadesUpload {
   controlId: string;
@@ -14,6 +14,7 @@ export default function UploadFotoPet({
   aoMudar
 }: PropriedadesUpload) {
   const [previas, setPrevias] = useState<string[]>([]);
+  useEffect(() => () => { previas.forEach(url => URL.revokeObjectURL(url)); }, [previas]);
 
   const manipularArquivos = (e: React.ChangeEvent<HTMLInputElement>) => {
     const arquivosselecionados = e.target.files;
@@ -33,7 +34,7 @@ export default function UploadFotoPet({
       <div className="areaUploadFoto position-relative rounded mb-3" style={{ height: '100px', backgroundColor: '#f8f9fa', border: '2px dashed #ced4da', overflow: 'hidden' }}>
         <Form.Control
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           multiple
           name="fotos"
           onChange={manipularArquivos}
