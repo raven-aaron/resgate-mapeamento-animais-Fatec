@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  Ref,
-} from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, Ref } from "react";
 
-export type CustomButtonVariant = "orange" | "gray" | "red" | "green";
+export type CustomButtonVariant = "orange" | "gray" | "red" | "green" | "admin";
 export type CustomButtonSize = "small" | "medium" | "large" | "icon";
 
 interface CustomButtonStyleProps {
@@ -17,9 +13,15 @@ interface CustomButtonStyleProps {
 }
 
 type NativeButtonProps = CustomButtonStyleProps &
-  ButtonHTMLAttributes<HTMLButtonElement> & { href?: never; ref?: Ref<HTMLButtonElement> };
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+    ref?: Ref<HTMLButtonElement>;
+  };
 type LinkButtonProps = CustomButtonStyleProps &
-  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & { href: string; type?: never };
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+    href: string;
+    type?: never;
+  };
 
 export type CustomButtonProps = NativeButtonProps | LinkButtonProps;
 
@@ -35,7 +37,9 @@ function buttonClassName(
     `custom-button--${size}`,
     fullWidth && "custom-button--full-width",
     className,
-  ].filter(Boolean).join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 export default function CustomButton(props: CustomButtonProps) {
@@ -50,7 +54,11 @@ export default function CustomButton(props: CustomButtonProps) {
       ...linkProps
     } = props;
     return (
-      <Link href={href} {...linkProps} className={buttonClassName(variant, size, fullWidth, className)}>
+      <Link
+        href={href}
+        {...linkProps}
+        className={buttonClassName(variant, size, fullWidth, className)}
+      >
         {children}
       </Link>
     );
@@ -72,6 +80,8 @@ export default function CustomButton(props: CustomButtonProps) {
       ref={ref}
       type={type}
       className={buttonClassName(variant, size, fullWidth, className)}
-    >{children}</button>
+    >
+      {children}
+    </button>
   );
 }
