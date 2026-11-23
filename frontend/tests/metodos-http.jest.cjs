@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Testes Jest em CommonJS. */
 /* global describe, test, expect */
 const fs = require("node:fs");
 const path = require("node:path");
