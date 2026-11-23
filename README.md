@@ -106,6 +106,7 @@ Com o banco e o ambiente preparados, no diretório `frontend/`:
 cd frontend
 npm ci
 npm run test:jest
+npm run test:regras
 npm run test:openapi
 npm run test:origem
 npm run test:fotos
