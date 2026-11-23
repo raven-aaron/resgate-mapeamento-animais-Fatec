@@ -8,7 +8,7 @@ A API possui uma especificação **OpenAPI 3.0.3** versionada em [`frontend/publ
 2. No navegador, acesse `http://localhost:3000/api-docs` ou `http://localhost:3001/api-docs`.
 3. Expanda uma categoria e escolha uma operação para ver entradas, respostas, autenticação e erros.
 
-O endereço acima redireciona para `/swagger/index.html`. Os arquivos CSS/JS do Swagger UI são obtidos da CDN `unpkg.com` (versão fixada em 5.32.0), por isso a interface depende de acesso à internet. A especificação `/openapi.json` funciona independentemente da CDN e pode ser importada no Swagger Editor, Postman, Insomnia ou outras ferramentas OpenAPI.
+O endereço acima redireciona para `/swagger/index.html`. Os arquivos CSS/JS do Swagger UI são obtidos da CDN `unpkg.com` (versão fixada em 5.32.0), por isso a interface depende de acesso à internet. A especificação `/openapi.json` funciona independentemente da CDN e pode ser importada no Swagger Editor ou outras ferramentas compatíveis com OpenAPI.
 
 ## Autenticação e testes interativos
 
@@ -37,6 +37,6 @@ Dentro de `frontend/`, execute:
 npm run test:openapi
 ```
 
-O teste compara os métodos/caminhos descritos no OpenAPI com os `route.ts` de `frontend/src/app/api/`, exige `operationId`, resumo, respostas e verifica referências internas. Está integrado à CI para impedir novos endpoints sem contrato. **Ele não valida automaticamente regras de negócio ou o conteúdo de cada resposta** — essas partes precisam continuar sendo conferidas com o código, testes de integração e coleção [Insomnia](../../insomnia/resgate-demo.insomnia-v4.json).
+O teste compara os métodos/caminhos descritos no OpenAPI com os `route.ts` de `frontend/src/app/api/`, exige `operationId`, resumo, respostas e verifica referências internas. Está integrado à CI para impedir novos endpoints sem contrato. **Ele não valida automaticamente regras de negócio ou o conteúdo de cada resposta** — essas partes precisam continuar sendo conferidas com o código, testes de integração e validações das APIs HTTP.
 
 Documentação complementar: [API HTTP](api-http.md), [visão geral da arquitetura](visao-geral.md) e [dados de demonstração](../operacao/dados-demonstracao.md).
