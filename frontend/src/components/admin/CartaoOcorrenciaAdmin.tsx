@@ -67,7 +67,7 @@ export default function CartaoOcorrenciaAdmin({
                 : "Oculta"}
         </p>
         <div className={styles.acoes}>
-          <CustomButton href={`/admin/ocorrencias/${ocorrencia.id}`} fullWidth>
+          <CustomButton href={`/admin/ocorrencias/${ocorrencia.id}`} variant="orange" fullWidth>
             SAIBA MAIS
           </CustomButton>
           {aoAprovar && <CustomButton variant="green" onClick={aoAprovar} fullWidth>ACEITAR</CustomButton>}

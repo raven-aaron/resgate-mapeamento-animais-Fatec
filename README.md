@@ -150,5 +150,6 @@ Informações sobre publicação estão em [Vercel e Azure](backend/docs/operaca
 ## Mais informações
 
 - [Organização da aplicação](backend/docs/arquitetura/visao-geral.md)
+- [Arquitetura MVC](backend/docs/arquitetura/mvc.md)
 - [Banco de dados e migrações](backend/database/README.md)
 - [Como contribuir](CONTRIBUTING.md)
