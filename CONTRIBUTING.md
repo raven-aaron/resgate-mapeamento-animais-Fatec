@@ -36,6 +36,8 @@ npm ci
 npm run check:versions
 npm run test:origem
 npm run test:fotos
+npm run test:jest
+npm run test:openapi
 npm run lint
 npx tsc --noEmit
 npm run build
