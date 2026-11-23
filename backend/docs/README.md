@@ -12,7 +12,7 @@ Consulte o guia correspondente à tarefa.
 | Front-end | [Guia da equipe](frontend/guia-equipe.md) | Onde editar, como validar e limites do escopo |
 | Front-end | [Identidade visual](frontend/identidade-visual.md) | Referências do PI original |
 | Operação | [Docker](operacao/docker.md) | Instalação e execução |
-| Operação | [Dados de demonstração](operacao/dados-demonstracao.md) | Seed, imagens e Insomnia |
+| Operação | [Dados de demonstração](operacao/dados-demonstracao.md) | Seed, imagens e testes |
 | Operação | [Backup](operacao/backup.md) | Cópia e restauração local |
 | Operação | [Versões](operacao/versoes.md) | Node, Next e ferramentas |
 | Apresentação | [Demonstração](apresentacao/demonstracao.md) | Roteiro de apresentação |
