@@ -346,7 +346,7 @@ export default function FormularioOcorrencia() {
           <dl className="review-list">
             <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Perdido" : "Encontrado"}</dd></div>
             <div><dt>Espécie / nome</dt><dd>{especie}{tipo === "PERDIDO" && nome ? " — " + nome : ""}</dd></div>
-            {tipo === "ENCONTRADO" && <div><dt>Acolhimento temporário</dt><dd>{situacaoLarTemporario === "PODE_ACOLHER" ? "Posso acolher temporariamente" : "Preciso de ajuda para acolhimento"}</dd></div>
+            {tipo === "ENCONTRADO" && <div><dt>Acolhimento temporário</dt><dd>{situacaoLarTemporario === "PODE_ACOLHER" ? "Posso acolher temporariamente" : "Preciso de ajuda para acolhimento"}</dd></div>}
             <div><dt>Raça</dt><dd>{especie === "Gato" ? "Não informada" : raca || "Não informada"}</dd></div>
             <div><dt>Sexo / porte</dt><dd>{sexo || "Não informado"} / {porte || "Não informado"}</dd></div>
             <div><dt>Cor/pelagem</dt><dd>{cor || "Não informada"}</dd></div>
