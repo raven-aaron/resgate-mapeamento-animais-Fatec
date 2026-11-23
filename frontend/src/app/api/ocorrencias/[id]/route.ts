@@ -63,7 +63,7 @@ export async function GET(_request: Request, context: Contexto) {
   }
 }
 
-export async function PATCH(request:Request,context:Contexto) {
+async function atualizarOcorrencia(request:Request,context:Contexto,metodo:"PATCH"|"PUT") {
   if(!mesmaOrigem(request))return respostaErro("Origem não permitida.",403);
   const usuario=await usuarioAtual();
   if(!usuario)return respostaErro("Entre na sua conta para gerenciar esta ocorrência.",401);
@@ -74,7 +74,9 @@ export async function PATCH(request:Request,context:Contexto) {
   try {
     const dados=await request.json() as Record<string,unknown>;
     if(!dados||typeof dados!=="object"||Array.isArray(dados))return respostaErro("Dados inválidos.",400);
-    const acao=dados.acao;
+    if(metodo==="PUT" && dados.acao!==undefined && dados.acao!=="EDITAR")
+      return respostaErro("Ação incompatível com PUT.",400);
+    const acao=metodo==="PUT"?"EDITAR":dados.acao;
     if(acao!=="EDITAR" && acao!=="ENCERRAR")return respostaErro("Ação inválida.",400);
     const id=Number(identificador);
     let regiaoNova: Awaited<ReturnType<typeof localizarBairroPorCep>>|null=null;
@@ -196,6 +198,14 @@ export async function PATCH(request:Request,context:Contexto) {
     console.error("Falha ao atualizar ocorrência",error);
     return respostaErro("Não foi possível atualizar a ocorrência.",500);
   }finally{conn?.release();}
+}
+
+export async function PATCH(request:Request,context:Contexto) {
+  return atualizarOcorrencia(request,context,"PATCH");
+}
+
+export async function PUT(request:Request,context:Contexto) {
+  return atualizarOcorrencia(request,context,"PUT");
 }
 
 export async function DELETE(request:Request,context:Contexto) {
