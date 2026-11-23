@@ -10,7 +10,8 @@
     "check:versions": "node scripts/check-versions.mjs",
     "test:origem": "node --test tests/seguranca.test.mjs",
     "test:fotos": "node --test tests/fotos.test.mjs",
-    "test:jest": "npx --yes jest@30.5.0 --runInBand --config jest.config.cjs"
+    "test:jest": "npx --yes jest@30.5.0 --runInBand --config jest.config.cjs",
+    "test:openapi": "node scripts/check-openapi.mjs"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
