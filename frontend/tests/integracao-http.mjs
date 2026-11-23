@@ -85,6 +85,28 @@ async function executar(){
   exigirStatus(await chamar("/api/ocorrencias/"+id,{
     method:"PATCH",cookie:terceiro,body:{acao:"ENCERRAR",motivo:"OUTRO",detalhe:"Tentativa indevida"}
   }),404,"Terceiro não pode encerrar ocorrência");
+  // PUT deve editar somente registros do autor, sem permitir encerramento ou publicação direta.
+  const dadosEdicao={
+    nome:"Animal CI isolado",
+    sexo:"MACHO",
+    porte:"MEDIO",
+    dataEvento:new Date().toISOString().slice(0,10),
+    descricao:"Atualização de ficha no teste de integração.",
+    referencia:"Ponto de referência público."
+  };
+  exigirStatus(await chamar("/api/ocorrencias/"+id,{
+    method:"PUT",body:dadosEdicao
+  }),401,"PUT exige login");
+  exigirStatus(await chamar("/api/ocorrencias/"+id,{
+    method:"PUT",cookie:terceiro,body:dadosEdicao
+  }),404,"PUT não permite editar ocorrência de outro usuário");
+  exigirStatus(await chamar("/api/ocorrencias/"+id,{
+    method:"PUT",cookie:autor,body:{acao:"ENCERRAR",motivo:"REENCONTRADO"}
+  }),400,"PUT não permite encerramento");
+  exigirStatus(await chamar("/api/ocorrencias/"+id,{
+    method:"PUT",cookie:autor,body:dadosEdicao
+  }),200,"Autor atualiza ocorrência com PUT");
+  exigirStatus(await chamar("/api/ocorrencias/"+id),404,"PUT mantém ocorrência em moderação");
   exigirStatus(await chamar("/api/admin/usuarios",{
     method:"PATCH",cookie:administrador,body:{
       id:Number(meuAdm.dados.usuario.id),acao:"SUSPENDER",confirmacao:"ci-admin@example.invalid"
