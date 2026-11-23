@@ -108,23 +108,15 @@ docker compose --env-file .env.demo -p resgate-animais-demo down
 
 Não use `down -v` em ambientes com informações que deseja preservar. Não execute `docker compose down -v` no projeto principal.
 
-## Importar no Insomnia
+## Testar a API no DEMO
 
-Arquivo: [`backend/insomnia/resgate-demo.insomnia-v4.json`](../../insomnia/resgate-demo.insomnia-v4.json).
+Com o ambiente DEMO iniciado, abra `http://localhost:3001/api-docs` para consultar a documentação Swagger. A consulta pública pode ser feita em `http://localhost:3001/api/ocorrencias`.
 
-1. No Insomnia, escolha **Import → File** e selecione o arquivo. O formato é **Insomnia JSON v4**, atualmente suportado para importação.
-2. Abra os ambientes da coleção e defina `cidadao_senha` e `admin_senha` **localmente**, usando a senha gerada no terminal. Não envie senhas para o GitHub nem exporte o ambiente com esses valores.
-3. A variável `base_url` começa em `http://localhost:3001`. Use o banco DEMO, nunca a porta 3000 por engano.
-4. Primeiro execute **Entrar como cidadão**, depois **Minha sessão**, **Listar animais** e **Minhas conversas**. Para testar moderação, faça login administrativo, consulte **Fila de moderação** e escolha um `ocorrencia_id` pendente.
-5. IDs de ocorrência, conversa e mensagem são **variáveis manuais** (você os obtém nas respostas). Os requests não adivinham IDs nem alteram contas automaticamente.
-6. Para **cadastrar** nova ocorrência, preencha `cep` e `data_evento` (YYYY-MM-DD, não futura). Os dois requests de cadastro são multipart e incluem `confirmacao_privacidade`. Não incluem fotos inicialmente.
-7. Requests `PATCH`, `DELETE` e alguns `POST` **alteram o banco**. Execute manualmente o pedido desejado, não clique em executar a coleção inteira sem revisar os IDs.
-
-A autenticação usa cookies HttpOnly do servidor: `resgate_sessao` para cidadãos e `resgate_admin_sessao` para administrador. O Insomnia deve armazenar e reenviar cookies por padrão; se uma requisição retornar 401/403, confira a cookie jar e a sessão do papel correto.
+Para experimentar operações protegidas, entre no site DEMO com uma conta de teste ou no login administrativo do mesmo ambiente. A documentação utiliza os cookies da sessão atual. Requisições de escrita alteram os dados do banco DEMO; verifique o ID e o efeito esperado antes de executá-las.
 
 ## Testes automatizados
 
-A pipeline **CI — Seed DEMO e Insomnia** usa Docker isolado para aplicar migrações, criar os registros, verificar que repetir o seed é recusado e consultar `/api/ocorrencias` pelo Next.js. O workflow remove **somente** seus volumes efêmeros no runner GitHub.
+A pipeline **CI — Dados de demonstração** usa Docker isolado para aplicar migrações, criar os registros, verificar que repetir o seed é recusado e consultar `/api/ocorrencias` pelo Next.js. O workflow remove **somente** seus volumes efêmeros no runner GitHub.
 
 Para validação local sem Docker e sem escrita:
 
