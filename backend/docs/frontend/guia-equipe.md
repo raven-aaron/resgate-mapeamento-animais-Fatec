@@ -47,7 +47,7 @@ Os endpoints em `frontend/src/app/api/` são contratos do servidor. O formulári
 | Notificações | `/api/notificacoes` |
 | Localização | `/api/localizacao/cep` |
 
-Para inspecionar exemplos reais de requisição, importe `backend/insomnia/resgate-demo.insomnia-v4.json` e consulte a [documentação DEMO](../operacao/dados-demonstracao.md).
+Para consultar exemplos de requisição, use a documentação Swagger em `/api-docs` e a [documentação DEMO](../operacao/dados-demonstracao.md).
 
 ## Antes de abrir um PR
 
