@@ -9,7 +9,8 @@
     "lint": "eslint",
     "check:versions": "node scripts/check-versions.mjs",
     "test:origem": "node --test tests/seguranca.test.mjs",
-    "test:fotos": "node --test tests/fotos.test.mjs"
+    "test:fotos": "node --test tests/fotos.test.mjs",
+    "test:jest": "npx --yes jest@30.5.0 --runInBand --config jest.config.cjs"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
