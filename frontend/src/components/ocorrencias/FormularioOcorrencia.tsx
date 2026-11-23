@@ -32,6 +32,7 @@ export default function FormularioOcorrencia() {
   const [cor, setCor] = useState("");
   const [idade, setIdade] = useState("");
   const [microchip, setMicrochip] = useState("");
+  const [situacaoLarTemporario, setSituacaoLarTemporario] = useState("");
   const [dataEvento, setDataEvento] = useState("");
   const [descricao, setDescricao] = useState("");
   const [cep, setCep] = useState("");
@@ -142,6 +143,7 @@ export default function FormularioOcorrencia() {
       formulario.append("dados", JSON.stringify({
         tipo, especie, ...(tipo === "PERDIDO" ? { nome } : {}), raca, sexo, porte, cor, idade, microchip: tipo === "PERDIDO" ? microchip : "", dataEvento, descricao,
         cep: endereco.cep, referencia,
+        ...(tipo === "ENCONTRADO" ? { situacaoLarTemporario } : {}),
       }));
       fotos.forEach(foto => formulario.append("fotos", foto));
       const resposta = await fetch("/api/ocorrencias", { method: "POST", body: formulario });
@@ -183,6 +185,7 @@ export default function FormularioOcorrencia() {
                 const selecionado=e.target.value==="ENCONTRADO"?"ENCONTRADO":"PERDIDO";
                 if(selecionado!==tipo){
                   if(selecionado==="ENCONTRADO")setMicrochip("");
+                  else setSituacaoLarTemporario("");
                   setRevisao(false);
                   // O History API integra-se ao useSearchParams no Next.js:
                   // URL e campos são atualizados juntos, sem navegação pendente.
@@ -219,6 +222,16 @@ export default function FormularioOcorrencia() {
                 <option value="">Selecione</option>
                 <option value="SIM">Sim</option>
                 <option value="NAO">Não</option>
+              </select>
+            </label>}
+
+            {tipo === "ENCONTRADO" && <label className="form-field">
+              Pode acolher o animal temporariamente?
+              <select required value={situacaoLarTemporario}
+                onChange={e => { setSituacaoLarTemporario(e.target.value); setRevisao(false); }}>
+                <option value="">Selecione</option>
+                <option value="PODE_ACOLHER">Sim, posso acolher temporariamente</option>
+                <option value="NAO_PODE_ACOLHER">Não posso acolher, preciso de ajuda</option>
               </select>
             </label>}
 
@@ -332,7 +345,8 @@ export default function FormularioOcorrencia() {
           </div>
           <dl className="review-list">
             <div><dt>Tipo</dt><dd>{tipo === "PERDIDO" ? "Perdido" : "Encontrado"}</dd></div>
-            <div><dt>Espécie / nome</dt><dd>{especie}{nome ? " — " + nome : ""}</dd></div>
+            <div><dt>Espécie / nome</dt><dd>{especie}{tipo === "PERDIDO" && nome ? " — " + nome : ""}</dd></div>
+            {tipo === "ENCONTRADO" && <div><dt>Acolhimento temporário</dt><dd>{situacaoLarTemporario === "PODE_ACOLHER" ? "Posso acolher temporariamente" : "Preciso de ajuda para acolhimento"}</dd></div>
             <div><dt>Raça</dt><dd>{especie === "Gato" ? "Não informada" : raca || "Não informada"}</dd></div>
             <div><dt>Sexo / porte</dt><dd>{sexo || "Não informado"} / {porte || "Não informado"}</dd></div>
             <div><dt>Cor/pelagem</dt><dd>{cor || "Não informada"}</dd></div>
