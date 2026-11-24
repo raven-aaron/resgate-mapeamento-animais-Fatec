@@ -13,7 +13,10 @@ frontend/src/app/          páginas do Next.js
    +--> frontend/src/app/api/  endpoints HTTP
                   |
                   v
-            frontend/src/lib/  autenticação, consultas e validações
+            frontend/src/lib/  autenticação e validações
+                  |
+                  v
+            frontend/src/models/  consultas e transações
                   |
                   v
             MySQL 8.4         esquema versionado em backend/database/migrations/
@@ -39,7 +42,8 @@ A sessão do cidadão e a sessão administrativa usam cookies distintos. O atalh
 - `frontend/src/app/api/conversas/`: conversas e mensagens.
 - `frontend/src/app/api/localizacao/`: consulta de CEP e geocodificação.
 - `frontend/src/components/`: telas e widgets; não deve acessar MySQL.
-- `frontend/src/lib/`: módulos auxiliares, inclusive os usados apenas no servidor.
+- `frontend/src/models/`: operações do banco de dados, separadas das rotas da API.
+- `frontend/src/lib/`: módulos auxiliares, inclusive autenticação e validações usadas no servidor.
 - `backend/database/migrations/`: evolução sequencial do esquema SQL. Migrações já aplicadas não devem ser editadas.
 
 ## Localização e publicação

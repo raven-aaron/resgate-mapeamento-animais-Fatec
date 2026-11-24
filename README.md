@@ -24,7 +24,7 @@ A localização divulgada é aproximada, por bairro. Endereços residenciais nã
 - **Documentação da API:** OpenAPI 3.0.3 e Swagger UI;
 - **Testes:** Jest, testes de integração em Node.js e verificações no GitHub Actions.
 
-O front-end e a API fazem parte da mesma aplicação Next.js. As rotas HTTP ficam em `frontend/src/app/api/`, a lógica de acesso e validação em `frontend/src/lib/`, e as migrações SQL em `backend/database/migrations/`. Não há um servidor Express separado.
+O front-end e a API fazem parte da mesma aplicação Next.js. As rotas HTTP ficam em `frontend/src/app/api/`, as consultas e transações em `frontend/src/models/`, os serviços de autenticação e validação em `frontend/src/lib/`, e as migrações SQL em `backend/database/migrations/`. Não há um servidor Express separado.
 
 ## Como executar no computador
 

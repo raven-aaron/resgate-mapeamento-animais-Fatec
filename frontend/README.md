@@ -8,7 +8,8 @@ Interface e API HTTP do Resgate e Mapeamento de Animais.
 | --- | --- |
 | `src/app/` | Páginas, layouts, navegação e rotas `/api` |
 | `src/components/` | Componentes reutilizáveis de interface, agrupados por domínio |
-| `src/lib/` | Consultas, autenticação, validações e tipos compartilhados |
+| `src/models/` | Consultas SQL e transações com o MySQL |
+| `src/lib/` | Autenticação, validações e funções compartilhadas |
 | `src/types/` | Declarações adicionais de tipos |
 | `public/assets/` | Imagens estáticas do projeto |
 | `scripts/` | Administração local, versões e enriquecimento DEMO |
