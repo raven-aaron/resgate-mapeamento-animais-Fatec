@@ -1,42 +1,47 @@
-# Swagger UI e OpenAPI — módulo Resgate
+# Documentação da API (Swagger)
 
-A API possui uma especificação **OpenAPI 3.0.3** versionada em [`frontend/public/openapi.json`](../../../frontend/public/openapi.json), renderizada por **Swagger UI**.
+A API do sistema está documentada com **OpenAPI 3.0.3**. O arquivo com as rotas é [`frontend/public/openapi.json`](../../../frontend/public/openapi.json), e o Swagger permite consultá-las pelo navegador.
 
-## Como abrir
+## Como acessar
 
-1. Execute o projeto localmente (porta **3000**) ou o ambiente DEMO (porta **3001**).
-2. No navegador, acesse `http://localhost:3000/api-docs` ou `http://localhost:3001/api-docs`.
-3. Expanda uma categoria e escolha uma operação para ver entradas, respostas, autenticação e erros.
+Com a aplicação ligada, abra:
 
-O endereço acima redireciona para `/swagger/index.html`. Os arquivos CSS/JS do Swagger UI são obtidos da CDN `unpkg.com` (versão fixada em 5.32.0), por isso a interface depende de acesso à internet. A especificação `/openapi.json` funciona independentemente da CDN e pode ser importada no Swagger Editor ou outras ferramentas compatíveis com OpenAPI.
+- **Swagger:** `http://localhost:3000/api-docs`
+- **Arquivo OpenAPI:** `http://localhost:3000/openapi.json`
+- **Ambiente DEMO:** `http://localhost:3001/api-docs`
 
-## Autenticação e testes interativos
+Na página do Swagger, escolha uma rota para consultar o método HTTP, os campos recebidos e as respostas possíveis.
 
-- Visitantes podem consultar as rotas públicas.
-- Para chamadas do **cidadão**, faça login no site, no **mesmo host/porta** do Swagger UI; o navegador enviará automaticamente o cookie HttpOnly `resgate_sessao`.
-- Para chamadas **administrativas**, faça login em `/admin/login`, no mesmo host/porta; o cookie `resgate_admin_sessao` é independente.
-- **Não cole o valor dos cookies** no campo Authorize: navegadores não permitem que JavaScript defina diretamente o cabeçalho Cookie. O Swagger UI usa `withCredentials=true` para aproveitar a sessão que já existe.
-- O botão **Try it out** está habilitado apenas em `localhost` e `127.0.0.1`. Mesmo localmente, chamadas POST/PUT/PATCH/DELETE modificam o banco e podem enviar notificações. Prefira o ambiente DEMO, com dados fictícios.
+## Autenticação
 
-Alterações de estado exigem requisições da mesma origem. Caso a interface e a API estejam em hosts/portas diferentes, autenticação e verificação de origem podem falhar.
+As rotas públicas podem ser consultadas sem login. Para testar uma rota protegida, entre primeiro na aplicação pelo mesmo endereço e porta do Swagger:
 
-## Observações sobre os contratos
+- Cidadão: login normal do site.
+- Administrador: `/admin/login`.
 
-- O cadastro de ocorrência usa `multipart/form-data`: `dados` é **texto JSON serializado**, `confirmacao_privacidade=confirmado` e `fotos` é um campo repetível (até 5 imagens). Não envie `dados` como objeto JSON separado do formulário.
-- A edição de ocorrência devolve o status para **PENDENTE** e exige nova moderação.
-- Fotos de ocorrências ainda não publicadas não são públicas; somente o autor e administrador podem acessá-las.
-- O endpoint `GET /api/admin/usuarios` **não existe**: a listagem da tela administrativa é obtida no servidor da página, diretamente no banco. Somente `PATCH /api/admin/usuarios` é uma rota HTTP.
-- As mensagens são persistidas no MySQL. Não existe WebSocket; o cliente consulta a API para atualizar as conversas. Não há garantia de entrega instantânea.
-- A recuperação de senha por e-mail depende de `RESEND_API_KEY`, `MAIL_FROM` e `APP_PUBLIC_URL`.
+O sistema usa sessões no MySQL e cookies `HttpOnly`. Não é necessário copiar o token para o Swagger. As requisições que alteram dados também verificam a origem.
 
-## Garantia contra documentação desatualizada
+O botão **Try it out** fica disponível apenas em `localhost` ou `127.0.0.1`. Um POST, PUT, PATCH ou DELETE pode modificar registros; prefira testar no ambiente DEMO.
 
-Dentro de `frontend/`, execute:
+## Alguns detalhes das rotas
+
+- Cadastro de ocorrência: usa `multipart/form-data`, com o campo `dados` contendo JSON em texto, `confirmacao_privacidade=confirmado` e até cinco fotos.
+- Edição: coloca a ocorrência novamente em análise.
+- Fotos ainda não publicadas: acessíveis somente pelo responsável e pelo administrador.
+- A listagem administrativa de usuários é carregada pela página no servidor; não existe `GET /api/admin/usuarios`.
+- Chat: as mensagens ficam no MySQL e são atualizadas por consultas à API. Não utiliza WebSocket.
+- Recuperação de senha: o envio de e-mail depende da configuração do serviço externo.
+
+Os arquivos do Swagger UI são carregados da CDN `unpkg.com`, portanto a interface precisa de internet. O arquivo `/openapi.json` continua disponível sem depender dessa CDN.
+
+## Como conferir a documentação
+
+Dentro da pasta `frontend/`:
 
 ```bash
 npm run test:openapi
 ```
 
-O teste compara os métodos/caminhos descritos no OpenAPI com os `route.ts` de `frontend/src/app/api/`, exige `operationId`, resumo, respostas e verifica referências internas. Está integrado à CI para impedir novos endpoints sem contrato. **Ele não valida automaticamente regras de negócio ou o conteúdo de cada resposta** — essas partes precisam continuar sendo conferidas com o código, testes de integração e validações das APIs HTTP.
+Esse comando compara os métodos e caminhos do OpenAPI com as rotas `route.ts` da aplicação. A verificação também roda no GitHub Actions. **O teste não confirma sozinho se cada regra de negócio está correta**; para isso, usamos os testes de integração e o [roteiro de testes manuais](../apresentacao/validacao.md).
 
-Documentação complementar: [API HTTP](api-http.md), [visão geral da arquitetura](visao-geral.md) e [dados de demonstração](../operacao/dados-demonstracao.md).
+Veja também a [lista de rotas HTTP](api-http.md) e o [README principal](../../../README.md).
