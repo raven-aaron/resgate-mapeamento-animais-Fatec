@@ -105,12 +105,14 @@ Com o banco e o ambiente preparados, no diretório `frontend/`:
 ```bash
 cd frontend
 npm ci
+npm run check:versions
 npm run test:jest
 npm run test:regras
 npm run test:openapi
 npm run test:origem
 npm run test:fotos
 npm run lint
+npx next typegen
 npx tsc --noEmit
 npm run build
 ```
@@ -153,4 +155,5 @@ Informações sobre publicação estão em [Vercel e Azure](backend/docs/operaca
 - [Organização da aplicação](backend/docs/arquitetura/visao-geral.md)
 - [Arquitetura MVC](backend/docs/arquitetura/mvc.md)
 - [Banco de dados e migrações](backend/database/README.md)
+- [Roteiro de testes no navegador](backend/docs/apresentacao/validacao.md)
 - [Como contribuir](CONTRIBUTING.md)
