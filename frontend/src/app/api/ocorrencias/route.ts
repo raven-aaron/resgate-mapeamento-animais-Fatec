@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { ResultSetHeader, RowDataPacket, PoolConnection } from "mysql2/promise";
 import { randomUUID } from "node:crypto";
-import { banco } from "../../../lib/db";
 import { administradorAtual, usuarioAtual } from "../../../lib/auth";
 import { buscarPublicas } from "../../../lib/ocorrencias";
 import { mesmaOrigem } from "../../../lib/seguranca";
 import { localizarBairroPorCep, ErroLocalizacao } from "../../../lib/localizacao-cep";
 import { validarSituacaoLarTemporario } from "../../../lib/situacao-lar-temporario.mjs";
 import { salvarFoto, excluirFoto, ErroArmazenamento, type ProvedorFoto } from "../../../lib/storage-fotos";
+import { cadastrarOcorrencia } from "../../../models/ocorrencias";
 
 export const runtime = "nodejs";
 
@@ -51,7 +50,6 @@ export async function POST(request: Request) {
   if (Number(request.headers.get("content-length") || 0) > 27 * 1024 * 1024) {
     return NextResponse.json({ erro: "Fotos excedem o limite de tamanho." }, { status: 413 });
   }
-  let conexao: PoolConnection | null = null;
   let concluiu = false;
   const criadas: { nome: string; provedor: ProvedorFoto }[] = [];
   try {
@@ -131,49 +129,16 @@ export async function POST(request: Request) {
       criadas.push({ nome: arquivo.nome, provedor });
     }
 
-    conexao = await banco().getConnection();
-    await conexao.beginTransaction();
-    const [bairros] = await conexao.execute<ResultSetHeader>(
-      "INSERT INTO bairros (nome,latitude_aproximada,longitude_aproximada) VALUES (?,?,?) ON DUPLICATE KEY UPDATE id_bairro=LAST_INSERT_ID(id_bairro),latitude_aproximada=VALUES(latitude_aproximada),longitude_aproximada=VALUES(longitude_aproximada)",
-      [endereco.bairro, endereco.latitude, endereco.longitude]
-    );
-    const [especies] = await conexao.execute<RowDataPacket[]>(
-      "SELECT id_especie AS id FROM especies WHERE nome=? AND ativo=1 LIMIT 1", [especie]
-    );
-    const idEspecie = Number(especies[0]?.id);
-    if (!idEspecie) throw new Error("Espécie não cadastrada");
-    let idRaca: number | null = null;
-    if (raca) {
-      const [racas] = await conexao.execute<RowDataPacket[]>(
-        "SELECT id_raca AS id FROM racas WHERE id_especie=? AND nome=? AND ativo=1 LIMIT 1", [idEspecie,raca]
-      );
-      if (!racas.length) return NextResponse.json({ erro: "Raça inválida para a espécie." }, { status: 400 });
-      idRaca = Number(racas[0].id);
-    }
-    const [animal] = await conexao.execute<ResultSetHeader>(
-      "INSERT INTO animais (nome,id_especie,id_raca,sexo,porte,possui_microchip,idade_aproximada,caracteristicas) VALUES (?,?,?,?,?,?,?,?)",
-      [nome || null,idEspecie,idRaca,sexo || "INDETERMINADO",porte || "INDETERMINADO",microchip === "" ? null : microchip === "SIM" ? 1 : 0,idade || null,descricao || null]
-    );
-    const [ocorrencia] = await conexao.execute<ResultSetHeader>(
-      "INSERT INTO ocorrencias (id_usuario_criador,id_animal,id_bairro,ponto_referencia,tipo_ocorrencia,status_aprovacao,data_evento,descricao,cep,logradouro,latitude_aproximada,longitude_aproximada,origem_localizacao,precisao_localizacao,situacao_lar_temporario) VALUES (?,?,?,?,?,'PENDENTE',?,?,?,?,?,?,?,?,?)",
-      [usuario.id,animal.insertId,bairros.insertId,referencia || null,tipo,dataEvento,descricao || null,cep,null,endereco.latitude,endereco.longitude,"BAIRRO","BAIRRO_APROXIMADO",situacaoLarTemporario]
-    );
-    if (cor) {
-      const [cores] = await conexao.execute<RowDataPacket[]>("SELECT id_cor AS id FROM cores WHERE nome=? AND ativo=1 LIMIT 1", [cor]);
-      if (!cores.length) throw new Error("Cor não cadastrada");
-      await conexao.execute("INSERT INTO animais_cores (id_animal,id_cor) VALUES (?,?)", [animal.insertId,Number(cores[0].id)]);
-    }
-    for (let i=0;i<arquivos.length;i++) {
-      await conexao.execute("INSERT INTO fotos_ocorrencias (id_ocorrencia,provedor,identificador_arquivo,url_foto,ordem) VALUES (?,?,?,?,?)",
-        [ocorrencia.insertId,criadas[i].provedor,arquivos[i].nome,"/api/fotos/"+arquivos[i].nome,i+1]);
-    }
-    await conexao.execute(
-      "INSERT INTO historico_ocorrencias (id_ocorrencia,id_usuario_responsavel,acao) VALUES (?,?,'CRIACAO')",
-      [ocorrencia.insertId,usuario.id]
-    );
-    await conexao.commit();
+    const resultado = await cadastrarOcorrencia({
+      idUsuario: usuario.id, tipo, especie, nome, raca, cor, sexo, porte, microchip,
+      idade, descricao, referencia, dataEvento, cep, situacaoLarTemporario, endereco,
+      fotos: criadas.map((foto, i) => ({ ...foto, ordem: i + 1 })),
+    });
+    if ("erro" in resultado) return NextResponse.json({ erro: resultado.erro }, { status: resultado.status });
     concluiu = true;
-    return NextResponse.json({ id: ocorrencia.insertId, status: "PENDENTE", mensagem: "Ocorrência registrada e enviada para análise." }, { status: 201 });
+    return NextResponse.json({
+      id: resultado.id, status: "PENDENTE", mensagem: "Ocorrência registrada e enviada para análise.",
+    }, { status: 201 });
   } catch (error) {
     console.error("Falha ao registrar ocorrência", error);
     if (error instanceof ErroArmazenamento) {
@@ -181,10 +146,6 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ erro: "Não foi possível salvar a ocorrência. Confira os dados e tente novamente." }, { status: 500 });
   } finally {
-    if (conexao) {
-      if (!concluiu) await conexao.rollback().catch(() => undefined);
-      conexao.release();
-    }
     if (!concluiu) await Promise.all(criadas.map(foto =>
       excluirFoto(foto.nome, foto.provedor).catch(error => console.warn("Falha ao desfazer upload", error))
     ));
