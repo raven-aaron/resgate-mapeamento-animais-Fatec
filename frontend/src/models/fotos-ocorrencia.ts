@@ -108,3 +108,13 @@ export async function removerFotoOcorrencia(
     conn.release();
   }
 }
+
+export async function buscarFotoCadastrada(arquivo: string) {
+  const [rows] = await banco().execute<RowDataPacket[]>(
+    "SELECT f.provedor,o.id_usuario_criador,o.status_aprovacao,o.status_caso,o.excluido_em " +
+    "FROM fotos_ocorrencias f JOIN ocorrencias o ON o.id_ocorrencia=f.id_ocorrencia " +
+    "WHERE f.provedor IN ('LOCAL','AZURE_BLOB') AND f.identificador_arquivo=? LIMIT 1",
+    [arquivo],
+  );
+  return rows[0] || null;
+}

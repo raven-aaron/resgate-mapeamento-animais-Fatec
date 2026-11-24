@@ -1,5 +1,4 @@
-import type { RowDataPacket } from "mysql2/promise";
-import { banco } from "../../../../lib/db";
+import { buscarFotoCadastrada } from "../../../../models/fotos-ocorrencia";
 import { usuarioAtual, administradorAtual } from "../../../../lib/auth";
 import { lerFoto, type ProvedorFoto } from "../../../../lib/storage-fotos";
 
@@ -9,12 +8,7 @@ export async function GET(_request:Request,{params}:{params:Promise<{arquivo:str
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$/.test(arquivo))
     return new Response("Arquivo não encontrado.",{status:404});
   try {
-    const [rows]=await banco().execute<RowDataPacket[]>(
-      "SELECT f.provedor,o.id_usuario_criador,o.status_aprovacao,o.status_caso,o.excluido_em "+
-      "FROM fotos_ocorrencias f JOIN ocorrencias o ON o.id_ocorrencia=f.id_ocorrencia "+
-      "WHERE f.provedor IN ('LOCAL','AZURE_BLOB') AND f.identificador_arquivo=? LIMIT 1",[arquivo]
-    );
-    const o=rows[0];
+    const o=await buscarFotoCadastrada(arquivo);
     if(!o)return new Response("Arquivo não encontrado.",{status:404});
     const publico=o.status_aprovacao==="APROVADO"&&o.status_caso==="ABERTO"&&!o.excluido_em;
     if(!publico){
