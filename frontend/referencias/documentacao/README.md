@@ -1,3 +1,5 @@
+> **Arquivo de referência do início do projeto.** Este texto registra a proposta original do grupo e não descreve necessariamente a versão atual. Para instalar e executar o sistema, use o [README principal](../../../README.md) e a [documentação atual da API](../../../backend/docs/arquitetura/swagger.md).
+
 # Projeto desenvolvido por :
 Bianca Diebe   
 Gabriel Tiago Santos Leme   
