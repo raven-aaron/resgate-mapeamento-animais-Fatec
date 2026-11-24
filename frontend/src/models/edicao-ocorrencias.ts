@@ -184,3 +184,46 @@ export async function excluirCadastroOcorrencia(
     conn.release();
   }
 }
+
+export type RegistroEdicaoOcorrencia = RowDataPacket & {
+  id: number; tipo: "PERDIDO" | "ENCONTRADO"; status_aprovacao: string;
+  status_caso: string; nome: string | null; especie: string; id_especie: number;
+  sexo: string; porte: string; idade: string | null; microchip: number | null;
+  raca: string | null; cor: string | null; data: string; descricao: string | null;
+  referencia: string | null; bairro: string; cep: string | null;
+};
+
+export async function buscarDadosParaEditar(idOcorrencia: number, idUsuario: number) {
+  const [registros] = await banco().execute<RegistroEdicaoOcorrencia[]>(
+    "SELECT o.id_ocorrencia AS id,o.tipo_ocorrencia AS tipo,o.status_aprovacao,o.status_caso," +
+    "a.nome,e.nome AS especie,a.id_especie,a.sexo,a.porte,a.idade_aproximada AS idade," +
+    "a.possui_microchip AS microchip,r.nome AS raca," +
+    "(SELECT c.nome FROM animais_cores ac JOIN cores c ON c.id_cor=ac.id_cor WHERE ac.id_animal=a.id_animal ORDER BY c.nome LIMIT 1) AS cor," +
+    "o.data_evento AS data,o.descricao,o.ponto_referencia AS referencia,b.nome AS bairro,o.cep " +
+    "FROM ocorrencias o JOIN animais a ON a.id_animal=o.id_animal " +
+    "JOIN especies e ON e.id_especie=a.id_especie " +
+    "JOIN bairros b ON b.id_bairro=o.id_bairro " +
+    "LEFT JOIN racas r ON r.id_raca=a.id_raca " +
+    "WHERE o.id_ocorrencia=? AND o.id_usuario_criador=? AND o.excluido_em IS NULL LIMIT 1",
+    [idOcorrencia, idUsuario],
+  );
+  return registros[0] || null;
+}
+
+export async function buscarOpcoesParaEditar(idOcorrencia: number, idEspecie: number) {
+  const [racas] = await banco().execute<RowDataPacket[]>(
+    "SELECT nome FROM racas WHERE id_especie=? AND ativo=1 ORDER BY nome", [idEspecie],
+  );
+  const [cores] = await banco().execute<RowDataPacket[]>(
+    "SELECT nome FROM cores WHERE ativo=1 ORDER BY nome",
+  );
+  const [fotos] = await banco().execute<RowDataPacket[]>(
+    "SELECT id_foto AS id,url_foto AS url FROM fotos_ocorrencias WHERE id_ocorrencia=? ORDER BY ordem",
+    [idOcorrencia],
+  );
+  return {
+    racas: racas.map(r => String(r.nome)),
+    cores: cores.map(c => String(c.nome)),
+    fotos: fotos.map(f => ({ id: Number(f.id), url: String(f.url) })),
+  };
+}

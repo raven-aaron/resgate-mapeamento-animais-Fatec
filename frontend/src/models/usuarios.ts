@@ -84,3 +84,40 @@ export async function alterarPermissaoResgate(
     conn.release();
   }
 }
+
+export type RegistroUsuarioAdmin = RowDataPacket & {
+  id: number; nome: string; email: string; situacao: string;
+  criada: string; admin_resgate: number; ocorrencias: number;
+};
+
+export async function listarUsuariosAdmin(
+  busca: string, status: string, paginaSolicitada: number, porPagina: number,
+) {
+  const where: string[] = [];
+  const valores: string[] = [];
+  if (busca) {
+    where.push("(u.nome LIKE ? OR u.email LIKE ?)");
+    valores.push("%" + busca + "%", "%" + busca + "%");
+  }
+  if (status) {
+    where.push("u.situacao=?");
+    valores.push(status);
+  }
+  const condicao = where.length ? "WHERE " + where.join(" AND ") : "";
+  const [contagem] = await banco().execute<RowDataPacket[]>(
+    "SELECT COUNT(*) AS total FROM usuarios u " + condicao, valores,
+  );
+  const total = Number(contagem[0]?.total || 0);
+  const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+  const pagina = Math.min(paginaSolicitada, totalPaginas);
+  const [rows] = await banco().execute<RegistroUsuarioAdmin[]>(
+    "SELECT u.id_usuario AS id,u.nome,u.email,u.situacao,u.criado_em AS criada," +
+    "EXISTS(SELECT 1 FROM permissoes_usuarios p WHERE p.id_usuario=u.id_usuario " +
+    "AND p.modulo='RESGATE' AND p.papel='ADMIN') AS admin_resgate," +
+    "(SELECT COUNT(*) FROM ocorrencias o WHERE o.id_usuario_criador=u.id_usuario AND o.excluido_em IS NULL) AS ocorrencias " +
+    "FROM usuarios u " + (condicao ? condicao + " " : "") +
+    "ORDER BY u.criado_em DESC,u.id_usuario DESC LIMIT ? OFFSET ?",
+    [...valores, porPagina, (pagina - 1) * porPagina],
+  );
+  return { rows, total, totalPaginas, pagina };
+}

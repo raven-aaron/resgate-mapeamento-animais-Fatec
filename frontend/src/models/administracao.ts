@@ -68,3 +68,13 @@ export async function moderarOcorrencia(
     conn.release();
   }
 }
+
+export async function consultarIndicadoresAdministrativos() {
+  const [rows] = await banco().query<RowDataPacket[]>(
+    "SELECT COUNT(*) AS total, SUM(status_aprovacao='PENDENTE') AS pendentes, " +
+    "SUM(status_aprovacao='APROVADO' AND status_caso='ABERTO') AS publicadas, " +
+    "SUM(status_aprovacao='REJEITADO') AS rejeitadas " +
+    "FROM ocorrencias WHERE excluido_em IS NULL",
+  );
+  return rows[0] || { total: 0, pendentes: 0, publicadas: 0, rejeitadas: 0 };
+}

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import type { RowDataPacket } from "mysql2/promise";
 import AdminShell from "../../components/admin/AdminShell";
 import CustomButton from "../../components/CustomButton";
 import { administradorAtual } from "../../lib/auth";
-import { banco } from "../../lib/db";
+import { consultarIndicadoresAdministrativos } from "../../models/administracao";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +10,7 @@ export default async function AdminPage() {
   const usuario = await administradorAtual();
   if (!usuario?.adminResgate) redirect("/admin/login");
 
-  const [rows] = await banco().query<RowDataPacket[]>(
-    "SELECT COUNT(*) AS total, SUM(status_aprovacao='PENDENTE') AS pendentes, " +
-    "SUM(status_aprovacao='APROVADO' AND status_caso='ABERTO') AS publicadas, " +
-    "SUM(status_aprovacao='REJEITADO') AS rejeitadas " +
-    "FROM ocorrencias WHERE excluido_em IS NULL"
-  );
-  const indicadores = rows[0];
+  const indicadores = await consultarIndicadoresAdministrativos();
 
   return (
     <AdminShell nome={usuario.nome} titulo="PAINEL ADMINISTRATIVO">
