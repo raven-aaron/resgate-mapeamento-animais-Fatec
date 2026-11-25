@@ -36,6 +36,7 @@ A recuperação por e-mail só envia mensagens quando `RESEND_API_KEY`, `MAIL_FR
 | GET | `/api/ocorrencias` | Pública | Query: `especie?`, `porte?`, `sexo?`, `tipo?`. Retorna até 200 itens em `{ocorrencias:[...]}` |
 | POST | `/api/ocorrencias` | Cidadão | Multipart: `dados` (JSON serializado), `confirmacao_privacidade=confirmado`, `fotos` (0 a 5). Retorna `{id,status:"PENDENTE",mensagem}` com HTTP 201 |
 | GET | `/api/ocorrencias/[id]` | Pública | Retorna `{ocorrencia}` somente se aprovada, aberta e não excluída |
+| PUT | `/api/ocorrencias/[id]` | Criador | JSON: dados da ficha para edição, com `dataEvento` obrigatório. Usa a validação do PATCH `EDITAR`, sem aceitar encerramento; retorna a ocorrência para `PENDENTE` |
 | PATCH | `/api/ocorrencias/[id]` | Criador | JSON: `acao:"EDITAR"` com `nome`, `sexo`, `porte`, `idade`, `microchip`, `raca`, `cor`, `descricao`, `referencia`, `dataEvento` e `cep?`; ou `acao:"ENCERRAR"`, `motivo`, `detalhe?` |
 | DELETE | `/api/ocorrencias/[id]` | Criador | Exclusão lógica: define `excluido_em`, encerra conversas; retorna `{ok,mensagem}` |
 | POST | `/api/ocorrencias/[id]/fotos` | Criador | Multipart: `fotos` (1 a 5 por envio, até cinco no total). Retorna `{ok,fotos:[...]}` |
@@ -111,6 +112,6 @@ O servidor consulta ViaCEP, OpenStreetMap/Nominatim e, quando necessário, Brasi
 
 ## Onde estão os contratos
 
-Cada contrato é implementado no respectivo arquivo `route.ts` dentro de `frontend/src/app/api/`. A coleção `backend/insomnia/resgate-demo.insomnia-v4.json` contém exemplos executáveis para desenvolvimento.
+Cada contrato é implementado no respectivo arquivo `route.ts` dentro de `frontend/src/app/api/`. A documentação Swagger em `/api-docs` apresenta os métodos, os parâmetros e exemplos das requisições.
 
 Leia também [modelo de dados](modelo-dados.md), [dicionário de dados](dicionario-dados.md) e [guia de front-end](../frontend/guia-equipe.md).

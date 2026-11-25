@@ -1,4 +1,4 @@
-name: CI — Seed DEMO e Insomnia
+name: CI — Dados de demonstração
 
 on:
   pull_request:
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   seed-demo:
-    name: Seed em MySQL isolado + consulta pública + coleção
+    name: Seed em MySQL isolado e consulta pública
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: frontend/.nvmrc
-      - name: Testar contrato do seed e coleção Insomnia sem Docker
+      - name: Testar regras do seed sem Docker
         run: node --test backend/database/tests/seed-demo.test.mjs
       - name: Preparar ambiente DEMO independente
         run: |

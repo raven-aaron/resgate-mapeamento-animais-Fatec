@@ -48,6 +48,15 @@ jobs:
       - name: Test map photo URLs
         run: npm run test:fotos
 
+      - name: Testes unitários com Jest
+        run: npm run test:jest
+
+      - name: Testar regras de localização e acolhimento
+        run: npm run test:regras
+
+      - name: Conferir documentação da API
+        run: npm run test:openapi
+
       - name: Lint
         run: npm run lint
 

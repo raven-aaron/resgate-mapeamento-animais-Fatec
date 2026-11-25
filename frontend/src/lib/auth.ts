@@ -2,8 +2,7 @@ import "server-only";
 import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { cookies } from "next/headers";
-import type { RowDataPacket } from "mysql2/promise";
-import { banco } from "./db";
+import { registrarSessao, revogarSessao, buscarUsuarioDaSessao } from "../models/sessoes";
 
 const scrypt=promisify(scryptCallback);
 type Perfil="cidadao"|"administrador";
@@ -34,22 +33,7 @@ export async function criarSessao(idUsuario:number,manterConectado=true,perfil:P
   const nomeCookie=COOKIES[perfil];
   const anterior=jar.get(nomeCookie)?.value;
   const token=randomBytes(32).toString("hex");
-  const conn=await banco().getConnection();
-  try{
-    await conn.beginTransaction();
-    await conn.execute(
-      "INSERT INTO sessoes (id_usuario,token_hash,expira_em) VALUES (?,UNHEX(?),DATE_ADD(UTC_TIMESTAMP(3),INTERVAL ? SECOND))",
-      [idUsuario,hashToken(token),duracaoSegundos]
-    );
-    if(anterior&&/^[a-f0-9]{64}$/.test(anterior)){
-      await conn.execute(
-        "UPDATE sessoes SET revogada_em=UTC_TIMESTAMP(3) WHERE token_hash=UNHEX(?) AND revogada_em IS NULL",
-        [hashToken(anterior)]
-      );
-    }
-    await conn.commit();
-  }catch(error){await conn.rollback().catch(()=>undefined);throw error;}
-  finally{conn.release();}
+  await registrarSessao(idUsuario, hashToken(token), duracaoSegundos, anterior && /^[a-f0-9]{64}$/.test(anterior) ? hashToken(anterior) : null);
   jar.set(nomeCookie,token,{
     httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production",path:"/",
     ...(persistente?{maxAge:duracaoSegundos}:{})
@@ -61,19 +45,14 @@ export async function encerrarSessao(perfil:Perfil="cidadao"){
   const nomeCookie=COOKIES[perfil];
   const token=jar.get(nomeCookie)?.value;
   if(token&&/^[a-f0-9]{64}$/.test(token)){
-    await banco().execute("UPDATE sessoes SET revogada_em=UTC_TIMESTAMP(3) WHERE token_hash=UNHEX(?) AND revogada_em IS NULL",[hashToken(token)]);
+    await revogarSessao(hashToken(token));
   }
   jar.delete(nomeCookie);
 }
 async function consultarSessao(perfil:Perfil):Promise<UsuarioSessao|null>{
   const token=(await cookies()).get(COOKIES[perfil])?.value;
   if(!token||!/^[a-f0-9]{64}$/.test(token))return null;
-  const sql="SELECT u.id_usuario AS id,u.nome,u.email,"+
-    "EXISTS(SELECT 1 FROM permissoes_usuarios p WHERE p.id_usuario=u.id_usuario AND p.modulo='RESGATE' AND p.papel='ADMIN') AS adminResgate "+
-    "FROM sessoes s JOIN usuarios u ON u.id_usuario=s.id_usuario "+
-    "WHERE s.token_hash=UNHEX(?) AND s.revogada_em IS NULL AND s.expira_em>UTC_TIMESTAMP(3) AND u.situacao='ATIVO' LIMIT 1";
-  const [linhas]=await banco().execute<RowDataPacket[]>(sql,[hashToken(token)]);
-  const u=linhas[0];
+  const u=await buscarUsuarioDaSessao(hashToken(token));
   if(!u)return null;
   const usuario={id:Number(u.id),nome:String(u.nome),email:String(u.email),adminResgate:Number(u.adminResgate)===1};
   if(perfil==="administrador"&&!usuario.adminResgate)return null;

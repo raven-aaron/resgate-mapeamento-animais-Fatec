@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import type { RowDataPacket } from "mysql2/promise";
-import { banco } from "../../../lib/db";
+import { listarUsuariosAdmin } from "../../../models/usuarios";
 import { administradorAtual } from "../../../lib/auth";
 import AdminShell from "../../../components/admin/AdminShell";
 import ControleUsuario from "../../../components/admin/ControleUsuario";
@@ -8,10 +7,6 @@ import CustomButton from "../../../components/CustomButton";
 
 export const dynamic="force-dynamic";
 const POR_PAGINA=10;
-type Registro=RowDataPacket&{
-  id:number;nome:string;email:string;situacao:string;
-  criada:string;admin_resgate:number;ocorrencias:number;
-};
 export default async function UsuariosAdmin({searchParams}:{
   searchParams:Promise<{busca?:string;situacao?:string;pagina?:string}>;
 }){
@@ -21,30 +16,7 @@ export default async function UsuariosAdmin({searchParams}:{
   const busca=(params.busca||"").trim().slice(0,60);
   const status=["ATIVO","SUSPENSO","DESATIVADO"].includes(params.situacao||"")?params.situacao||"":"";
   const paginaSolicitada=/^[1-9]\d*$/.test(params.pagina||"")?Number(params.pagina):1;
-  const where:string[]=[];
-  const valores:string[]=[];
-  if(busca){
-    where.push("(u.nome LIKE ? OR u.email LIKE ?)");
-    valores.push("%"+busca+"%","%"+busca+"%");
-  }
-  if(status){where.push("u.situacao=?");valores.push(status);}
-  const condicao=where.length?"WHERE "+where.join(" AND "):"";
-  const [contagem]=await banco().execute<RowDataPacket[]>(
-    "SELECT COUNT(*) AS total FROM usuarios u "+condicao,valores
-  );
-  const total=Number(contagem[0]?.total||0);
-  const totalPaginas=Math.max(1,Math.ceil(total/POR_PAGINA));
-  const pagina=Math.min(paginaSolicitada,totalPaginas);
-  const [rows]=await banco().execute<Registro[]>(
-    "SELECT u.id_usuario AS id,u.nome,u.email,u.situacao,u.criado_em AS criada,"+
-    "EXISTS(SELECT 1 FROM permissoes_usuarios p WHERE p.id_usuario=u.id_usuario "+
-    "AND p.modulo='RESGATE' AND p.papel='ADMIN') AS admin_resgate,"+
-    "(SELECT COUNT(*) FROM ocorrencias o WHERE o.id_usuario_criador=u.id_usuario AND o.excluido_em IS NULL) AS ocorrencias "+
-    "FROM usuarios u "+(condicao?condicao+" ":"")+
-    "ORDER BY u.criado_em DESC,u.id_usuario DESC LIMIT ? OFFSET ?",[
-      ...valores,POR_PAGINA,(pagina-1)*POR_PAGINA
-    ]
-  );
+  const { rows, total, totalPaginas, pagina } = await listarUsuariosAdmin(busca, status, paginaSolicitada, POR_PAGINA);
   return <AdminShell nome={usuario.nome} titulo="CONTAS CADASTRADAS">
     <form className="filtros-usuarios-admin" method="GET">
       <label className="form-field">Nome ou e-mail<input name="busca" type="search" defaultValue={busca} maxLength={60}/></label>

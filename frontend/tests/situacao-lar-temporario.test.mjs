@@ -35,11 +35,13 @@ test("migration preserva registros antigos e impede situação em pet perdido", 
 });
 
 test("POST salva a situação e as consultas retornam o campo", async () => {
-  const [route, consulta] = await Promise.all([
+  const [route, model, consulta] = await Promise.all([
     readFile(new URL("../src/app/api/ocorrencias/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/models/ocorrencias.ts", import.meta.url), "utf8"),
     readFile(new URL("../src/lib/ocorrencias.ts", import.meta.url), "utf8"),
   ]);
   assert.match(route, /validarSituacaoLarTemporario\(tipo, dados\.situacaoLarTemporario\)/);
-  assert.match(route, /situacao_lar_temporario\) VALUES/);
+  assert.match(route, /cadastrarOcorrencia\(/);
+  assert.match(model, /situacao_lar_temporario\) VALUES/);
   assert.match(consulta, /o\.situacao_lar_temporario AS situacao_lar_temporario/);
 });

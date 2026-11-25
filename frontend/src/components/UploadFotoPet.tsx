@@ -1,5 +1,6 @@
 'use client'
 import { Form, Row, Col } from 'react-bootstrap';
+import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 
 interface PropriedadesUpload {
@@ -49,7 +50,7 @@ export default function UploadFotoPet({
         {previas.map((url, index) => (
           <Col key={index} xs={4} md={3}>
             <div style={{ height: '100px', overflow: 'hidden', borderRadius: '8px', border: '1px solid #dee2e6' }}>
-              <img src={url} alt={`Previa ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <Image src={url} alt={`Prévia da foto ${index + 1}`} width={100} height={100} unoptimized style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </Col>
         ))}
