@@ -37,7 +37,7 @@ docker compose restart web
 docker compose exec web node scripts/criar-admin.mjs
 ```
 
-Informe nome, e-mail e senha de pelo menos dez caracteres. Acesse `/admin/login` pelo rodapé. Não existe senha administrativa padrão. O login de cidadão e o login administrativo usam sessões separadas.
+Informe nome, e-mail e senha de pelo menos dez caracteres. Acesse `/admin/login` digitando o endereço diretamente. O acesso administrativo não aparece nos menus públicos. Não existe senha administrativa padrão. O login de cidadão e o login administrativo usam sessões separadas.
 
 ## Diagnóstico
 
