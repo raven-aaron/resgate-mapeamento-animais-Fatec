@@ -12,7 +12,7 @@ function LoginFormFinal() {
   const router = useRouter();
   const parametros = useSearchParams();
   const solicitado = parametros.get("retorno") || "/mapa";
-  const retorno = solicitado.startsWith("/") && !solicitado.startsWith("//") && !solicitado.startsWith("/\\")
+  const retorno = solicitado.startsWith("/") && !solicitado.startsWith("//") && !solicitado.startsWith("/\\") && !solicitado.startsWith("/admin")
     ? solicitado
     : "/mapa";
   const [email, setEmail] = useState("");
@@ -66,7 +66,6 @@ function LoginFormFinal() {
         </form>
         <Link href="/recuperar-senha" className={styles["link-esqueci"]}>ESQUECI MINHA SENHA</Link>
         <p className="mt-3">Não tem conta? <Link href={`/registro-usuario?retorno=${encodeURIComponent(retorno)}`}>Cadastre-se</Link></p>
-        <p><Link href="/admin/login">Acesso administrativo</Link></p>
       </div>
     </main>
   );

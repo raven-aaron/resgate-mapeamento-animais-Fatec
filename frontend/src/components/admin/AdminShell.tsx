@@ -38,7 +38,7 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
     <aside className={styles.menuAdmContainer} aria-label="Navegação administrativa">
       <div className={styles.cabecalho}><span className={styles.selo}>Acesso restrito</span><h2>MENU ADM</h2><p>Resgate e Mapeamento</p></div>
       <nav className={styles.menuLinks}>{renderMenu()}</nav>
-      <div className={styles.menuAcoes}><p>Conectado com: <Link href="/minha-conta">{nome}</Link></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
+      <div className={styles.menuAcoes}><p>Conectado com: <span>{nome}</span></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
     </aside>
 
     <aside className={`${styles.mobileMenuPanel} ${menuAberto ? styles.mobileMenuPanelOpen : ""}`} aria-label="Menu administrativo em mobile" aria-modal="true" role="dialog">
@@ -50,7 +50,7 @@ export default function AdminShell({ nome, titulo, children }: { nome: string; t
         <button type="button" className={styles.mobileMenuClose} aria-label="Fechar menu administrativo" onClick={() => setMenuAberto(false)}>&times;</button>
       </div>
       <nav className={styles.mobileMenuLinks}>{renderMenu()}</nav>
-      <div className={styles.mobileMenuActions}><p>Conectado com: <Link href="/minha-conta" onClick={() => setMenuAberto(false)}>{nome}</Link></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
+      <div className={styles.mobileMenuActions}><p>Conectado com: <span>{nome}</span></p><LogoutButton administrativo destino="/admin/login" texto="Sair da administração" /></div>
     </aside>
 
     <section className={styles.conteudo}>

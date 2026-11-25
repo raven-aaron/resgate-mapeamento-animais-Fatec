@@ -94,7 +94,7 @@ O cadastro comum não cria um usuário administrador. Para cadastrar um administ
 docker compose exec web node scripts/criar-admin.mjs
 ```
 
-O script exige os dados definidos durante sua execução. A área administrativa é acessada por `/admin/login`, separada do login do cidadão.
+O script exige os dados definidos durante sua execução. A área administrativa é acessada diretamente por `/admin/login`, separado do login do cidadão e sem link na navegação pública. Na hospedagem, o primeiro administrador também é criado pelo script no terminal privado do serviço. Consulte [Acesso administrativo](backend/docs/operacao/acesso-administrativo.md).
 
 Existe também um ambiente de demonstração com banco separado, contas de teste e ocorrências fictícias. As instruções estão em [Dados de demonstração](backend/docs/operacao/dados-demonstracao.md). Não utilize esses registros como se fossem ocorrências reais.
 

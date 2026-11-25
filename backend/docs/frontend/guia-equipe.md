@@ -7,7 +7,7 @@
 3. Faça um cadastro como cidadão e explore `/mapa` e `/minhas-ocorrencias`. Para acessar a área administrativa, entre em `/admin/login` com uma conta de teste que tenha permissão ADMIN no módulo Resgate.
 4. Antes de mudar componentes, confirme o fluxo e o endpoint utilizado na página.
 
-O atalho **Painel administrativo** no menu só é exibido para uma sessão administrativa válida. A interface não é a barreira de segurança: páginas e APIs administrativas também validam a permissão no servidor, portanto esconder ou mostrar o link não concede acesso.
+O atalho **Painel administrativo** aparece somente para quem já está autenticado como administrador; a URL de login não aparece na navegação pública. A interface não é a barreira de segurança: páginas e APIs administrativas também validam a permissão no servidor, portanto esconder ou mostrar o link não concede acesso.
 
 ## Organização da interface
 
