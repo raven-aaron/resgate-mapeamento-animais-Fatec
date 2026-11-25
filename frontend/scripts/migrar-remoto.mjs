@@ -15,6 +15,8 @@ export function dividirInstrucoes(sql) {
   let delimitador = ";";
   let buffer = "";
   for (const linha of sql.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").split("\n")) {
+    // Comentários isolados e linhas vazias podem aparecer entre comandos.
+    if (/^\s*(?:--|#|$)/.test(linha)) continue;
     const novoDelimitador = /^\s*DELIMITER\s+(\S+)\s*$/i.exec(linha);
     if (novoDelimitador) {
       if (buffer.trim()) throw new Error("DELIMITER no meio de uma instrução SQL.");
