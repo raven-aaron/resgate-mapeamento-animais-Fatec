@@ -24,13 +24,13 @@ A equipe de interface deve começar por `src/components/` e pelos estilos de `sr
 | Rota | Uso |
 | --- | --- |
 | `/` | Página inicial |
-| `/entrar` | Escolha de acesso |
+| `/entrar` | Encaminha o cidadão ao login público |
 | `/registro-usuario`, `/cadastro`, `/login` | Cadastro e autenticação do cidadão |
 | `/mapa` | Consulta pública e mapa |
 | `/ocorrencias/nova` | Cadastro de perda ou encontro |
 | `/ocorrencias/[id]` | Cartaz da ocorrência |
 | `/minha-conta`, `/minhas-ocorrencias`, `/mensagens`, `/notificacoes` | Área autenticada |
-| `/admin/login` | Entrada administrativa; exige uma conta com permissão ADMIN no módulo Resgate |
+| `/admin/login` | Entrada administrativa por URL direta, sem link público; exige permissão ADMIN no módulo Resgate |
 | `/admin/*` | Painel e operações restritos a administradores; o link do painel só aparece no menu para uma sessão administrativa válida, e as páginas e APIs também verificam a permissão no servidor |
 
 ## Executar e validar
