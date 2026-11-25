@@ -185,7 +185,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className={styles.rodapeBase}>
-          <div className={styles.container}>Proteção e Bem-Estar Animal • Votorantim/SP <Link href="/admin/login" className={styles.linkAdministracao}>Área administrativa</Link></div>
+          <div className={styles.container}>Proteção e Bem-Estar Animal • Votorantim/SP</div>
         </div>
       </footer>
     </>
