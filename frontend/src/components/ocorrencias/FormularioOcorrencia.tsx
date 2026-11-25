@@ -65,8 +65,8 @@ export default function FormularioOcorrencia() {
       evento.currentTarget.value = "";
       return;
     }
-    if (arquivos.some(arquivo => !["image/jpeg", "image/png", "image/webp"].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024)) {
-      setErroFotos("Use fotos JPG, PNG ou WebP com até 5 MB cada.");
+    if (arquivos.some(arquivo => !["image/jpeg", "image/png", "image/webp"].includes(arquivo.type) || arquivo.size > 4 * 1024 * 1024)) {
+      setErroFotos("Use fotos JPG, PNG ou WebP com até 4 MB cada.");
       evento.currentTarget.value = "";
       return;
     }
@@ -137,6 +137,7 @@ export default function FormularioOcorrencia() {
     setEnviando(true);
     setErroEnvio("");
     setPrecisaLogin(false);
+    let idCriado: number | null = null;
     try {
       const formulario = new FormData();
       formulario.append("confirmacao_privacidade", "confirmado");
@@ -145,7 +146,8 @@ export default function FormularioOcorrencia() {
         cep: endereco.cep, referencia,
         ...(tipo === "ENCONTRADO" ? { situacaoLarTemporario } : {}),
       }));
-      fotos.forEach(foto => formulario.append("fotos", foto));
+      // Primeiro salva o cadastro. Cada fotografia é enviada separadamente
+      // para respeitar o limite de tamanho das funções da Vercel.
       const resposta = await fetch("/api/ocorrencias", { method: "POST", body: formulario });
       const dados = await resposta.json() as { id?: number; erro?: string; login?: boolean };
       if (!resposta.ok) {
@@ -153,10 +155,29 @@ export default function FormularioOcorrencia() {
         throw new Error(dados.erro || "Não foi possível registrar a ocorrência.");
       }
       if (typeof dados.id !== "number") throw new Error("O servidor não retornou o registro criado.");
+      idCriado = dados.id;
+      for (const foto of fotos) {
+        const formularioFoto = new FormData();
+        formularioFoto.append("fotos", foto);
+        const respostaFoto = await fetch("/api/ocorrencias/" + dados.id + "/fotos", {
+          method: "POST",
+          body: formularioFoto,
+        });
+        if (!respostaFoto.ok) {
+          const erroFoto = await respostaFoto.json().catch(() => ({})) as { erro?: string };
+          throw new Error(erroFoto.erro || "Não foi possível enviar uma das fotografias.");
+        }
+      }
       setRegistro(dados.id);
       setConfirmacaoAberta(false);
     } catch (error) {
-      setErroEnvio(error instanceof Error ? error.message : "Falha ao enviar o cadastro.");
+      if (idCriado !== null) {
+        setRegistro(idCriado);
+        setConfirmacaoAberta(false);
+        setErroEnvio("A ocorrência foi criada, mas uma foto falhou. Acesse Minhas ocorrências para completar as fotos.");
+      } else {
+        setErroEnvio(error instanceof Error ? error.message : "Falha ao enviar o cadastro.");
+      }
     } finally {
       setEnviando(false);
     }
@@ -319,7 +340,7 @@ export default function FormularioOcorrencia() {
               <div className="area-upload-foto">
                 <input id="fotos-pet" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={trocarFotos} aria-describedby="instrucao-fotos" />
               </div>
-              <small id="instrucao-fotos">Até 5 fotos JPG, PNG ou WebP, com no máximo 5 MB cada.</small>
+              <small id="instrucao-fotos">Até 5 fotos JPG, PNG ou WebP, com no máximo 4 MB cada.</small>
               {erroFotos && <p role="alert" className="note note-warning">{erroFotos}</p>}
               {previas.length > 0 && <div className="galeria-previas">
                 {previas.map((url,indice) => <Image key={url} src={url} alt={"Prévia da foto " + (indice + 1)} width={106} height={106} unoptimized />)}
@@ -362,7 +383,7 @@ export default function FormularioOcorrencia() {
           {registro ? (
             <div className="note" role="status">
               <strong>Solicitação nº {registro} recebida com sucesso.</strong>
-              <p>Em análise.</p>
+              {erroEnvio ? <p role="alert" className="note note-warning">{erroEnvio}</p> : <p>Em análise.</p>}
               <CustomButton href="/minhas-ocorrencias" variant="green">ACOMPANHAR MINHAS OCORRÊNCIAS</CustomButton>
             </div>
           ) : (

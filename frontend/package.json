@@ -12,7 +12,7 @@
     "test:fotos": "node --test tests/fotos.test.mjs",
     "test:jest": "npx --yes jest@30.5.0 --runInBand --config jest.config.cjs",
     "test:openapi": "node scripts/check-openapi.mjs",
-    "test:regras": "node --test tests/mapa-densidade.test.mjs tests/situacao-lar-temporario.test.mjs"
+    "test:regras": "node --test tests/mapa-densidade.test.mjs tests/situacao-lar-temporario.test.mjs tests/migracao-remota.test.mjs"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

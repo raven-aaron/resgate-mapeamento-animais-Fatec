@@ -16,13 +16,16 @@ Depois de iniciar o MySQL e **aplicar as migrações**, execute o script existen
 docker compose exec web node scripts/criar-admin.mjs
 ```
 
-**Contêiner da aplicação no Northflank:**
+**Vercel com MySQL hospedado na Enzonic:**
 
-1. Abra o serviço Next.js hospedado e a opção de terminal/Shell do contêiner em execução.
-2. Verifique que o serviço recebeu `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD` do banco MySQL privado.
-3. Execute `node scripts/criar-admin.mjs` no diretório `/app`.
-4. Informe seu nome, e-mail e uma senha forte com pelo menos 10 caracteres. O script oculta a digitação da senha em terminal interativo.
-5. Confira a mensagem `Administrador RESGATE configurado`. Acesse `https://<dominio-publico>/admin/login` e entre com os dados cadastrados.
+A Vercel não fornece terminal persistente do aplicativo como o Docker local. Com as migrações já aplicadas no MySQL remoto, no notebook Linux e na pasta `frontend/`, configure `DATABASE_URL` em um arquivo local ignorado pelo Git (`.env.remoto`) e execute:
+
+```bash
+node --env-file=.env.remoto scripts/criar-admin.mjs
+```
+
+O script estabelece uma conexão TLS ao banco remoto, solicita nome/e-mail/senha sem exibir a senha e cria a conta com permissão `ADMIN`. Use a URL direta `https://<dominio-do-site>/admin/login`.
+
 
 Não existe senha administrativa padrão, API pública para criar administradores, ou necessidade de gravar `ADMIN_SENHA` no GitHub. O script também consegue atribuir permissão a um e-mail já cadastrado, redefinindo a senha dessa conta; use esse comportamento apenas conscientemente. Reexecutá-lo para o mesmo usuário revoga as sessões anteriores.
 

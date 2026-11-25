@@ -94,7 +94,7 @@ O cadastro comum não cria um usuário administrador. Para cadastrar um administ
 docker compose exec web node scripts/criar-admin.mjs
 ```
 
-O script exige os dados definidos durante sua execução. A área administrativa é acessada diretamente por `/admin/login`, separado do login do cidadão e sem link na navegação pública. Na hospedagem, o primeiro administrador também é criado pelo script no terminal privado do serviço. Consulte [Acesso administrativo](backend/docs/operacao/acesso-administrativo.md).
+O script exige os dados definidos durante sua execução. A área administrativa é acessada diretamente por `/admin/login`, separado do login do cidadão e sem link na navegação pública. Na hospedagem Vercel, o primeiro administrador é criado pelo script no notebook, com conexão TLS ao MySQL remoto. Consulte [Acesso administrativo](backend/docs/operacao/acesso-administrativo.md).
 
 Existe também um ambiente de demonstração com banco separado, contas de teste e ocorrências fictícias. As instruções estão em [Dados de demonstração](backend/docs/operacao/dados-demonstracao.md). Não utilize esses registros como se fossem ocorrências reais.
 
@@ -140,7 +140,7 @@ O repositório contém o código do front-end, API e banco de dados, mas a publi
 
 **As URLs públicas do site e da API ainda não estão confirmadas.** Elas serão incluídas aqui depois de um deploy testado. Os endereços `localhost` acima servem somente para execução local e não devem ser usados como links da entrega.
 
-Informações sobre publicação estão em [Vercel e Azure](backend/docs/operacao/vercel-azure.md).
+Para publicar sem cobrança, siga [Vercel, Enzonic e Cloudinary](backend/docs/operacao/vercel-enzonic-cloudinary.md). A configuração [Vercel e Azure](backend/docs/operacao/vercel-azure.md) permanece como alternativa.
 
 ## Integrantes
 
