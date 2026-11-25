@@ -64,11 +64,16 @@ if (nome.length < 2 || nome.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e
 const salt = randomBytes(16).toString("hex");
 const hash = "scrypt$" + salt + "$" + scryptSync(senha, salt, 64).toString("hex");
 const db = await mysql.createConnection({
-  host: process.env.DB_HOST || "127.0.0.1",
-  port: Number(process.env.DB_PORT || "3306"),
-  database: process.env.DB_NAME || "resgate_animais",
-  user: process.env.DB_USER || "resgate_app",
-  password: process.env.DB_PASSWORD,
+  ...(process.env.DATABASE_URL
+    ? { uri: process.env.DATABASE_URL, ssl: { rejectUnauthorized: true } }
+    : {
+        host: process.env.DB_HOST || "127.0.0.1",
+        port: Number(process.env.DB_PORT || "3306"),
+        database: process.env.DB_NAME || "resgate_animais",
+        user: process.env.DB_USER || "resgate_app",
+        password: process.env.DB_PASSWORD,
+      }),
+  connectTimeout: 45000,
 });
 try {
   await db.beginTransaction();
