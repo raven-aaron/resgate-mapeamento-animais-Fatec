@@ -98,7 +98,7 @@ export async function removerFotoOcorrencia(
     await conn.commit();
     concluiu = true;
     const foto = rows[0];
-    if (["LOCAL", "AZURE_BLOB"].includes(String(foto.provedor)) && formatoFoto.test(String(foto.identificador_arquivo))) {
+    if (["LOCAL", "AZURE_BLOB", "CLOUDINARY"].includes(String(foto.provedor)) && formatoFoto.test(String(foto.identificador_arquivo))) {
       await excluirFoto(String(foto.identificador_arquivo), foto.provedor as ProvedorFoto)
         .catch(e => console.warn("Arquivo já indisponível após exclusão", e));
     }
@@ -113,7 +113,7 @@ export async function buscarFotoCadastrada(arquivo: string) {
   const [rows] = await banco().execute<RowDataPacket[]>(
     "SELECT f.provedor,o.id_usuario_criador,o.status_aprovacao,o.status_caso,o.excluido_em " +
     "FROM fotos_ocorrencias f JOIN ocorrencias o ON o.id_ocorrencia=f.id_ocorrencia " +
-    "WHERE f.provedor IN ('LOCAL','AZURE_BLOB') AND f.identificador_arquivo=? LIMIT 1",
+    "WHERE f.provedor IN ('LOCAL','AZURE_BLOB','CLOUDINARY') AND f.identificador_arquivo=? LIMIT 1",
     [arquivo],
   );
   return rows[0] || null;
