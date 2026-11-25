@@ -17,6 +17,7 @@ describe("Acesso administrativo fora da interface pública", () => {
   test("o formulário de login público não revela link de administração", () => {
     const login = fonte("src/app/login/page.tsx");
     expect(login).not.toContain('href="/admin/login"');
+    expect(fonte("src/components/layout/SiteChrome.tsx")).not.toContain('href="/admin/login"');
   });
 
   test("a rota direta de administração mantém formulário próprio e evita indexação", () => {
