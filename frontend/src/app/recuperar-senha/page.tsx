@@ -39,7 +39,7 @@ export default function RecuperarSenhaPage() {
           <div role="status" style={{ textAlign: "center", padding: "20px" }}>
             <AppIcon name="checkCircle" className="ui-icon" style={{ fontSize: "3rem", color: "var(--cor-verde-agua)" }} />
             <p style={{ marginTop: "15px", fontWeight: "bold" }}>{mensagem}</p>
-            <CustomButton href="/login" variant="red" style={{ marginTop: "20px" }}>VOLTAR PARA LOGIN</CustomButton>
+            <CustomButton href="/login" variant="gray" style={{ marginTop: "20px" }}>VOLTAR PARA LOGIN</CustomButton>
           </div>
         ) : (
           <>

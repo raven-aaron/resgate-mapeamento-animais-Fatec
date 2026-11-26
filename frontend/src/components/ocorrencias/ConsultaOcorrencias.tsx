@@ -90,7 +90,7 @@ export default function ConsultaOcorrencias() {
         </div>
         <div className="filtros-acoes">
           <CustomButton type="button" size="small" variant="gray" onClick={()=>{setEspecie("");setPorte("");setTipo("");setSexo("");setBusca("");setBairro("");setDataInicio("");setDataFim("");}}>Limpar filtros</CustomButton>
-          <CustomButton type="button" size="small" variant="green" onClick={()=>setVersao(v=>v+1)}>Atualizar resultados</CustomButton>
+          <CustomButton type="button" size="small" variant="outline" onClick={()=>setVersao(v=>v+1)}>Atualizar resultados</CustomButton>
           <span role="status">{carregando ? "Buscando ocorrências..." : filtradas.length + " ocorrência(s) encontrada(s)"}</span>
           <div className="seletor-modo" aria-label="Modo de visualização">
             <CustomButton type="button" size="small" variant={modo==="mapa"?"green":"gray"} aria-pressed={modo==="mapa"} onClick={()=>setModo("mapa")}>Mapa</CustomButton>
@@ -111,7 +111,7 @@ export default function ConsultaOcorrencias() {
             <p>{o.especie} • {o.bairro} • Votorantim/SP</p>
             <p>Porte: {o.porte==="INDETERMINADO"?"Não informado":o.porte.toLowerCase()} · Sexo: {o.sexo==="INDETERMINADO"?"Não informado":o.sexo.toLowerCase()}</p>
             <p>Data: {String(o.data).slice(0,10).split("-").reverse().join("/")}</p>
-            <CustomButton href={"/ocorrencias/"+o.id} variant="green">VER CARTAZ</CustomButton>
+            <CustomButton href={"/ocorrencias/"+o.id} variant="orange">VER CARTAZ</CustomButton>
           </div>
         </article>)}
         {!carregando && !erro && filtradas.length===0 && <div className="form-panel"><p>Nenhum animal encontrado.</p></div>}

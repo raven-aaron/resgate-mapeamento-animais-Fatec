@@ -25,7 +25,7 @@ export default async function MinhaContaPage() {
 
         {administrador ? <div className="action-row">
           <CustomButton href="/admin" variant="gray">Voltar ao painel administrativo</CustomButton>
-          <CustomButton href="/mensagens" variant="gray">Minhas conversas</CustomButton>
+          <CustomButton href="/mensagens" variant="orange">Minhas conversas</CustomButton>
           <CustomButton href="/notificacoes" variant="outline">Notificações</CustomButton>
           <LogoutButton administrativo destino="/admin/login" texto="Sair da administração" />
         </div> : <>
