@@ -136,11 +136,18 @@ A lista completa de rotas, parâmetros e respostas pode ser consultada no [Swagg
 
 ## Hospedagem
 
-O repositório contém o código do front-end, API e banco de dados, mas a publicação pública precisa de infraestrutura própria e validação de persistência, fotos, acesso ao MySQL e autenticação.
+O front-end e a API REST são publicados juntos no mesmo projeto Next.js na Vercel, com MySQL 8.4 hospedado na Enzonic e fotografias na Cloudinary.
 
-**As URLs públicas do site e da API ainda não estão confirmadas.** Elas serão incluídas aqui depois de um deploy testado. Os endereços `localhost` acima servem somente para execução local e não devem ser usados como links da entrega.
+- **Front-end (site público):** https://resgate-mapeamento-animais-fatec.vercel.app/
+- **Back-end (API REST pública, exemplo GET):** https://resgate-mapeamento-animais-fatec.vercel.app/api/ocorrencias
+- **Documentação da API (Swagger):** https://resgate-mapeamento-animais-fatec.vercel.app/api-docs
+- **Especificação OpenAPI:** https://resgate-mapeamento-animais-fatec.vercel.app/openapi.json
 
-Para publicar sem cobrança, siga [Vercel, Enzonic e Cloudinary](backend/docs/operacao/vercel-enzonic-cloudinary.md). A configuração [Vercel e Azure](backend/docs/operacao/vercel-azure.md) permanece como alternativa.
+**Para a entrega do Projeto Integrador:** o repositório público é https://github.com/raven-aaron/resgate-mapeamento-animais-Fatec . Os links do front-end e back-end acima são URLs externas, acessíveis sem `localhost`, e usam o mesmo domínio porque a API faz parte da aplicação Next.js. As funções protegidas exigem sessão e autorização específicas.
+
+O deploy de produção foi concluído com sucesso na Vercel (status `READY`), mas o ciclo completo de testes manuais — incluindo upload de fotografias pela Cloudinary, aprovação administrativa, mapa e chat — deve ser conferido em produção antes da apresentação. O domínio pode permanecer no ar enquanto correções são publicadas.
+
+Para operar a hospedagem, siga [Vercel, Enzonic e Cloudinary](backend/docs/operacao/vercel-enzonic-cloudinary.md). A configuração [Vercel e Azure](backend/docs/operacao/vercel-azure.md) permanece como alternativa.
 
 ## Integrantes
 
