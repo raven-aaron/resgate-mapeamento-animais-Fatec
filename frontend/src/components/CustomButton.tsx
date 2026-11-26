@@ -7,7 +7,7 @@ import type {
   Ref,
 } from "react";
 
-export type CustomButtonVariant = "orange" | "gray" | "red" | "green" | "outline";
+export type CustomButtonVariant = "orange" | "gray" | "red" | "green" | "outline" | "admin";
 export type CustomButtonSize = "small" | "medium" | "large" | "icon";
 
 interface CustomButtonStyleProps {
