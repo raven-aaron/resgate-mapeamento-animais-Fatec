@@ -81,6 +81,24 @@ describe("Fotos hospedadas na Cloudinary", () => {
     expect(erro.message).not.toContain(env.CLOUDINARY_API_SECRET);
   });
 
+  test("edição envia fotos separadamente e limita 4 MB por arquivo na Vercel", () => {
+    const editar = readFileSync(join(__dirname, "../src/components/ocorrencias/EditarOcorrencia.tsx"), "utf8");
+    expect(editar).toContain("f.size>4*1024*1024");
+    expect(editar).toContain("for(const foto of novasFotos)");
+    expect(editar).toContain('body.append("fotos",foto)');
+    expect(editar).not.toContain('novasFotos.forEach(f=>body.append("fotos",f))');
+    expect(editar).toContain("setNovasFotos(novasFotos.slice(enviadas))");
+  });
+
+  test("cadastro informa falha parcial em vez de anunciar foto salva", () => {
+    const form = readFileSync(join(__dirname, "../src/components/RegistroPetFinal.tsx"), "utf8");
+    expect(form).toContain('titulo={erroEnvio ? "CADASTRO CRIADO, FOTO PENDENTE"');
+    expect(form).toContain("a fotografia não foi salva");
+    const card = readFileSync(join(__dirname, "../src/components/admin/CartaoOcorrenciaAdmin.tsx"), "utf8");
+    expect(card).toContain("Foto não cadastrada");
+    expect(card).not.toContain('ocorrencia.foto || "/assets/cachorrogatoinicial.jpg"');
+  });
+
   test("não usa disco efêmero na Vercel quando Cloudinary está sem credenciais", async () => {
     const armazenamento = carregar({ VERCEL: "1" }, async () => { throw new Error("Não deve chamar rede"); });
     await expect(armazenamento.salvarFoto(nome, new Uint8Array([1]))).rejects.toThrow(

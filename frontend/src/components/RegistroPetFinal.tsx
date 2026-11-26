@@ -504,8 +504,10 @@ export default function RegistroPetFinal({
       <ModalSucesso
         exibir={registroCriado !== null}
         aoFechar={() => setRegistroCriado(null)}
-        titulo="REGISTRO ENVIADO"
-        mensagem={`A ocorrência #${registroCriado ?? ""} foi enviada para análise. Ela aparecerá no mapa após aprovação.`}
+        titulo={erroEnvio ? "CADASTRO CRIADO, FOTO PENDENTE" : "REGISTRO ENVIADO"}
+        mensagem={erroEnvio
+          ? `A ocorrência #${registroCriado ?? ""} foi criada, mas a fotografia não foi salva. Entre em Minhas ocorrências, clique em Editar dados e tente enviar a foto novamente.`
+          : `A ocorrência #${registroCriado ?? ""} foi enviada para análise. Ela aparecerá no mapa após aprovação.`}
       />
     </Container>
   );
