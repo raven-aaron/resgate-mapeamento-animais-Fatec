@@ -156,7 +156,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
           <aside id="menu-resgate" role="dialog" aria-modal="true" aria-label="Menu do módulo de resgate" className={styles.menuLateral}>
             <div className={styles.menuTopo}>
               <strong>🐾 MENU DE RESGATE</strong>
-              <CustomButton ref={fecharMenuRef} type="button" size="icon" variant="red" aria-label="Fechar menu lateral" className={styles.fechar} onClick={() => setMenuAberto(false)}>×</CustomButton>
+              <CustomButton ref={fecharMenuRef} type="button" size="icon" variant="gray" aria-label="Fechar menu lateral" className={styles.fechar} onClick={() => setMenuAberto(false)}>×</CustomButton>
             </div>
             <div className={styles.menuCorpo}>
               <h2>ANIMAIS PERDIDOS E ENCONTRADOS</h2>

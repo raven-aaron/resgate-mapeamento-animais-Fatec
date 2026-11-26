@@ -52,7 +52,7 @@ export default function PainelNotificacoes(){
           <p>{a.texto}</p><small>{String(a.data).replace("T"," ").slice(0,16)}</small>
         </div>
         <div className="aviso-acoes">
-          <CustomButton href={a.conversa?"/mensagens/"+a.conversa:"/minhas-ocorrencias"} size="small">ABRIR</CustomButton>
+          <CustomButton href={a.conversa?"/mensagens/"+a.conversa:"/minhas-ocorrencias"} size="small" variant="outline">ABRIR</CustomButton>
           {!a.lida&&<CustomButton type="button" size="small" variant="green" disabled={salvando} onClick={()=>void marcar(a.id)}>MARCAR LIDA</CustomButton>}
         </div>
       </article>)}

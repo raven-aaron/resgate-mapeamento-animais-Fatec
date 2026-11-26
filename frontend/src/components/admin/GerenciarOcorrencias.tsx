@@ -181,10 +181,10 @@ export default function GerenciarOcorrencias({ status }: { status: "PENDENTE" | 
 
   return <div>
     <div className={styles.topoLista}>
-      <CustomButton type="button" size="small" variant="green" onClick={() => {
+      <CustomButton type="button" size="small" variant="gray" onClick={() => {
         void carregar().catch((error: unknown) => setErro(error instanceof Error ? error.message : "Falha ao atualizar."));
       }}>ATUALIZAR LISTA</CustomButton>
-      <CustomButton type="button" size="small" variant="gray" className={styles.botaoFiltro}
+      <CustomButton type="button" size="small" variant="outline" className={styles.botaoFiltro}
         aria-haspopup="dialog" aria-expanded={filtroAberto}
         onClick={() => {
           setFiltrosTemporarios(filtros);

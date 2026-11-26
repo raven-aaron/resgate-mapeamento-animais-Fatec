@@ -42,15 +42,15 @@ export default function CaixaEntrada(){
     </div>
     <div className="action-row" style={{marginBottom:20}}>
       <CustomButton href="/minha-conta" variant="gray">VOLTAR AO PERFIL</CustomButton>
-      <CustomButton type="button" variant="gray" onClick={()=>void ativarAvisos()}>
+      <CustomButton type="button" variant={permissao==="granted"?"outline":"green"} onClick={()=>void ativarAvisos()}>
         {permissao==="granted"?"AVISOS DO NAVEGADOR ATIVADOS":"ATIVAR AVISOS DO NAVEGADOR"}
       </CustomButton>
-      <CustomButton href="/notificacoes" variant="gray">NOTIFICAÇÕES</CustomButton>
+      <CustomButton href="/notificacoes" variant="orange">NOTIFICAÇÕES</CustomButton>
     </div>
     <div className="action-row" style={{marginBottom:12}}>
-      <CustomButton type="button" variant="gray" aria-pressed={!somenteNaoLidas}
+      <CustomButton type="button" variant={!somenteNaoLidas?"green":"outline"} aria-pressed={!somenteNaoLidas}
         onClick={()=>setSomenteNaoLidas(false)}>Todas as conversas</CustomButton>
-      <CustomButton type="button" variant="gray" aria-pressed={somenteNaoLidas}
+      <CustomButton type="button" variant={somenteNaoLidas?"green":"outline"} aria-pressed={somenteNaoLidas}
         onClick={()=>setSomenteNaoLidas(true)}>Não lidas ({conversas.filter(c=>Number(c.naoLidas)>0).length})</CustomButton>
     </div>
     {permissao==="denied"&&<p className="note note-warning">O navegador bloqueou notificações. Altere a permissão nas configurações do site.</p>}
@@ -67,6 +67,6 @@ export default function CaixaEntrada(){
     {!carregando&&!erro&&!conversas.length&&<p className="note">Nenhuma conversa ainda.</p>}
     {!carregando&&!erro&&somenteNaoLidas&&conversas.length>0&&!conversas.some(c=>Number(c.naoLidas)>0)&&
       <p className="note">Nenhuma mensagem não lida.</p>}
-    <div className="action-row"><CustomButton href="/mapa" variant="gray">Ver animais no mapa</CustomButton></div>
+    <div className="action-row"><CustomButton href="/mapa" variant="outline">Ver animais no mapa</CustomButton></div>
   </main>;
 }

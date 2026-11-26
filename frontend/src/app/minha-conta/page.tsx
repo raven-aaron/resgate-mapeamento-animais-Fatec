@@ -24,19 +24,19 @@ export default async function MinhaContaPage() {
         </p>
 
         {administrador ? <div className="action-row">
-          <CustomButton href="/admin" variant="green">Voltar ao painel administrativo</CustomButton>
-          <CustomButton href="/mensagens" variant="green">Minhas conversas</CustomButton>
-          <CustomButton href="/notificacoes" variant="gray">Notificações</CustomButton>
+          <CustomButton href="/admin" variant="gray">Voltar ao painel administrativo</CustomButton>
+          <CustomButton href="/mensagens" variant="gray">Minhas conversas</CustomButton>
+          <CustomButton href="/notificacoes" variant="outline">Notificações</CustomButton>
           <LogoutButton administrativo destino="/admin/login" texto="Sair da administração" />
         </div> : <>
           <div className="action-row">
-            <CustomButton href="/mensagens" variant="green">
+            <CustomButton href="/mensagens" variant="gray">
               Minhas conversas
             </CustomButton>
-            <CustomButton href="/notificacoes" variant="gray">
+            <CustomButton href="/notificacoes" variant="outline">
               Notificações
             </CustomButton>
-            <CustomButton href="/minhas-ocorrencias" variant="gray">
+            <CustomButton href="/minhas-ocorrencias" variant="orange">
               Minhas ocorrências
             </CustomButton>
           </div>
