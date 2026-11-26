@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Jest usa CommonJS para ler arquivos no teste. */
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
