@@ -46,7 +46,7 @@ describe("auditoria transversal de botões: navegação, ação e estado", () =>
     expect(pagina).toContain('href="/mapa" variant="orange">Ver mapa público');
     expect(acoes).toContain('variant={statusAprovacao==="REJEITADO"?"orange":"gray"}');
     expect(acoes).toContain('variant="green" type="button"');
-    expect(acoes).toContain('variant="red" onClick={() => {');
+    expect(acoes).toContain('variant="red" onClick={()=>{');
     expect(acoes).toContain('variant={acao==="EXCLUIR"?"red":"green"}');
     expect(acoes).toContain('variant="gray" disabled={enviando}');
   });
