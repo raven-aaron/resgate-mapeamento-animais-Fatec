@@ -53,6 +53,7 @@ describe("Fotos hospedadas na Cloudinary", () => {
     expect(chamadas[0].u.hostname).toBe("api.cloudinary.com");
     expect(chamadas[0].opts.body.get("type")).toBe("authenticated");
     expect(chamadas[0].opts.body.get("public_id")).toBe(publicId);
+    expect(chamadas[0].opts.body.get("asset_folder")).toBe("resgate-animais");
     expect(chamadas[0].opts.headers.Authorization).toMatch(/^Basic /);
 
     const bytes = await armazenamento.lerFoto(nome, "CLOUDINARY");
