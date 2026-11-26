@@ -354,7 +354,7 @@ export default function FormularioOcorrencia() {
           </div>
 
           <div className="action-row">
-            <CustomButton href="/" variant="gray">CANCELAR</CustomButton>
+            <CustomButton href="/" variant="red">CANCELAR</CustomButton>
             <CustomButton variant="green" type="submit">REVISAR CADASTRO</CustomButton>
           </div>
         </section>
@@ -389,7 +389,7 @@ export default function FormularioOcorrencia() {
           ) : (
             <>
               {erroEnvio && <p role="alert" className="note note-warning">{erroEnvio}</p>}
-              {precisaLogin && <div className="action-row"><CustomButton href="/login" variant="gray">ENTRAR</CustomButton><CustomButton href="/cadastro" variant="gray">CRIAR CONTA</CustomButton></div>}
+              {precisaLogin && <div className="action-row"><CustomButton href="/login" variant="gray">ENTRAR</CustomButton><CustomButton href="/cadastro" variant="green">CRIAR CONTA</CustomButton></div>}
               <div className="action-row">
                 <CustomButton type="button" disabled={enviando} onClick={() => { setOrientacoesLidas(false); setConfirmacaoAberta(true); }}>
                   ENVIAR PARA ANÁLISE

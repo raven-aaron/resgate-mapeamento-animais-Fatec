@@ -101,7 +101,11 @@ async function salvarCloudinary(nome: string, bytes: Uint8Array) {
     body: form,
     signal: AbortSignal.timeout(60_000),
   });
-  if (!resposta.ok) throw new ErroArmazenamento("Falha ao salvar foto na Cloudinary.");
+  if (!resposta.ok) {
+    // O corpo remoto pode conter detalhes da conta: registrar apenas o status.
+    console.error("Cloudinary recusou o upload", { httpStatus: resposta.status });
+    throw new ErroArmazenamento("Falha ao salvar foto na Cloudinary (HTTP " + resposta.status + ").");
+  }
   const json = await resposta.json() as { public_id?: string; type?: string };
   if (json.public_id !== id || json.type !== "authenticated") {
     throw new ErroArmazenamento("Cloudinary retornou um identificador ou tipo de acesso inesperado.");

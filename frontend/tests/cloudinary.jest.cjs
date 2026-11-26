@@ -69,6 +69,18 @@ describe("Fotos hospedadas na Cloudinary", () => {
     expect(chamadas[2].opts.body.get("public_id")).toBe(publicId);
   });
 
+  test("informa o status HTTP da Cloudinary sem revelar credenciais", async () => {
+    const env = {
+      VERCEL: "1", CLOUDINARY_CLOUD_NAME: "ambiente-teste",
+      CLOUDINARY_API_KEY: "12345", CLOUDINARY_API_SECRET: "segredo-testes-nao-real",
+    };
+    const armazenamento = carregar(env, async () => ({ ok: false, status: 403 }));
+    const erro = await armazenamento.salvarFoto(nome, new Uint8Array([255, 216, 255]))
+      .catch(error => error);
+    expect(erro.message).toContain("HTTP 403");
+    expect(erro.message).not.toContain(env.CLOUDINARY_API_SECRET);
+  });
+
   test("não usa disco efêmero na Vercel quando Cloudinary está sem credenciais", async () => {
     const armazenamento = carregar({ VERCEL: "1" }, async () => { throw new Error("Não deve chamar rede"); });
     await expect(armazenamento.salvarFoto(nome, new Uint8Array([1]))).rejects.toThrow(
