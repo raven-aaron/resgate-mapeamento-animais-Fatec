@@ -34,7 +34,7 @@ export default function CartazPet({ o, fotos, administrativo=false }: { o: Ocorr
         <p>{perdido?"Animal desaparecido":"Animal encontrado"} em Votorantim/SP</p>
         <p><strong>Sexo:</strong> {rotulo(o.sexo)}</p>
         <p className={styles.descricao}>{exibir(o.descricao)}</p>
-        <CustomButton href="/mapa" variant="green">VER NO MAPA</CustomButton>
+        <CustomButton href="/mapa" variant="orange">VER NO MAPA</CustomButton>
       </div>
       <GaleriaFotos fotos={fotos} nome={identificacao} />
     </section>

@@ -103,6 +103,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .custom-button.custom-button--orange { background: var(--cor-laranja); color: #1b2531; }
 .custom-button.custom-button--orange:hover:not(:disabled) { background: #df7105; }
 .custom-button.custom-button--gray { background: #6c757d; box-shadow: none; }
+.custom-button.custom-button--outline { background: transparent; border: 2px solid var(--cor-principal-escura); color: var(--cor-principal-escura); box-shadow: none; padding: 9px 22px; }
+.custom-button.custom-button--outline:hover:not(:disabled) { background: var(--cor-verde-agua-claro); color: #184d4b; }
 .custom-button.custom-button--gray:hover:not(:disabled) { background: #535a61; }
 .custom-button.custom-button--red { background: #cc3838; box-shadow: none; }
 .custom-button.custom-button--red:hover:not(:disabled) { background: #b93030; }
@@ -115,7 +117,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .custom-button.custom-button--gray:focus-visible,
 .custom-button.custom-button--red:focus-visible,
 .custom-button.custom-button--green:focus-visible,
-.custom-button.custom-button--orange:focus-visible { outline: 3px solid var(--cor-laranja); outline-offset: 3px; }
+.custom-button.custom-button--orange:focus-visible,
+.custom-button.custom-button--outline:focus-visible { outline: 3px solid var(--cor-laranja); outline-offset: 3px; }
 .form-shell { width: min(850px, calc(100% - 32px)); margin: 44px auto 0; padding: 0; }
 .form-heading { margin: 0 0 28px; }
 .form-heading a { color: var(--cor-verde-agua); font-weight: 700; font-size: .9rem; }
@@ -184,6 +187,8 @@ body.modo-alto-contraste .review-list dt { color: #eee; }
 body.modo-alto-contraste .custom-button.custom-button--orange { color: #181818; }
 body.modo-alto-contraste .custom-button.custom-button--green { background: #9EF8EE; color: #181818; }
 body.modo-alto-contraste .custom-button.custom-button--green:hover:not(:disabled) { background: #7cddd5; }
+body.modo-alto-contraste .custom-button.custom-button--outline { background: #151515; color: #fff; border-color: #fff; }
+body.modo-alto-contraste .custom-button.custom-button--outline:hover:not(:disabled) { background: #323232; color: #fff; }
 body.modo-alto-contraste .area-upload-foto { background: #181818; border-color: #eee; }
 /* mobile: ajustes globais de largura */
 @media (max-width: 768px) {

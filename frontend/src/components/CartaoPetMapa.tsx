@@ -39,7 +39,7 @@ export function CartaoPetMapa({
         <p className={`${styles['texto-card-mapa']} ${isPerdido ? styles['status-perdido'] : styles['status-encontrado']}`}>
           Status: {isPerdido ? "Perdido" : "Encontrado"}
         </p>
-        <CustomButton href={`/ocorrencias/${pet.id}`} size="small">
+        <CustomButton href={`/ocorrencias/${pet.id}`} variant="orange" size="small">
           Ver informações
         </CustomButton>
       </div>

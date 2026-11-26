@@ -16,6 +16,6 @@ export default function LogoutButton({destino="/",texto="Sair",administrativo=fa
       router.refresh();
     } catch {setErro("Não foi possível encerrar a sessão. Tente novamente.");setSaindo(false);}
   }
-  return <div><CustomButton type="button" onClick={sair} disabled={saindo} variant="gray">{saindo?"Saindo...":texto}</CustomButton>
+  return <div><CustomButton type="button" onClick={sair} disabled={saindo} variant="red">{saindo?"Saindo...":texto}</CustomButton>
     {erro&&<p role="alert" className="note note-warning">{erro}</p>}</div>;
 }

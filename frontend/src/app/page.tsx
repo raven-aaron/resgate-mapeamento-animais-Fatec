@@ -21,7 +21,7 @@ export default function HomePage() {
                 animais e seus tutores.
               </p>
               <div className={styles.botoes}>
-                <CustomButton href="/registro-pet-perdido" variant="green">
+                <CustomButton href="/registro-pet-perdido" variant="orange">
                   PERDI MEU PET
                 </CustomButton>
                 <CustomButton href="/registro-pet-encontrado" variant="green">
@@ -55,7 +55,7 @@ export default function HomePage() {
                 reencontro dos pets com seus tutores.
               </p>
               <div className={styles.botoes}>
-                <CustomButton href="/mapa" variant="green">VER NO MAPA</CustomButton>
+                <CustomButton href="/mapa" variant="orange">VER NO MAPA</CustomButton>
               </div>
             </div>
             <div className={styles.colImg}>

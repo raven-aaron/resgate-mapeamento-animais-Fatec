@@ -21,7 +21,7 @@ export default async function ServicoPage({ params }: { params: Promise<{ slug: 
       <h1 style={{color:"var(--cor-verde-agua)",fontSize:"clamp(30px,5vw,44px)",margin:"14px 0"}}>{servico.nome}</h1>
       <section className="card" style={{maxWidth:780}}>
         <p style={{fontSize:17,lineHeight:1.7}}>{servico.texto}</p>
-        <div className="action-row"><CustomButton href="/" variant="red">Voltar ao início</CustomButton></div>
+        <div className="action-row"><CustomButton href="/" variant="gray">Voltar ao início</CustomButton></div>
       </section>
     </main>
   );
