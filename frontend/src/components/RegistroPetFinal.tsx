@@ -303,6 +303,7 @@ export default function RegistroPetFinal({
   }
 
   function cancelarCadastro() {
+    if (formik.dirty && !window.confirm("Cancelar o cadastro? Os dados preenchidos serão perdidos.")) return;
     formik.resetForm();
     setEtapa(1);
     setEndereco(null);
@@ -496,7 +497,7 @@ export default function RegistroPetFinal({
             <CustomButton type="button" variant="gray" onClick={() => setEtapa((atual) => Math.max(atual - 1, 1))}>VOLTAR</CustomButton>
           </div>}
           <div className={styles.wrapperBtn}>
-            <CustomButton type="button" variant="gray" onClick={cancelarCadastro}>CANCELAR</CustomButton>
+            <CustomButton type="button" variant="red" onClick={cancelarCadastro}>CANCELAR</CustomButton>
           </div>
         </div>
       </Form>

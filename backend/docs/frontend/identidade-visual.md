@@ -15,6 +15,13 @@ Fonte de referência: [Projeto-Resgate-e-Mapeamento-FATEC](https://github.com/ra
 - Cinza: \`#707070\`.
 - Fundo geral: \`#FBF9F7\`.
 
+## Hierarquia das ações nos formulários
+- **Verde-água (primária positiva):** salvar, enviar, avançar, confirmar aprovação.
+- **Cinza (navegação secundária):** voltar, revisar e fechar um modal sem descartar o cadastro.
+- **Vermelho (abandono/destrutiva):** cancelar o cadastro e perder o preenchimento, excluir registros ou remover fotos. Em cadastros com dados preenchidos, confirmar antes de zerar o formulário.
+- **Laranja:** destaque e chamadas para ação da identidade original, quando apropriado.
+- Ações vizinhas com funções diferentes não devem ter cores idênticas quando isso dificulta distingui-las. O código mantém o componente `CustomButton` e suas variantes existentes.
+
 ## Elementos que devem ser reutilizados
 
 - Barra superior de acessibilidade.
