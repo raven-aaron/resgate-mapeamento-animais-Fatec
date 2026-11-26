@@ -48,8 +48,8 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
   function escolherFotos(evento:ChangeEvent<HTMLInputElement>){
     const selecionadas=Array.from(evento.currentTarget.files||[]);
     if(selecionadas.length+fotos.length>5||
-      selecionadas.some(f=>f.size===0||f.size>5*1024*1024||!["image/jpeg","image/png","image/webp"].includes(f.type))){
-      setErro("Selecione no máximo 5 fotos, em JPG, PNG ou WebP, de até 5 MB cada.");
+      selecionadas.some(f=>f.size===0||f.size>4*1024*1024||!["image/jpeg","image/png","image/webp"].includes(f.type))){
+      setErro("Selecione no máximo 5 fotos, em JPG, PNG ou WebP, de até 4 MB cada.");
       evento.currentTarget.value="";
       return;
     }
@@ -58,17 +58,29 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
   async function adicionarFotos(){
     if(!novasFotos.length||alterandoFotos)return;
     setAlterandoFotos(true);setErro("");setSucessoFoto("");
+    let enviadas=0;
     try{
-      const body=new FormData();
-      novasFotos.forEach(f=>body.append("fotos",f));
-      const resposta=await fetch("/api/ocorrencias/"+dados.id+"/fotos",{method:"POST",body});
-      const d=await resposta.json() as {erro?:string;fotos?:{id:number;url:string}[]};
-      if(!resposta.ok)throw new Error(d.erro||"Falha ao adicionar fotos.");
-      setFotos(d.fotos||[]);setNovasFotos([]);
+      // Uma fotografia por requisição evita o limite de 4,5 MB das funções Vercel.
+      for(const foto of novasFotos){
+        const body=new FormData();
+        body.append("fotos",foto);
+        const resposta=await fetch("/api/ocorrencias/"+dados.id+"/fotos",{method:"POST",body});
+        const resultado=await resposta.json() as {erro?:string;fotos?:{id:number;url:string}[]};
+        if(!resposta.ok)throw new Error(resultado.erro||"Falha ao adicionar fotos.");
+        setFotos(resultado.fotos||[]);
+        enviadas++;
+      }
+      setNovasFotos([]);
       setSucessoFoto("Fotografias atualizadas. A ocorrência voltou para análise.");
       router.refresh();
-    }catch(e){setErro(e instanceof Error?e.message:"Falha ao enviar fotos.");}
-    finally{setAlterandoFotos(false);}
+    }catch(e){
+      if(enviadas>0){
+        setNovasFotos(novasFotos.slice(enviadas));
+        setSucessoFoto(`${enviadas} foto(s) salva(s). As demais ainda precisam ser enviadas.`);
+        router.refresh();
+      }
+      setErro(e instanceof Error?e.message:"Falha ao enviar fotos.");
+    }finally{setAlterandoFotos(false);}
   }
   async function removerFoto(idFoto:number){
     if(alterandoFotos||!window.confirm("Remover esta fotografia da ocorrência?"))return;
@@ -171,7 +183,7 @@ export default function EditarOcorrencia({dados,racas,cores,fotosIniciais}:{dado
       </div>
       <section className="edicao-fotos" aria-label="Gerenciar fotografias do animal">
         <h2>FOTOGRAFIAS DO ANIMAL</h2>
-        <p>Até cinco fotos.</p>
+        <p>Até cinco fotos JPG, PNG ou WebP, com até 4 MB cada. As fotos são enviadas individualmente.</p>
         <div className="edicao-fotos-grid">
           {fotos.map(f=><div key={f.id} className="edicao-foto">
             <Image src={f.url} unoptimized width={135} height={112} alt={"Foto cadastrada "+f.id}/>

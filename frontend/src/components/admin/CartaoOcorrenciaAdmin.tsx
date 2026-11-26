@@ -34,13 +34,19 @@ export default function CartaoOcorrenciaAdmin({
   return (
     <article className={styles.cartao}>
       <div className={styles.foto}>
-        <Image
-          src={ocorrencia.foto || "/assets/cachorrogatoinicial.jpg"}
-          alt={`Foto de ${nome}`}
-          fill
-          sizes="(max-width: 720px) 100vw, 50vw"
-          unoptimized={Boolean(ocorrencia.foto?.startsWith("/api/"))}
-        />
+        {ocorrencia.foto ? (
+          <Image
+            src={ocorrencia.foto}
+            alt={`Foto de ${nome}`}
+            fill
+            sizes="(max-width: 720px) 100vw, 50vw"
+            unoptimized={ocorrencia.foto.startsWith("/api/")}
+          />
+        ) : (
+          <div className={styles.semFoto} role="img" aria-label="Animal sem fotografia cadastrada">
+            Foto não cadastrada
+          </div>
+        )}
       </div>
       <div className={styles.conteudo}>
         <div className={styles.cabecalhoTipo}>

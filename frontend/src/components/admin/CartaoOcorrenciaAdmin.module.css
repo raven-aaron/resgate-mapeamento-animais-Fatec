@@ -27,6 +27,20 @@
   object-position: center;
 }
 
+.semFoto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  padding: 16px;
+  text-align: center;
+  color: #245a56;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .conteudo {
   display: flex;
   flex: 1;

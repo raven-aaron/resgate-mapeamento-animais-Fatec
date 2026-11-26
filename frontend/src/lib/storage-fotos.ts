@@ -93,6 +93,9 @@ async function salvarCloudinary(nome: string, bytes: Uint8Array) {
   const form = new FormData();
   form.set("file", new Blob([new Uint8Array(bytes).buffer as ArrayBuffer], { type: tipoFoto(nome) }), nome);
   form.set("public_id", id);
+  // Em contas Cloudinary com pastas dinâmicas, public_id não define a pasta
+  // de permissões. A chave restrita deve ter acesso a este asset_folder.
+  form.set("asset_folder", "resgate-animais");
   form.set("type", "authenticated");
   form.set("overwrite", "false");
   const resposta = await fetch("https://api.cloudinary.com/v1_1/" + cloud + "/image/upload", {
